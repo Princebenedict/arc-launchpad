@@ -54,28 +54,14 @@ Chain ID:          5042002
 RPC:               https://rpc.testnet.arc.network
 Explorer:          https://testnet.arcscan.app
 Frontend
-The frontend is a single-file static app built with:
+The frontend is app built with:
 
 HTML
 CSS
 Vanilla JavaScript
 It is designed to be deployed easily on Vercel and connected to the already deployed Arc Testnet contract.
 
-The frontend is currently configured with:
 
-LAUNCHPAD_ADDRESS = 0x2feA3305fcB02184b2e120B1D511D3f539F276B7
-ARC_RPC = https://rpc.testnet.arc.network
-CHAIN_ID = 5042002
-USDC_ADDRESS = 0x3600000000000000000000000000000000000000
-Local Development
-If you just want to preview the frontend locally, open index.html in a browser or use a simple local server.
-
-Example:
-
-python3 -m http.server 5500
-Then open:
-
-http://localhost:5500
 Foundry Setup
 Install Foundry:
 
