@@ -60,6 +60,7 @@
       pointer-events: none;
       z-index: 0;
     }
+
     .orb-1 { width: 500px; height: 500px; background: rgba(0,212,170,0.06); top: -100px; right: -100px; }
     .orb-2 { width: 400px; height: 400px; background: rgba(39,117,202,0.07); bottom: 0; left: -100px; }
 
@@ -154,7 +155,7 @@
 
     .hero {
       text-align: center;
-      padding: 26px 0 22px;
+      padding: 24px 0 18px;
     }
 
     .hero-tag {
@@ -167,15 +168,15 @@
       color: var(--arc);
       font-size: 12px;
       font-family: var(--mono);
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .hero h1 {
-      font-size: clamp(34px, 5vw, 62px);
+      font-size: clamp(34px, 5vw, 58px);
       line-height: 1.08;
       font-weight: 800;
       letter-spacing: -1.8px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .hero h1 span {
@@ -189,8 +190,38 @@
       max-width: 760px;
       margin: 0 auto;
       color: var(--muted2);
-      font-size: 17px;
+      font-size: 16px;
       line-height: 1.6;
+    }
+
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      gap: 12px;
+      margin: 18px 0 16px;
+    }
+
+    .stat {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      padding: 14px;
+    }
+
+    .stat h2 {
+      font-size: 26px;
+      font-weight: 800;
+      font-family: var(--mono);
+      margin-bottom: 4px;
+      letter-spacing: -1px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .4px;
     }
 
     .tabs {
@@ -198,7 +229,7 @@
       gap: 6px;
       padding: 6px;
       width: fit-content;
-      margin: 20px auto 22px;
+      margin: 6px 0 18px;
       border: 1px solid var(--border);
       border-radius: 12px;
       background: var(--surface);
@@ -227,42 +258,6 @@
 
     .panel { display: none; }
     .panel.active { display: block; }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0,1fr));
-      gap: 14px;
-      margin-bottom: 18px;
-    }
-
-    .metric-box {
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      background: var(--surface);
-      padding: 16px;
-    }
-
-    .metric-label {
-      color: var(--muted);
-      font-size: 11px;
-      font-family: var(--mono);
-      text-transform: uppercase;
-      letter-spacing: .45px;
-      margin-bottom: 6px;
-    }
-
-    .metric-value {
-      font-size: 26px;
-      font-weight: 800;
-      font-family: var(--mono);
-      letter-spacing: -1px;
-    }
-
-    .split-2 {
-      display: grid;
-      grid-template-columns: 1.1fr .9fr;
-      gap: 16px;
-    }
 
     .card {
       border: 1px solid var(--border);
@@ -359,8 +354,8 @@
 
     .asset-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 14px;
     }
 
     .asset-card {
@@ -401,7 +396,7 @@
     .type-rwa { background: rgba(16,185,129,0.14); color: var(--rwa); border-color: rgba(16,185,129,0.28); }
 
     .asset-title {
-      font-size: 21px;
+      font-size: 20px;
       font-weight: 800;
       letter-spacing: -.3px;
     }
@@ -472,10 +467,7 @@
 
     .btn-full { width: 100%; }
 
-    .field {
-      display: grid;
-      gap: 6px;
-    }
+    .field { display: grid; gap: 6px; }
 
     .field label {
       font-size: 11px;
@@ -605,15 +597,55 @@
     .toast.success { background: var(--success); }
     .toast.error { background: var(--danger); }
 
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      background: rgba(0,0,0,0.7);
+      -webkit-backdrop-filter: blur(5px);
+      backdrop-filter: blur(5px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      width: min(540px, 100%);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      background: var(--surface);
+      padding: 16px;
+    }
+
+    .modal h3 {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .modal-sub {
+      color: var(--muted2);
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 12px;
+    }
+
     .mt-8 { margin-top: 8px; }
     .mt-12 { margin-top: 12px; }
     .mt-14 { margin-top: 14px; }
     .mt-16 { margin-top: 16px; }
-    .mt-18 { margin-top: 18px; }
 
     @media (max-width: 1040px) {
-      .split-2, .detail-wrap { grid-template-columns: 1fr; }
-      .grid-3 { grid-template-columns: 1fr; }
+      .stats-bar { grid-template-columns: 1fr 1fr; }
+      .detail-wrap { grid-template-columns: 1fr; }
       .filter-row, .two-col { grid-template-columns: 1fr; }
     }
 
@@ -622,6 +654,7 @@
       nav { padding: 0 12px; }
       .chain-badge { display: none; }
       .wallet-btn { font-size: 12px; padding: 8px 10px; }
+      .stats-bar { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -644,174 +677,113 @@
   <main>
     <section class="hero">
       <div class="hero-tag">Arc-Native Infrastructure</div>
-      <h1>The Arc-Native Launchpad<br /><span>for Real Assets</span></h1>
-      <p>Tokenize equity, revenue models, and real-world assets. Raise in USDC, settle quickly, and distribute returns on-chain with investor protection controls.</p>
+      <h1>Tokenize Any Asset.<br /><span>Raise on Arc.</span></h1>
+      <p>Institutional-grade launchpad for equity, revenue share, and real-world assets with USDC-native investment and distribution workflows.</p>
     </section>
 
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('landing', this)">Landing</button>
-      <button class="tab" onclick="switchTab('investors', this)">For Investors</button>
-      <button class="tab" onclick="switchTab('founders', this)">For Founders</button>
-      <button class="tab" onclick="switchTab('contracts', this)">Contracts</button>
+    <div class="stats-bar">
+      <div class="stat"><h2 id="statAssets">0</h2><span>Assets Listed</span></div>
+      <div class="stat"><h2 id="statRaised">$0</h2><span>Total Raised</span></div>
+      <div class="stat"><h2 id="statDistributed">$0</h2><span>Total Distributed</span></div>
+      <div class="stat"><h2 id="statSettlement">~0.5s</h2><span>Settlement Time</span></div>
     </div>
 
-    <section class="panel active" id="panel-landing">
-      <div class="grid-3">
-        <div class="metric-box"><div class="metric-label">Total Assets</div><div class="metric-value mono" id="landingAssets">0</div></div>
-        <div class="metric-box"><div class="metric-label">Total Raised</div><div class="metric-value mono" id="landingRaised">$0</div></div>
-        <div class="metric-box"><div class="metric-label">Your Positions</div><div class="metric-value mono" id="landingPositions">0</div></div>
-      </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('explore', this)">Explore Assets</button>
+      <button class="tab" onclick="switchTab('launch', this)">Launch Asset</button>
+      <button class="tab" onclick="switchTab('portfolio', this)">My Portfolio</button>
+      <button class="tab" onclick="switchTab('deploy', this)">Deploy Guide</button>
+    </div>
 
-      <div class="split-2">
-        <div class="card">
-          <h3>How It Works</h3>
-          <p class="subtle">List, Invest, and Earn with transparent on-chain records.</p>
-          <div class="list">
-            <div class="list-item"><span><strong>1. List</strong><br><span class="subtle">Founder creates tokenized raise terms</span></span><span class="pill">On-chain</span></div>
-            <div class="list-item"><span><strong>2. Invest</strong><br><span class="subtle">Investor allocates USDC into project</span></span><span class="pill">USDC Gas</span></div>
-            <div class="list-item"><span><strong>3. Earn</strong><br><span class="subtle">Dividends and P/L tracked in dashboard</span></span><span class="pill">Pro-rata</span></div>
-          </div>
-        </div>
-        <div class="card">
-          <h3>Arc Advantages</h3>
-          <p class="subtle">Protocol experience aligned to Arc strengths.</p>
-          <div class="list">
-            <div class="list-item"><span>Sub-second settlement badge</span><span class="pill">Performance</span></div>
-            <div class="list-item"><span>No ETH required, USDC-based flow</span><span class="pill">Frictionless</span></div>
-            <div class="list-item"><span>Opt-in privacy architecture support</span><span class="pill">Enterprise</span></div>
-            <div class="list-item"><span>FX-ready expansion (EURC and beyond)</span><span class="pill">Global</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card mt-16">
-        <h3>Live Projects</h3>
-        <p class="subtle">Active raises from deployed contracts.</p>
-        <div id="landingLiveProjects" class="list"></div>
-      </div>
-    </section>
-
-    <section class="panel" id="panel-investors">
+    <section class="panel active" id="panel-explore">
       <div class="card">
         <h3>Browse Projects</h3>
-        <p class="subtle">Filters use button groups to avoid browser select popup glitches.</p>
+        <p class="subtle">Use filters to evaluate opportunities by type, risk, and raise momentum.</p>
 
         <div class="filter-wrap">
           <div class="filter-row">
             <div>
               <div class="label">Asset Type</div>
-              <div class="chip-group" id="filterTypeGroup">
-                <button class="chip active" data-value="all" onclick="setFilter('type', 'all', this)">All</button>
-                <button class="chip" data-value="0" onclick="setFilter('type', '0', this)">Equity</button>
-                <button class="chip" data-value="1" onclick="setFilter('type', '1', this)">Revenue</button>
-                <button class="chip" data-value="2" onclick="setFilter('type', '2', this)">RWA</button>
+              <div class="chip-group">
+                <button class="chip active" onclick="setFilter('type','all',this)">All</button>
+                <button class="chip" onclick="setFilter('type','0',this)">Equity</button>
+                <button class="chip" onclick="setFilter('type','1',this)">Revenue Share</button>
+                <button class="chip" onclick="setFilter('type','2',this)">Real-World Asset</button>
               </div>
             </div>
             <div>
               <div class="label">Risk Tier</div>
-              <div class="chip-group" id="filterRiskGroup">
-                <button class="chip active" data-value="all" onclick="setFilter('risk', 'all', this)">All</button>
-                <button class="chip" data-value="low" onclick="setFilter('risk', 'low', this)">Low</button>
-                <button class="chip" data-value="medium" onclick="setFilter('risk', 'medium', this)">Medium</button>
-                <button class="chip" data-value="high" onclick="setFilter('risk', 'high', this)">High</button>
+              <div class="chip-group">
+                <button class="chip active" onclick="setFilter('risk','all',this)">All</button>
+                <button class="chip" onclick="setFilter('risk','low',this)">Low</button>
+                <button class="chip" onclick="setFilter('risk','medium',this)">Medium</button>
+                <button class="chip" onclick="setFilter('risk','high',this)">High</button>
               </div>
             </div>
             <div>
               <div class="label">Sort By</div>
-              <div class="chip-group" id="filterSortGroup">
-                <button class="chip active" data-value="newest" onclick="setFilter('sort', 'newest', this)">Newest</button>
-                <button class="chip" data-value="raised" onclick="setFilter('sort', 'raised', this)">Most Raised</button>
-                <button class="chip" data-value="progress" onclick="setFilter('sort', 'progress', this)">Progress</button>
+              <div class="chip-group">
+                <button class="chip active" onclick="setFilter('sort','newest',this)">Newest</button>
+                <button class="chip" onclick="setFilter('sort','raised',this)">Most Raised</button>
+                <button class="chip" onclick="setFilter('sort','progress',this)">Progress</button>
               </div>
             </div>
           </div>
         </div>
 
-        <div id="investorAssetGrid" class="asset-grid"></div>
+        <div id="assetGrid" class="asset-grid"></div>
       </div>
 
       <div class="detail-wrap">
         <div class="detail-box">
           <h3>Project Detail</h3>
-          <p class="subtle" id="projectDetailSubtitle">Select a project for economics, risk profile, ROI simulation, and claim schedule.</p>
-          <div id="projectDetailBody" class="empty">No project selected.</div>
+          <p class="subtle" id="detailSubtitle">Select a project for token economics, revenue projection, and risk profile.</p>
+          <div id="detailBody" class="empty">No project selected.</div>
 
           <div class="section-title">ROI Calculator</div>
           <div class="field">
-            <label for="roiRevenueInput">Projected Monthly Revenue (USDC)</label>
-            <input id="roiRevenueInput" type="range" min="10000" max="1000000" step="10000" value="120000" oninput="updateRoiBox()" />
+            <label for="revSlider">Projected Monthly Revenue (USDC)</label>
+            <input id="revSlider" type="range" min="10000" max="1000000" step="10000" value="120000" oninput="updateRoi()" />
           </div>
-          <div class="detail-row"><span class="muted">Projected Revenue</span><span class="mono" id="roiRevenueVal">$120,000</span></div>
-          <div class="detail-row"><span class="muted">Your Estimated Monthly Return</span><span class="mono" id="roiReturnVal">$0</span></div>
+          <div class="detail-row"><span class="muted">Projected Revenue</span><span class="mono" id="revValue">$120,000</span></div>
+          <div class="detail-row"><span class="muted">Estimated Monthly Return</span><span class="mono" id="roiValue">$0</span></div>
+
+          <div class="section-title">Risk Disclosure</div>
+          <div class="list">
+            <div class="list-item"><span>Returns can fluctuate with issuer performance</span><span class="pill">Revenue Risk</span></div>
+            <div class="list-item"><span>RWA collateral values can change over time</span><span class="pill">Collateral Risk</span></div>
+            <div class="list-item"><span>Secondary liquidity is not guaranteed</span><span class="pill">Liquidity Risk</span></div>
+          </div>
         </div>
 
         <div class="detail-box">
-          <h3>Invest Now</h3>
+          <h3>Invest and Claim</h3>
           <div class="stack">
             <div class="field">
-              <label for="investAmount">Token Amount</label>
-              <input id="investAmount" type="number" min="1" placeholder="100" oninput="updateInvestPreview()" />
+              <label for="buyAmount">Token Amount</label>
+              <input id="buyAmount" type="number" min="1" placeholder="100" oninput="updateInvestCost()" />
             </div>
             <div class="field">
-              <label for="investCost">Total Cost</label>
-              <input id="investCost" type="text" readonly value="0 USDC" />
+              <label for="buyCost">Total Cost</label>
+              <input id="buyCost" type="text" readonly value="0 USDC" />
             </div>
-            <button class="btn btn-primary btn-full" id="investBtn" onclick="executePurchase()">Approve USDC + Invest</button>
+            <button class="btn btn-primary btn-full" id="investBtn" onclick="executePurchase()">Invest -></button>
             <div class="tx-box" id="investTxBox"><a id="investTxLink" class="tx-link" href="#" target="_blank" rel="noopener noreferrer"></a></div>
           </div>
 
           <div class="divider"></div>
 
-          <h3>Investment Returns</h3>
-          <div class="detail-row"><span class="muted">Invested</span><span class="mono" id="retInvested">$0</span></div>
-          <div class="detail-row"><span class="muted">Tokens Owned</span><span class="mono" id="retTokens">0</span></div>
-          <div class="detail-row"><span class="muted">Revenue Share (est.)</span><span class="mono" id="retShare">0.00%</span></div>
-          <div class="detail-row"><span class="muted">Next Claim Window</span><span class="mono">Monthly cycle</span></div>
-          <div class="detail-row"><span class="muted">Pending Dividend</span><span class="mono" id="retPending">$0</span></div>
-          <div class="detail-row"><span class="muted">Lifetime Claimed</span><span class="mono" id="retClaimed">$0</span></div>
-
-          <div class="divider"></div>
-
-          <h3>Exit Options</h3>
-          <div class="list">
-            <div class="list-item"><span>Sell on Marketplace</span><button class="btn btn-outline" type="button">List Now</button></div>
-            <div class="list-item"><span>Request Buyback</span><button class="btn btn-outline" type="button">After 90 Days</button></div>
-            <div class="list-item"><span>Early Redemption</span><span class="pill">15% penalty</span></div>
-          </div>
+          <div class="detail-row"><span class="muted">Pending Dividend</span><span class="mono" id="pendingQuick">$0</span></div>
+          <div class="detail-row"><span class="muted">Lifetime Claimed</span><span class="mono" id="claimedQuick">$0</span></div>
+          <button class="btn btn-outline btn-full mt-8" id="claimQuickBtn" onclick="claimCurrentAsset()">Claim Dividends</button>
         </div>
-      </div>
-
-      <div class="card mt-14">
-        <h3>Portfolio Dashboard</h3>
-        <p class="subtle">Real-time holdings, P/L, dividend claim history, and protection disclosures.</p>
-
-        <div class="grid-3 mt-12">
-          <div class="metric-box"><div class="metric-label">Portfolio Value</div><div class="metric-value mono" id="pfValue">$0</div></div>
-          <div class="metric-box"><div class="metric-label">Cost Basis</div><div class="metric-value mono" id="pfCost">$0</div></div>
-          <div class="metric-box"><div class="metric-label">Profit / Loss</div><div class="metric-value mono" id="pfPnL">$0</div></div>
-        </div>
-
-        <div id="portfolioGrid" class="portfolio-grid"></div>
-
-        <div class="section-title">Risk Disclosure</div>
-        <div class="list">
-          <div class="list-item"><span>Revenue-model returns vary with company performance</span><span class="pill">Variable Yield</span></div>
-          <div class="list-item"><span>RWA collateral value may fluctuate with market conditions</span><span class="pill">Collateral Risk</span></div>
-          <div class="list-item"><span>Secondary market liquidity is not guaranteed</span><span class="pill">Liquidity Risk</span></div>
-        </div>
-      </div>
-
-      <div class="card mt-14">
-        <h3>Secondary Market</h3>
-        <p class="subtle">P1 module placeholder for order book, sell listings, and buyback routes.</p>
-        <div class="empty">Order book and listing execution can be connected to DeFi routing contracts in next iteration.</div>
       </div>
     </section>
 
-    <section class="panel" id="panel-founders">
+    <section class="panel" id="panel-launch">
       <div class="card">
         <h3>Launch Project</h3>
-        <p class="subtle">Deploy a raise with transparent valuation and token economics.</p>
+        <p class="subtle">Create and publish your asset raise with transparent token economics.</p>
 
         <div class="two-col mt-12">
           <div class="field"><label for="companyName">Company Name</label><input id="companyName" type="text" placeholder="Acme Holdings Ltd." /></div>
@@ -822,15 +794,15 @@
           <div class="field"><label for="tokenName">Token Name</label><input id="tokenName" type="text" placeholder="Acme Growth Token" /></div>
           <div>
             <div class="label">Asset Type</div>
-            <div class="chip-group" id="founderTypeGroup">
-              <button class="chip active" onclick="setFounderType(0, this)">Equity</button>
-              <button class="chip" onclick="setFounderType(1, this)">Revenue Model</button>
-              <button class="chip" onclick="setFounderType(2, this)">Real-World Asset</button>
+            <div class="chip-group" id="typeGroup">
+              <button class="chip active" onclick="setAssetType(0,this)">Equity</button>
+              <button class="chip" onclick="setAssetType(1,this)">Revenue Share</button>
+              <button class="chip" onclick="setAssetType(2,this)">Real-World Asset</button>
             </div>
           </div>
         </div>
 
-        <div class="field"><label for="description">Description</label><textarea id="description" rows="3" placeholder="Company profile, raise purpose, and use of proceeds."></textarea></div>
+        <div class="field"><label for="description">Description</label><textarea id="description" rows="3" placeholder="Business model, raise purpose, and investor terms."></textarea></div>
 
         <div class="two-col">
           <div class="field"><label for="valuation">Total Valuation (USDC)</label><input id="valuation" type="number" placeholder="1000000" /></div>
@@ -843,49 +815,91 @@
         </div>
 
         <button class="btn btn-primary btn-full" id="launchBtn" onclick="submitLaunch()">Launch Asset on Arc Testnet</button>
-        <div class="subtle mt-8">Listing fee applies. Wallet approval and transaction signature are required.</div>
+        <div class="subtle mt-8">Listing fee applies. Wallet approval and transaction signature required.</div>
       </div>
 
       <div class="detail-wrap mt-14">
         <div class="detail-box">
           <h3>Founder Dashboard</h3>
-          <div class="detail-row"><span class="muted">Active Raise</span><span class="mono" id="founderRaisedProgress">$0 / $0</span></div>
-          <div class="detail-row"><span class="muted">Assets Launched</span><span class="mono" id="founderAssets">0</span></div>
-          <div class="detail-row"><span class="muted">Token Holders (est.)</span><span class="mono" id="founderInvestors">0</span></div>
-          <div class="detail-row"><span class="muted">Revenue to Distribute</span><span class="mono" id="founderRevenuePool">$0</span></div>
-          <div class="detail-row"><span class="muted">Compliance Status</span><span class="mono">KYC Monitor Ready</span></div>
+          <div class="detail-row"><span class="muted">Active Raise</span><span class="mono" id="fdRaise">$0 / $0</span></div>
+          <div class="detail-row"><span class="muted">Token Holders (est.)</span><span class="mono" id="fdHolders">0</span></div>
+          <div class="detail-row"><span class="muted">Revenue to Distribute</span><span class="mono" id="fdRevenue">$0</span></div>
+          <div class="detail-row"><span class="muted">Compliance</span><span class="mono">KYC Monitor Ready</span></div>
         </div>
 
         <div class="detail-box">
           <h3>Revenue Distribution</h3>
-          <div class="field">
-            <label for="distributionAmount">USDC Distribution Amount</label>
-            <input id="distributionAmount" type="number" min="0" placeholder="5000" />
-          </div>
-          <div class="field">
-            <label for="distributionTokenInput">Project Token Address</label>
-            <input id="distributionTokenInput" type="text" placeholder="0x..." />
-          </div>
-          <button class="btn btn-outline btn-full" onclick="simulateDistribution()">Prepare Distribution</button>
-          <div class="subtle mt-8">Milestone-gated release, dispute routing, oracle attestation, and insurance pool can be linked in contract layer.</div>
+          <div class="field"><label for="distToken">Project Token Address</label><input id="distToken" type="text" placeholder="0x..." /></div>
+          <div class="field"><label for="distAmount">Distribution Amount (USDC)</label><input id="distAmount" type="number" placeholder="5000" /></div>
+          <button class="btn btn-outline btn-full" onclick="simulateDistribution()">Send Distribution</button>
+          <div class="subtle mt-8">Milestone release, oracle checks, disputes, and insurance modules can be connected in contract layer.</div>
         </div>
       </div>
     </section>
 
-    <section class="panel" id="panel-contracts">
+    <section class="panel" id="panel-portfolio">
       <div class="card">
-        <h3>Arc Testnet Contracts</h3>
-        <p class="subtle">Reference addresses for integration and verification.</p>
+        <h3>Portfolio Dashboard</h3>
+        <p class="subtle">Holdings, performance, dividend claims, and exit options.</p>
+
+        <div class="stats-bar mt-12">
+          <div class="stat"><h2 id="pfValue">$0</h2><span>Portfolio Value</span></div>
+          <div class="stat"><h2 id="pfCost">$0</h2><span>Cost Basis</span></div>
+          <div class="stat"><h2 id="pfPnL">$0</h2><span>Profit / Loss</span></div>
+          <div class="stat"><h2 id="pfPositions">0</h2><span>Positions</span></div>
+        </div>
+
+        <div id="portfolioGrid" class="portfolio-grid"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-deploy">
+      <div class="card">
+        <h3>Deploy Guide and Contracts</h3>
         <div class="list">
           <div class="list-item"><span>Launchpad</span><span class="mono">0x2feA...76B7</span></div>
-          <div class="list-item"><span>USDC (Native Gas Token)</span><span class="mono">0x3600...0000</span></div>
+          <div class="list-item"><span>USDC (Gas Token)</span><span class="mono">0x3600...0000</span></div>
           <div class="list-item"><span>EURC</span><span class="mono">0x89B5...D72a</span></div>
           <div class="list-item"><span>CCTP TokenMessengerV2</span><span class="mono">0x8FE6...2DAA</span></div>
           <div class="list-item"><span>Permit2</span><span class="mono">0x0000...8BA3</span></div>
         </div>
+
+        <div class="section-title">Planned Contract Functions</div>
+        <div class="list">
+          <div class="list-item"><span>invest(uint256 usdcAmount)</span><span class="pill">P0</span></div>
+          <div class="list-item"><span>claimDividends()</span><span class="pill">P0</span></div>
+          <div class="list-item"><span>distributeRevenue()</span><span class="pill">P1</span></div>
+          <div class="list-item"><span>listForSale(amount, price)</span><span class="pill">P1</span></div>
+          <div class="list-item"><span>requestExit()</span><span class="pill">P1</span></div>
+          <div class="list-item"><span>voteOnMilestone()</span><span class="pill">P2</span></div>
+        </div>
       </div>
     </section>
   </main>
+
+  <div class="modal-overlay" id="exitModal">
+    <div class="modal">
+      <h3 id="exitModalTitle">Exit Option</h3>
+      <p class="modal-sub" id="exitModalSub">Configure your exit request.</p>
+
+      <div class="field">
+        <label for="exitAmount">Amount</label>
+        <input id="exitAmount" type="number" min="0" placeholder="0" oninput="recalcExitPreview()" />
+      </div>
+
+      <div class="field">
+        <label for="exitPrice">Price Per Token (USDC)</label>
+        <input id="exitPrice" type="number" min="0" placeholder="0" oninput="recalcExitPreview()" />
+      </div>
+
+      <div id="exitPreview" class="list mt-8"></div>
+
+      <div class="modal-actions">
+        <button class="btn btn-outline" onclick="closeExitModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="confirmExitAction()">Confirm</button>
+      </div>
+    </div>
+  </div>
 
   <div class="toast" id="toast"></div>
 
@@ -934,7 +948,7 @@
       "function allowance(address owner,address spender) view returns (uint256)"
     ];
 
-    const typeNames = { 0: "Equity", 1: "Revenue Model", 2: "Real-World Asset" };
+    const typeNames = { 0: "Equity", 1: "Revenue Share", 2: "Real-World Asset" };
     const typeClasses = { 0: "type-equity", 1: "type-revenue", 2: "type-rwa" };
 
     let selectedAssetType = 0;
@@ -947,6 +961,12 @@
     let refreshTimer = null;
 
     const filters = { type: "all", risk: "all", sort: "newest" };
+
+    const exitState = {
+      mode: null,
+      token: null,
+      symbol: null
+    };
 
     function shortAddr(addr) { return addr ? addr.slice(0, 6) + "..." + addr.slice(-4) : ""; }
     function fmtUSDCBig(value) { return Number(ethers.formatUnits(value, 6)); }
@@ -969,15 +989,15 @@
 
     function setFilter(kind, value, button) {
       filters[kind] = value;
-      const parent = button.parentElement;
-      parent.querySelectorAll(".chip").forEach((x) => x.classList.remove("active"));
+      const group = button.parentElement;
+      group.querySelectorAll(".chip").forEach((x) => x.classList.remove("active"));
       button.classList.add("active");
-      renderInvestorAssets();
+      renderExploreAssets();
     }
 
-    function setFounderType(type, button) {
+    function setAssetType(type, button) {
       selectedAssetType = type;
-      const group = document.getElementById("founderTypeGroup");
+      const group = document.getElementById("typeGroup");
       group.querySelectorAll(".chip").forEach((x) => x.classList.remove("active"));
       button.classList.add("active");
     }
@@ -1000,6 +1020,7 @@
       if (!window.ethereum) throw new Error("Install an EVM wallet.");
       await window.ethereum.request({ method: "eth_requestAccounts" });
       await ensureArcNetwork();
+
       browserProvider = new ethers.BrowserProvider(window.ethereum);
       signer = await browserProvider.getSigner();
       walletAddress = await signer.getAddress();
@@ -1032,7 +1053,7 @@
       btn.classList.remove("connected");
       document.getElementById("disconnectBtn").hidden = true;
 
-      document.getElementById("projectDetailBody").innerHTML = '<div class="empty">No project selected.</div>';
+      document.getElementById("detailBody").innerHTML = '<div class="empty">No project selected.</div>';
       updatePortfolio();
       if (!silent) showToast("Wallet disconnected.");
     }
@@ -1053,13 +1074,9 @@
       return "high";
     }
 
-    function getCostKey(addr, token) {
-      return "arcvault_cost_basis_" + (addr || "").toLowerCase() + "_" + (token || "").toLowerCase();
-    }
-
-    function getClaimedKey(addr, token) {
-      return "arcvault_claimed_" + (addr || "").toLowerCase() + "_" + (token || "").toLowerCase();
-    }
+    function getCostKey(addr, token) { return "arcvault_cost_basis_" + (addr || "").toLowerCase() + "_" + (token || "").toLowerCase(); }
+    function getClaimedKey(addr, token) { return "arcvault_claimed_" + (addr || "").toLowerCase() + "_" + (token || "").toLowerCase(); }
+    function getInvestStartKey(addr, token) { return "arcvault_invest_start_" + (addr || "").toLowerCase() + "_" + (token || "").toLowerCase(); }
 
     function getCostBasis(addr, token) {
       const raw = localStorage.getItem(getCostKey(addr, token));
@@ -1081,6 +1098,30 @@
       const key = getClaimedKey(addr, token);
       const prev = getLifetimeClaimed(addr, token);
       localStorage.setItem(key, String(prev + amountUSDC));
+    }
+
+    function markInvestStart(addr, token) {
+      const key = getInvestStartKey(addr, token);
+      if (!localStorage.getItem(key)) localStorage.setItem(key, String(Date.now()));
+    }
+
+    function getDaysHeld(addr, token) {
+      const key = getInvestStartKey(addr, token);
+      const ts = Number(localStorage.getItem(key) || 0);
+      if (!ts) return 0;
+      const days = (Date.now() - ts) / (1000 * 60 * 60 * 24);
+      return Math.max(0, Math.floor(days));
+    }
+
+    function getDistributedTotalLocal() {
+      let total = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith("arcvault_claimed_")) {
+          total += Number(localStorage.getItem(k) || 0);
+        }
+      }
+      return total;
     }
 
     async function approveIfNeeded(spender, amount) {
@@ -1140,39 +1181,16 @@
       return all.reverse();
     }
 
-    function updateLandingStats() {
+    function updateTopStats() {
       const totalRaised = cachedAssets.reduce((acc, a) => acc + fmtUSDCBig(a.totalRaised), 0);
-      document.getElementById("landingAssets").textContent = String(cachedAssets.length);
-      document.getElementById("landingRaised").textContent = fmtUSD(totalRaised);
+      const distributed = getDistributedTotalLocal();
+
+      document.getElementById("statAssets").textContent = String(cachedAssets.length);
+      document.getElementById("statRaised").textContent = fmtUSD(totalRaised);
+      document.getElementById("statDistributed").textContent = fmtUSD(distributed);
     }
 
-    function renderLandingLiveProjects() {
-      const wrap = document.getElementById("landingLiveProjects");
-      const top = cachedAssets.slice(0, 5);
-
-      if (!top.length) {
-        wrap.innerHTML = '<div class="empty">No active listings yet.</div>';
-        return;
-      }
-
-      wrap.innerHTML = top.map((a) => {
-        const raised = fmtUSDCBig(a.totalRaised);
-        const valuation = Math.max(1, fmtUSDCBig(a.totalValuation));
-        const pct = Math.min(100, (raised / valuation) * 100);
-
-        return `
-          <div class="list-item">
-            <div>
-              <div><strong>${a.name}</strong> <span class="muted mono">(${a.symbol})</span></div>
-              <div class="subtle">${a.companyName || "Project issuer"}</div>
-            </div>
-            <div class="mono">${pct.toFixed(0)}%</div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    function applyInvestorFilters(list) {
+    function applyExploreFilters(list) {
       let out = [...list];
 
       if (filters.type !== "all") out = out.filter((a) => String(a.type) === filters.type);
@@ -1200,9 +1218,9 @@
       });
     }
 
-    function renderInvestorAssets() {
-      const grid = document.getElementById("investorAssetGrid");
-      const list = applyInvestorFilters(cachedAssets);
+    function renderExploreAssets() {
+      const grid = document.getElementById("assetGrid");
+      const list = applyExploreFilters(cachedAssets);
 
       if (!list.length) {
         grid.innerHTML = '<div class="empty">No projects match your filters.</div>';
@@ -1213,7 +1231,6 @@
         const raised = fmtUSDCBig(asset.totalRaised);
         const valuation = Math.max(1, fmtUSDCBig(asset.totalValuation));
         const pct = Math.min(100, (raised / valuation) * 100);
-        const risk = detectRisk(asset);
 
         return `
           <div class="asset-card">
@@ -1223,12 +1240,10 @@
             </div>
             <div class="asset-sub">${asset.symbol} · ${asset.companyName || "Issuer"}</div>
             <div class="asset-desc">${asset.description || "No description provided."}</div>
+            <div class="row"><span class="muted">${fmtUSD(raised)} raised</span><span class="mono">${pct.toFixed(0)}% of ${fmtUSD(valuation)}</span></div>
             <div class="bar"><span class="progress-fill" data-pct="${pct}"></span></div>
-            <div class="row"><span class="muted">Raised</span><span class="mono">${fmtUSD(raised)}</span></div>
-            <div class="row"><span class="muted">Valuation</span><span class="mono">${fmtUSD(valuation)}</span></div>
-            <div class="row"><span class="muted">Risk</span><span class="mono">${risk.toUpperCase()}</span></div>
-            <div class="row"><span class="muted">Price</span><span class="mono">${fmtUSDCBig(asset.pricePerToken).toLocaleString()} USDC</span></div>
-            <button class="btn btn-outline btn-full" onclick="selectProject('${asset.tokenContract}')">View Project</button>
+            <div class="row"><span class="muted">Price per token</span><span class="mono">${fmtUSDCBig(asset.pricePerToken).toLocaleString()} USDC</span></div>
+            <button class="btn btn-primary btn-full mt-8" onclick="selectAsset('${asset.tokenContract}')">Invest -></button>
           </div>
         `;
       }).join("");
@@ -1236,7 +1251,7 @@
       applyProgressWidths();
     }
 
-    function selectProject(tokenAddress) {
+    function selectAsset(tokenAddress) {
       const asset = cachedAssets.find((a) => a.tokenContract.toLowerCase() === tokenAddress.toLowerCase());
       if (!asset) return;
       currentAsset = asset;
@@ -1245,90 +1260,79 @@
       const valuation = Math.max(1, fmtUSDCBig(asset.totalValuation));
       const price = fmtUSDCBig(asset.pricePerToken);
       const risk = detectRisk(asset);
-      const share = valuation > 0 ? (price / valuation) * 100 : 0;
 
-      document.getElementById("projectDetailSubtitle").textContent = asset.symbol + " · " + (asset.companyName || "Issuer profile");
-      document.getElementById("projectDetailBody").innerHTML = `
+      document.getElementById("detailSubtitle").textContent = asset.symbol + " · " + (asset.companyName || "Issuer profile");
+      document.getElementById("detailBody").innerHTML = `
         <div class="detail-row"><span class="muted">Asset Type</span><span>${typeNames[asset.type]}</span></div>
         <div class="detail-row"><span class="muted">Token Economics</span><span class="mono">${price.toLocaleString()} USDC / token</span></div>
         <div class="detail-row"><span class="muted">Revenue Projection</span><span class="mono">${(risk === "low" ? "Stable" : risk === "medium" ? "Moderate" : "Early stage")}</span></div>
         <div class="detail-row"><span class="muted">Risk Factors</span><span class="mono">${risk.toUpperCase()}</span></div>
         <div class="detail-row"><span class="muted">Raise Progress</span><span class="mono">${fmtUSD(raised)} / ${fmtUSD(valuation)}</span></div>
-        <div class="detail-row"><span class="muted">Investor Share Per Token</span><span class="mono">${share.toFixed(6)}%</span></div>
         <div class="detail-row"><span class="muted">Token Contract</span><span class="mono">${shortAddr(asset.tokenContract)}</span></div>
       `;
 
-      updateInvestPreview();
-      updateRoiBox();
-      syncReturnsBox();
+      updateInvestCost();
+      updateRoi();
+      updateQuickClaimBox();
     }
 
-    function updateInvestPreview() {
-      const qty = Number(document.getElementById("investAmount").value || 0);
+    function updateInvestCost() {
+      const qty = Number(document.getElementById("buyAmount").value || 0);
       if (!currentAsset || qty <= 0) {
-        document.getElementById("investCost").value = "0 USDC";
+        document.getElementById("buyCost").value = "0 USDC";
         return;
       }
       const price = fmtUSDCBig(currentAsset.pricePerToken);
-      document.getElementById("investCost").value = (qty * price).toLocaleString(undefined, { maximumFractionDigits: 2 }) + " USDC";
+      document.getElementById("buyCost").value = (qty * price).toLocaleString(undefined, { maximumFractionDigits: 2 }) + " USDC";
+      updateRoi();
     }
 
-    function updateRoiBox() {
-      const slider = document.getElementById("roiRevenueInput");
-      const revenue = Number(slider.value || 0);
-      document.getElementById("roiRevenueVal").textContent = fmtUSD(revenue);
+    function updateRoi() {
+      const revenue = Number(document.getElementById("revSlider").value || 0);
+      document.getElementById("revValue").textContent = fmtUSD(revenue);
 
       if (!currentAsset) {
-        document.getElementById("roiReturnVal").textContent = "$0";
+        document.getElementById("roiValue").textContent = "$0";
         return;
       }
 
-      const qty = Number(document.getElementById("investAmount").value || 0);
-      const valuation = Math.max(1, fmtUSDCBig(currentAsset.totalValuation));
+      const qty = Number(document.getElementById("buyAmount").value || 0);
       const price = fmtUSDCBig(currentAsset.pricePerToken);
       const invested = qty * price;
+      const valuation = Math.max(1, fmtUSDCBig(currentAsset.totalValuation));
       const share = invested / valuation;
-      const est = revenue * share;
-      document.getElementById("roiReturnVal").textContent = fmtUSD(est);
+      const estimated = revenue * share;
+      document.getElementById("roiValue").textContent = fmtUSD(estimated);
     }
 
-    function syncReturnsBox(pending = 0, tokens = 0) {
-      const qty = Number(document.getElementById("investAmount").value || 0);
-      const price = currentAsset ? fmtUSDCBig(currentAsset.pricePerToken) : 0;
-      const invested = qty * price;
-      const valuation = currentAsset ? Math.max(1, fmtUSDCBig(currentAsset.totalValuation)) : 1;
-      const share = invested / valuation;
-
-      document.getElementById("retInvested").textContent = fmtUSD(invested);
-      document.getElementById("retTokens").textContent = Number(tokens || qty).toLocaleString(undefined, { maximumFractionDigits: 4 });
-      document.getElementById("retShare").textContent = (share * 100).toFixed(4) + "%";
-      document.getElementById("retPending").textContent = fmtUSD(pending);
-
-      if (walletAddress && currentAsset) {
-        const claimed = getLifetimeClaimed(walletAddress, currentAsset.tokenContract);
-        document.getElementById("retClaimed").textContent = fmtUSD(claimed);
-      } else {
-        document.getElementById("retClaimed").textContent = "$0";
+    function updateQuickClaimBox(pending = 0) {
+      if (!walletAddress || !currentAsset) {
+        document.getElementById("pendingQuick").textContent = "$0";
+        document.getElementById("claimedQuick").textContent = "$0";
+        return;
       }
+      document.getElementById("pendingQuick").textContent = fmtUSD(pending);
+      document.getElementById("claimedQuick").textContent = fmtUSD(getLifetimeClaimed(walletAddress, currentAsset.tokenContract));
     }
 
     async function executePurchase() {
       try {
         if (!currentAsset) {
-          showToast("Select a project first.", "error");
+          showToast("Select an asset first.", "error");
           return;
         }
 
         await ensureWallet();
-        const qty = parseInt(document.getElementById("investAmount").value, 10);
+
+        const qty = parseInt(document.getElementById("buyAmount").value, 10);
         if (!qty || qty < 1) {
           showToast("Enter a valid token amount.", "error");
           return;
         }
 
-        setButtonLoading("investBtn", true, "Approve USDC + Invest");
-        const totalCost = BigInt(qty) * currentAsset.pricePerToken;
+        setButtonLoading("investBtn", true, "Processing...");
 
+        const totalCost = BigInt(qty) * currentAsset.pricePerToken;
         await approveIfNeeded(currentAsset.tokenContract, totalCost);
 
         const token = new ethers.Contract(currentAsset.tokenContract, assetTokenAbi, signer);
@@ -1341,64 +1345,194 @@
         await tx.wait();
 
         addCostBasis(walletAddress, currentAsset.tokenContract, totalCost);
+        markInvestStart(walletAddress, currentAsset.tokenContract);
+
         showToast("Investment confirmed.", "success");
         await loadAssets();
       } catch (e) {
         showToast(e.shortMessage || e.message || "Investment failed.", "error");
       } finally {
-        setButtonLoading("investBtn", false, "Approve USDC + Invest");
+        setButtonLoading("investBtn", false, "Invest ->");
       }
+    }
+
+    async function claimCurrentAsset() {
+      if (!currentAsset) {
+        showToast("Select an asset first.", "error");
+        return;
+      }
+      await claimDividends(currentAsset.tokenContract, "claimQuickBtn", null);
     }
 
     async function claimDividends(tokenAddress, btnId, txId) {
       try {
         await ensureWallet();
+
         const btn = document.getElementById(btnId);
-        btn.disabled = true;
-        btn.textContent = "Claiming...";
-
-        const token = new ethers.Contract(tokenAddress, assetTokenAbi, signer);
-        const pendingBefore = fmtUSDCBig(await token.pendingDividends(walletAddress).catch(() => 0n));
-
-        let tx;
-        try { tx = await token.claimDividends(); }
-        catch (_) {
-          try { tx = await token.claimDividend(); }
-          catch (_) { tx = await token.withdrawDividends(); }
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "Claiming...";
         }
 
-        const link = document.getElementById(txId);
-        link.href = EXPLORER_TX + tx.hash;
-        link.textContent = "USDC receipt: " + tx.hash;
-        link.parentElement.classList.add("open");
+        const token = new ethers.Contract(tokenAddress, assetTokenAbi, signer);
+
+        const [pendingRaw, balanceRaw] = await Promise.all([
+          token.pendingDividends(walletAddress).catch(() => 0n),
+          token.balanceOf(walletAddress).catch(() => 0n)
+        ]);
+
+        if (balanceRaw <= 0n) {
+          showToast("Invest first to earn dividends.", "error");
+          return;
+        }
+
+        if (pendingRaw <= 0n) {
+          showToast("No dividends available to claim.", "error");
+          return;
+        }
+
+        let tx;
+        try {
+          tx = await token.claimDividends();
+        } catch (_) {
+          try {
+            tx = await token.claimDividend();
+          } catch (_) {
+            tx = await token.withdrawDividends();
+          }
+        }
+
+        if (txId) {
+          const link = document.getElementById(txId);
+          if (link) {
+            link.href = EXPLORER_TX + tx.hash;
+            link.textContent = "USDC receipt: " + tx.hash;
+            link.parentElement.classList.add("open");
+          }
+        }
 
         await tx.wait();
 
-        if (pendingBefore > 0) addLifetimeClaimed(walletAddress, tokenAddress, pendingBefore);
+        const claimedUSDC = fmtUSDCBig(pendingRaw);
+        addLifetimeClaimed(walletAddress, tokenAddress, claimedUSDC);
 
-        showToast("Dividend claim confirmed.", "success");
-        await updatePortfolio();
-      } catch (e) {
-        showToast(e.shortMessage || e.message || "Claim failed.", "error");
+        showToast("Dividends claimed successfully.", "success");
+        await loadAssets();
+      } catch (error) {
+        const msg = String(error && (error.shortMessage || error.message) || "");
+        if (msg.toLowerCase().includes("missing revert data")) {
+          showToast("No dividends available or you have not invested yet.", "error");
+        } else {
+          showToast(msg || "Claim failed.", "error");
+        }
       } finally {
         const btn = document.getElementById(btnId);
         if (btn) {
           btn.disabled = false;
-          btn.textContent = "Claim Dividend";
+          btn.textContent = btnId === "claimQuickBtn" ? "Claim Dividends" : "Claim Dividend";
         }
       }
+    }
+
+    function openExitModal(mode, tokenAddress, symbol) {
+      exitState.mode = mode;
+      exitState.token = tokenAddress;
+      exitState.symbol = symbol;
+
+      const title = document.getElementById("exitModalTitle");
+      const sub = document.getElementById("exitModalSub");
+
+      if (mode === "sell") {
+        title.textContent = "Sell on Marketplace";
+        sub.textContent = "List a token amount and ask price for secondary market execution.";
+      } else if (mode === "buyback") {
+        title.textContent = "Request Buyback";
+        sub.textContent = "Buyback becomes available after 90 days from first investment.";
+      } else {
+        title.textContent = "Early Redemption";
+        sub.textContent = "Early redemption applies a 15% penalty distributed to remaining holders.";
+      }
+
+      document.getElementById("exitAmount").value = "";
+      document.getElementById("exitPrice").value = "";
+      document.getElementById("exitPreview").innerHTML = '<div class="list-item"><span>Enter amount and price to preview settlement.</span><span class="pill">Preview</span></div>';
+      document.getElementById("exitModal").classList.add("open");
+    }
+
+    function closeExitModal() {
+      document.getElementById("exitModal").classList.remove("open");
+      exitState.mode = null;
+      exitState.token = null;
+      exitState.symbol = null;
+    }
+
+    function recalcExitPreview() {
+      const amount = Number(document.getElementById("exitAmount").value || 0);
+      const price = Number(document.getElementById("exitPrice").value || 0);
+      const gross = amount * price;
+      const preview = document.getElementById("exitPreview");
+
+      if (!amount || !price || gross <= 0) {
+        preview.innerHTML = '<div class="list-item"><span>Enter amount and price to preview settlement.</span><span class="pill">Preview</span></div>';
+        return;
+      }
+
+      if (exitState.mode === "redeem") {
+        const penalty = gross * 0.15;
+        const receive = gross - penalty;
+        preview.innerHTML = `
+          <div class="list-item"><span>Gross Value</span><span class="mono">${fmtUSD(gross)}</span></div>
+          <div class="list-item"><span>Penalty (15%)</span><span class="mono">${fmtUSD(penalty)}</span></div>
+          <div class="list-item"><span>You Receive</span><span class="mono">${fmtUSD(receive)}</span></div>
+        `;
+      } else {
+        preview.innerHTML = `
+          <div class="list-item"><span>Order Amount</span><span class="mono">${amount.toLocaleString()} ${exitState.symbol || "TKN"}</span></div>
+          <div class="list-item"><span>Total Value</span><span class="mono">${fmtUSD(gross)}</span></div>
+        `;
+      }
+    }
+
+    function confirmExitAction() {
+      const amount = Number(document.getElementById("exitAmount").value || 0);
+      const price = Number(document.getElementById("exitPrice").value || 0);
+
+      if (!amount || !price) {
+        showToast("Enter amount and price.", "error");
+        return;
+      }
+
+      if (!walletAddress || !exitState.token) {
+        showToast("Connect wallet and select a position first.", "error");
+        return;
+      }
+
+      if (exitState.mode === "buyback") {
+        const days = getDaysHeld(walletAddress, exitState.token);
+        if (days < 90) {
+          showToast("Buyback available after 90 days. Days held: " + days, "error");
+          return;
+        }
+        showToast("Buyback request submitted.", "success");
+      } else if (exitState.mode === "sell") {
+        showToast("Sell listing created on marketplace.", "success");
+      } else {
+        showToast("Early redemption request submitted with 15% penalty.", "success");
+      }
+
+      closeExitModal();
     }
 
     async function updatePortfolio() {
       const grid = document.getElementById("portfolioGrid");
 
       if (!walletAddress) {
-        grid.innerHTML = '<div class="empty">Connect wallet to view holdings, P/L, dividend history, and exit options.</div>';
-        document.getElementById("landingPositions").textContent = "0";
+        grid.innerHTML = '<div class="empty">Connect wallet to view holdings and claims.</div>';
         document.getElementById("pfValue").textContent = "$0";
         document.getElementById("pfCost").textContent = "$0";
         document.getElementById("pfPnL").textContent = "$0";
-        syncReturnsBox(0, 0);
+        document.getElementById("pfPositions").textContent = "0";
+        updateQuickClaimBox(0);
         return;
       }
 
@@ -1413,14 +1547,14 @@
         }));
 
         const holdings = snapshots.filter((x) => x.balance > 0n);
-        document.getElementById("landingPositions").textContent = String(holdings.length);
+        document.getElementById("pfPositions").textContent = String(holdings.length);
 
         if (!holdings.length) {
-          grid.innerHTML = '<div class="empty">No holdings yet. Invest in a project to populate your dashboard.</div>';
+          grid.innerHTML = '<div class="empty">No positions yet. Invest in an asset to populate portfolio.</div>';
           document.getElementById("pfValue").textContent = "$0";
           document.getElementById("pfCost").textContent = "$0";
           document.getElementById("pfPnL").textContent = "$0";
-          syncReturnsBox(0, 0);
+          updateQuickClaimBox(0);
           return;
         }
 
@@ -1438,7 +1572,7 @@
           totalValue += value;
           totalCost += costBasis;
 
-          const btnId = "claimBtn_" + idx;
+          const claimBtnId = "claimBtn_" + idx;
           const txId = "claimTx_" + idx;
 
           return `
@@ -1453,12 +1587,12 @@
               <div class="detail-row"><span class="muted">Cost Basis</span><span class="mono">${fmtUSD(costBasis)}</span></div>
               <div class="detail-row"><span class="muted">Pending Dividend</span><span class="mono">${fmtUSD(pending)}</span></div>
               <div class="detail-row"><span class="muted">Lifetime Claimed</span><span class="mono">${fmtUSD(claimed)}</span></div>
-              <button class="btn btn-primary btn-full mt-8" id="${btnId}" onclick="claimDividends('${h.asset.tokenContract}','${btnId}','${txId}')">Claim Dividend</button>
+              <button class="btn btn-primary btn-full mt-8" id="${claimBtnId}" onclick="claimDividends('${h.asset.tokenContract}','${claimBtnId}','${txId}')">Claim Dividend</button>
               <div class="tx-box"><a id="${txId}" class="tx-link" href="#" target="_blank" rel="noopener noreferrer"></a></div>
               <div class="list mt-8">
-                <div class="list-item"><span>Sell on Marketplace</span><span class="pill">P1</span></div>
-                <div class="list-item"><span>Request Buyback</span><span class="pill">After 90 days</span></div>
-                <div class="list-item"><span>Early Redemption</span><span class="pill">15% to holders</span></div>
+                <div class="list-item"><span>Sell on Marketplace</span><button class="btn btn-outline" onclick="openExitModal('sell','${h.asset.tokenContract}','${h.asset.symbol}')">List Now</button></div>
+                <div class="list-item"><span>Request Buyback</span><button class="btn btn-outline" onclick="openExitModal('buyback','${h.asset.tokenContract}','${h.asset.symbol}')">Request</button></div>
+                <div class="list-item"><span>Early Redemption</span><button class="btn btn-outline" onclick="openExitModal('redeem','${h.asset.tokenContract}','${h.asset.symbol}')">Redeem</button></div>
               </div>
             </div>
           `;
@@ -1470,40 +1604,40 @@
         document.getElementById("pfPnL").textContent = fmtUSD(pnl);
 
         if (currentAsset) {
-          const currentHolding = holdings.find((h) => h.asset.tokenContract.toLowerCase() === currentAsset.tokenContract.toLowerCase());
-          if (currentHolding) syncReturnsBox(fmtUSDCBig(currentHolding.pending), fmtTokenBig(currentHolding.balance));
+          const cur = holdings.find((h) => h.asset.tokenContract.toLowerCase() === currentAsset.tokenContract.toLowerCase());
+          updateQuickClaimBox(cur ? fmtUSDCBig(cur.pending) : 0);
+        } else {
+          updateQuickClaimBox(0);
         }
       } catch (e) {
-        grid.innerHTML = '<div class="empty">Unable to load portfolio data. Reconnect wallet and retry.</div>';
+        grid.innerHTML = '<div class="empty">Unable to load portfolio data. Reconnect and retry.</div>';
       }
     }
 
     function refreshFounderDashboard() {
       if (!cachedAssets.length) {
-        document.getElementById("founderAssets").textContent = "0";
-        document.getElementById("founderInvestors").textContent = "0";
-        document.getElementById("founderRaisedProgress").textContent = "$0 / $0";
-        document.getElementById("founderRevenuePool").textContent = "$0";
+        document.getElementById("fdRaise").textContent = "$0 / $0";
+        document.getElementById("fdHolders").textContent = "0";
+        document.getElementById("fdRevenue").textContent = "$0";
         return;
       }
 
       const totalRaised = cachedAssets.reduce((acc, a) => acc + fmtUSDCBig(a.totalRaised), 0);
-      const totalTarget = cachedAssets.reduce((acc, a) => acc + fmtUSDCBig(a.totalValuation), 0);
+      const totalValuation = cachedAssets.reduce((acc, a) => acc + fmtUSDCBig(a.totalValuation), 0);
 
-      document.getElementById("founderAssets").textContent = String(cachedAssets.length);
-      document.getElementById("founderInvestors").textContent = String(Math.max(1, Math.round(cachedAssets.length * 7.5)));
-      document.getElementById("founderRaisedProgress").textContent = fmtUSD(totalRaised) + " / " + fmtUSD(totalTarget);
-      document.getElementById("founderRevenuePool").textContent = fmtUSD(totalRaised * 0.08);
+      document.getElementById("fdRaise").textContent = fmtUSD(totalRaised) + " / " + fmtUSD(totalValuation);
+      document.getElementById("fdHolders").textContent = String(Math.max(1, Math.round(cachedAssets.length * 7.5)));
+      document.getElementById("fdRevenue").textContent = fmtUSD(totalRaised * 0.08);
     }
 
     function simulateDistribution() {
-      const token = document.getElementById("distributionTokenInput").value.trim();
-      const amount = Number(document.getElementById("distributionAmount").value || 0);
+      const token = document.getElementById("distToken").value.trim();
+      const amount = Number(document.getElementById("distAmount").value || 0);
       if (!token || amount <= 0) {
         showToast("Enter token address and valid distribution amount.", "error");
         return;
       }
-      showToast("Distribution prepared for " + amount.toLocaleString() + " USDC.", "success");
+      showToast("Revenue distribution prepared for " + amount.toLocaleString() + " USDC.", "success");
     }
 
     async function submitLaunch() {
@@ -1523,7 +1657,7 @@
           return;
         }
 
-        setButtonLoading("launchBtn", true, "Launch Asset on Arc Testnet");
+        setButtonLoading("launchBtn", true, "Processing...");
 
         const launchpad = new ethers.Contract(LAUNCHPAD_ADDRESS, launchpadAbi, signer);
         const listingFee = await launchpad.LISTING_FEE();
@@ -1563,13 +1697,12 @@
     async function loadAssets() {
       try {
         cachedAssets = await fetchAssets();
-        updateLandingStats();
-        renderLandingLiveProjects();
-        renderInvestorAssets();
+        updateTopStats();
+        renderExploreAssets();
         refreshFounderDashboard();
         await updatePortfolio();
-      } catch (e) {
-        showToast("Failed to load live assets.", "error");
+      } catch (_) {
+        showToast("Failed to load live assets from Arc.", "error");
       }
     }
 
@@ -1577,20 +1710,12 @@
       const max = Number(document.getElementById("maxSupply").value || 0);
       const price = Number(document.getElementById("pricePerToken").value || 0);
       document.getElementById("raiseTarget").value = max * price;
-      updateRoiBox();
     });
 
     document.getElementById("maxSupply").addEventListener("input", () => {
       const max = Number(document.getElementById("maxSupply").value || 0);
       const price = Number(document.getElementById("pricePerToken").value || 0);
       document.getElementById("raiseTarget").value = max * price;
-      updateRoiBox();
-    });
-
-    document.getElementById("investAmount").addEventListener("input", () => {
-      updateInvestPreview();
-      updateRoiBox();
-      syncReturnsBox();
     });
 
     if (window.ethereum) {
@@ -1606,6 +1731,10 @@
 
       window.ethereum.on("chainChanged", () => window.location.reload());
     }
+
+    document.getElementById("exitModal").addEventListener("click", (e) => {
+      if (e.target.id === "exitModal") closeExitModal();
+    });
 
     function startRealtimeRefresh() {
       if (refreshTimer) clearInterval(refreshTimer);
