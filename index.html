@@ -126,6 +126,8 @@
     animation: pulse-dot 2s infinite;
   }
 
+  .contracts-section-padded { padding: 24px; }
+
   @keyframes pulse-dot {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.3; }
@@ -827,6 +829,7 @@
       Arc Testnet · 5042002
     </div>
     <button class="wallet-btn" id="walletBtn" onclick="connectWallet()">Connect Wallet</button>
+    <button class="wallet-btn" id="disconnectBtn" onclick="disconnectWallet()" hidden>Disconnect</button>
   </div>
 </nav>
 
@@ -963,7 +966,7 @@
   </div>
 
   <div class="panel" id="panel-deploy">
-    <div class="contracts-section" style="padding:24px;">
+    <div class="contracts-section contracts-section-padded">
       <div class="form-section-title">Arc Testnet Contract Addresses</div>
       <div class="contract-row">
         <span class="contract-name">USDC (Native Gas Token)</span>
@@ -1200,6 +1203,9 @@ async function ensureWallet() {
   const btn = document.getElementById("walletBtn");
   btn.textContent = shortAddr(walletAddress);
   btn.classList.add("connected");
+
+  const disconnectBtn = document.getElementById("disconnectBtn");
+  disconnectBtn.hidden = false;
 }
 
 async function connectWallet() {
@@ -1212,6 +1218,25 @@ async function connectWallet() {
     console.error(err);
     showToast(err.message || "Wallet connection failed", "error");
   }
+}
+
+function disconnectWallet(silent = false) {
+  walletAddress = null;
+  browserProvider = null;
+  signer = null;
+  currentAsset = null;
+  clearTx();
+  closeModal();
+
+  const btn = document.getElementById("walletBtn");
+  btn.textContent = "Connect Wallet";
+  btn.classList.remove("connected");
+
+  const disconnectBtn = document.getElementById("disconnectBtn");
+  disconnectBtn.hidden = true;
+
+  updatePortfolio();
+  if (!silent) showToast("Wallet disconnected.", "info");
 }
 
 async function approveIfNeeded(spender, amount) {
@@ -1548,11 +1573,8 @@ document.getElementById("investModal").addEventListener("click", function (e) {
 if (window.ethereum) {
   window.ethereum.on("accountsChanged", async (accounts) => {
     walletAddress = accounts[0] || null;
-    const btn = document.getElementById("walletBtn");
     if (!walletAddress) {
-      btn.textContent = "Connect Wallet";
-      btn.classList.remove("connected");
-      await updatePortfolio();
+      disconnectWallet(true);
       return;
     }
     await ensureWallet();
@@ -1567,4 +1589,3 @@ updatePortfolio();
 </script>
 </body>
 </html>
-
