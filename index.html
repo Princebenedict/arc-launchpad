@@ -1,1568 +1,1621 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ArcVault - Arc-Native Launchpad for Real Assets</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
-<style>
-  :root {
-    --bg: #080b10;
-    --surface: #0d1117;
-    --surface2: #131923;
-    --border: #1e2a38;
-    --border2: #243040;
-    --usdc: #2775ca;
-    --usdc-light: #3d8fe0;
-    --arc: #00d4aa;
-    --arc-dim: #00d4aa22;
-    --equity: #f59e0b;
-    --revenue: #8b5cf6;
-    --rwa: #10b981;
-    --text: #e8edf5;
-    --muted: #5a7294;
-    --muted2: #8fa5bf;
-    --danger: #ef4444;
-    --success: #22c55e;
-    --font: "Syne", sans-serif;
-    --mono: "DM Mono", monospace;
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  html, body {
-    color-scheme: dark;
-    background: #080b10;
-  }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(var(--border) 1px, transparent 1px),
-      linear-gradient(90deg, var(--border) 1px, transparent 1px);
-    background-size: 48px 48px;
-    opacity: 0.3;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .orb {
-    position: fixed;
-    border-radius: 50%;
-    filter: blur(120px);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .orb-1 { width: 500px; height: 500px; background: rgba(0,212,170,0.06); top: -100px; right: -100px; }
-  .orb-2 { width: 400px; height: 400px; background: rgba(39,117,202,0.07); bottom: 0; left: -100px; }
-
-  nav {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    height: 68px;
-    background: rgba(8,11,16,0.9);
-    border-bottom: 1px solid var(--border);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-  }
-
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 18px;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-  }
-
-  .logo-mark {
-    width: 32px;
-    height: 32px;
-    background: var(--arc);
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    font-weight: 800;
-    color: var(--bg);
-  }
-
-  .nav-right {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .chain-badge {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    background: var(--arc-dim);
-    border: 1px solid var(--arc);
-    border-radius: 20px;
-    font-size: 12px;
-    font-family: var(--mono);
-    color: var(--arc);
-  }
-
-  .chain-badge .dot {
-    width: 6px;
-    height: 6px;
-    background: var(--arc);
-    border-radius: 50%;
-    animation: pulse-dot 2s infinite;
-  }
-
-  @keyframes pulse-dot {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-
-  .wallet-btn {
-    border: 1px solid var(--border2);
-    background: var(--surface2);
-    color: var(--text);
-    border-radius: 10px;
-    padding: 10px 14px;
-    font-family: var(--font);
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all .2s;
-  }
-
-  .wallet-btn:hover { border-color: var(--arc); color: var(--arc); }
-  .wallet-btn.connected { border-color: var(--arc); color: var(--arc); background: var(--arc-dim); }
-
-  main {
-    position: relative;
-    z-index: 1;
-    max-width: 1220px;
-    margin: 0 auto;
-    padding: 34px 20px 80px;
-  }
-
-  .hero {
-    text-align: center;
-    padding: 38px 0 28px;
-    animation: fadeUp .5s ease both;
-  }
-
-  .hero-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
-    background: var(--arc-dim);
-    border: 1px solid rgba(0,212,170,0.35);
-    border-radius: 20px;
-    font-size: 12px;
-    color: var(--arc);
-    font-family: var(--mono);
-    margin-bottom: 18px;
-  }
-
-  .hero h1 {
-    font-size: clamp(34px, 5vw, 62px);
-    font-weight: 800;
-    line-height: 1.08;
-    letter-spacing: -2px;
-    margin-bottom: 14px;
-  }
-
-  .hero h1 span {
-    background: linear-gradient(135deg, var(--arc), var(--usdc-light));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .hero p {
-    font-size: 17px;
-    color: var(--muted2);
-    max-width: 700px;
-    margin: 0 auto 24px;
-    line-height: 1.6;
-  }
-
-  .tabs {
-    display: flex;
-    gap: 6px;
-    padding: 6px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    margin: 0 auto 28px;
-    width: fit-content;
-  }
-
-  .tab {
-    padding: 10px 18px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    border: none;
-    background: transparent;
-    color: var(--muted);
-    transition: all .2s;
-    font-family: var(--font);
-  }
-
-  .tab.active {
-    background: var(--surface2);
-    color: var(--text);
-    border: 1px solid var(--border2);
-  }
-
-  .tab:hover:not(.active) { color: var(--muted2); }
-
-  .panel { display: none; animation: fadeUp .25s ease both; }
-  .panel.active { display: block; }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .grid-3 {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0,1fr));
-    gap: 16px;
-    margin-bottom: 20px;
-  }
-
-  .metric-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 16px;
-  }
-
-  .metric-label {
-    font-size: 11px;
-    color: var(--muted);
-    font-family: var(--mono);
-    text-transform: uppercase;
-    letter-spacing: .5px;
-    margin-bottom: 6px;
-  }
-
-  .metric-value {
-    font-size: 26px;
-    font-weight: 800;
-    font-family: var(--mono);
-    letter-spacing: -1px;
-  }
-
-  .landing-sections {
-    display: grid;
-    grid-template-columns: 1.1fr .9fr;
-    gap: 18px;
-  }
-
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 20px;
-  }
-
-  .card h3 {
-    font-size: 18px;
-    letter-spacing: -.3px;
-    margin-bottom: 6px;
-  }
-
-  .subtle {
-    color: var(--muted2);
-    font-size: 14px;
-    line-height: 1.55;
-  }
-
-  .steps {
-    display: grid;
-    gap: 10px;
-    margin-top: 12px;
-  }
-
-  .step {
-    border: 1px solid var(--border2);
-    border-radius: 10px;
-    padding: 12px;
-    background: var(--surface2);
-  }
-
-  .step-title {
-    font-size: 13px;
-    font-weight: 700;
-    margin-bottom: 4px;
-  }
-
-  .step-desc {
-    font-size: 13px;
-    color: var(--muted2);
-  }
-
-  .list {
-    display: grid;
-    gap: 10px;
-    margin-top: 12px;
-  }
-
-  .list-item {
-    border: 1px solid var(--border2);
-    border-radius: 10px;
-    padding: 12px;
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    align-items: center;
-    background: var(--surface2);
-  }
-
-  .pill {
-    font-family: var(--mono);
-    font-size: 11px;
-    padding: 4px 8px;
-    border-radius: 20px;
-    border: 1px solid var(--border2);
-    color: var(--muted2);
-  }
-
-  .filters {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-
-  .field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .field label {
-    font-size: 11px;
-    color: var(--muted2);
-    font-family: var(--mono);
-    letter-spacing: .4px;
-  }
-
-  .field input, .field select, .field textarea {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border2);
-    border-radius: 10px;
-    color: var(--text);
-    padding: 10px 12px;
-    font-family: var(--font);
-    font-size: 14px;
-    outline: none;
-  }
-
-  .field input:focus, .field select:focus, .field textarea:focus {
-    border-color: var(--arc);
-    box-shadow: 0 0 0 3px var(--arc-dim);
-  }
-
-  /* Force dark select controls */
-.field select,
-#filterType,
-#filterRisk,
-#sortBy,
-#founderType,
-#distributionToken {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  background-color: #0b111a !important;
-  color: #e8edf5 !important;
-  border: 1px solid #243040 !important;
-  border-radius: 10px;
-  color-scheme: dark;
-}
-
-.field select:focus,
-#filterType:focus,
-#filterRisk:focus,
-#sortBy:focus,
-#founderType:focus,
-#distributionToken:focus {
-  border-color: #00d4aa !important;
-  box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.18) !important;
-  outline: none;
-}
-
-.field select option,
-.field select optgroup {
-  background: #0b111a !important;
-  color: #e8edf5 !important;
-}
-
-/* Selected/hovered option colors */
-.field select option:checked {
-  background: #132033 !important;
-  color: #00d4aa !important;
-}
-
-/* IE/old Edge arrow */
-.field select::-ms-expand {
-  background: #0b111a;
-  color: #e8edf5;
-}
-
-
-  .asset-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 18px;
-  }
-
-  .portfolio-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 14px;
-  }
-
-  .asset-card {
-    position: relative;
-    background: linear-gradient(180deg, #0d1521 0%, #0a1119 100%);
-    border: 1px solid #1e2f45;
-    border-radius: 16px;
-    padding: 18px;
-    box-shadow: inset 0 0 0 1px rgba(0, 212, 170, 0.04), 0 10px 30px rgba(0, 0, 0, 0.35);
-    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .asset-card:hover {
-    transform: translateY(-2px);
-    border-color: #2e4666;
-    box-shadow: inset 0 0 0 1px rgba(0, 212, 170, 0.08), 0 14px 35px rgba(0, 0, 0, 0.45);
-  }
-
-  .portfolio-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 18px;
-  }
-
-  .asset-head {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-
-  .asset-type {
-    font-family: var(--mono);
-    font-size: 11px;
-    text-transform: uppercase;
-    border-radius: 20px;
-    padding: 4px 8px;
-    letter-spacing: .4px;
-  }
-
-  .type-equity { background: rgba(245,158,11,0.15); color: var(--equity); }
-  .type-revenue { background: rgba(139,92,246,0.15); color: var(--revenue); }
-  .type-rwa { background: rgba(16,185,129,0.15); color: var(--rwa); }
-
-  .asset-title {
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: -0.4px;
-    margin-bottom: 3px;
-  }
-
-  .asset-sub {
-    color: #8fa5bf;
-    font-family: var(--mono);
-    font-size: 12px;
-    margin-bottom: 10px;
-  }
-
-  .asset-desc {
-    color: #a4b7cd;
-    font-size: 14px;
-    line-height: 1.5;
-    min-height: 60px;
-    margin-bottom: 14px;
-  }
-
-  .bar {
-    height: 6px;
-    border-radius: 4px;
-    background: #233248;
-    overflow: hidden;
-    margin: 10px 0 12px;
-  }
-
-  .bar > span {
-    display: block;
-    height: 100%;
-    background: linear-gradient(90deg, #00d4aa, #3d8fe0);
-  }
-
-  .row {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    align-items: center;
-    font-size: 12px;
-  }
-
-  .muted { color: var(--muted); font-family: var(--mono); }
-  .mono { font-family: var(--mono); }
-
-  .btn {
-    border: none;
-    border-radius: 10px;
-    padding: 10px 14px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all .2s;
-    font-family: var(--font);
-  }
-
-  .btn-primary {
-    background: var(--arc);
-    color: var(--bg);
-  }
-
-  .btn-primary:hover { background: #00ebbd; }
-
-  .btn-outline {
-    background: var(--surface2);
-    color: var(--text);
-    border: 1px solid var(--border2);
-  }
-
-  .btn-outline:hover { border-color: var(--arc); color: var(--arc); }
-
-  .btn-full { width: 100%; }
-
-  .stack {
-    display: grid;
-    gap: 10px;
-  }
-
-  .two-col {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  .detail-wrap {
-    display: grid;
-    grid-template-columns: 1.2fr .8fr;
-    gap: 16px;
-    margin-top: 16px;
-  }
-
-  .detail-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 18px;
-  }
-
-  .detail-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
-    border-bottom: 1px solid var(--border);
-    padding: 8px 0;
-    font-size: 13px;
-  }
-
-  .detail-row:last-child { border-bottom: none; }
-
-  .tx-box {
-    margin-top: 10px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    border: 1px solid rgba(39,117,202,0.3);
-    background: rgba(39,117,202,0.1);
-    display: none;
-  }
-
-  .tx-box.open { display: block; }
-
-  .tx-link {
-    color: var(--usdc-light);
-    word-break: break-all;
-    text-decoration: none;
-    font-size: 12px;
-    font-family: var(--mono);
-  }
-
-  .empty {
-    border: 1px dashed var(--border2);
-    border-radius: 12px;
-    padding: 26px;
-    text-align: center;
-    color: var(--muted);
-    font-size: 14px;
-  }
-
-  .toast {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: var(--usdc);
-    color: #fff;
-    border-radius: 12px;
-    padding: 12px 14px;
-    font-weight: 700;
-    transform: translateY(80px);
-    opacity: 0;
-    transition: all .25s ease;
-    z-index: 300;
-    max-width: 340px;
-  }
-
-  .toast.show { transform: translateY(0); opacity: 1; }
-  .toast.success { background: var(--success); }
-  .toast.error { background: var(--danger); }
-
-  .mt-8 { margin-top: 8px; }
-  .mt-12 { margin-top: 12px; }
-  .mt-16 { margin-top: 16px; }
-  .mt-18 { margin-top: 18px; }
-
-  @media (max-width: 980px) {
-    .landing-sections, .detail-wrap { grid-template-columns: 1fr; }
-    .grid-3 { grid-template-columns: 1fr; }
-    .filters, .two-col { grid-template-columns: 1fr; }
-  }
-
-  @media (max-width: 720px) {
-    .tabs { width: 100%; overflow-x: auto; }
-    nav { padding: 0 12px; }
-    .chain-badge { display: none; }
-    .wallet-btn { padding: 9px 10px; font-size: 12px; }
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ArcVault - Arc-Native Launchpad for Real Assets</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #080b10;
+      --surface: #0d1117;
+      --surface2: #131923;
+      --surface3: #0b121c;
+      --border: #1e2a38;
+      --border2: #243040;
+      --usdc: #2775ca;
+      --usdc-light: #3d8fe0;
+      --arc: #00d4aa;
+      --arc-dim: #00d4aa22;
+      --equity: #f59e0b;
+      --revenue: #8b5cf6;
+      --rwa: #10b981;
+      --text: #e8edf5;
+      --muted: #5a7294;
+      --muted2: #8fa5bf;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --font: "Syne", sans-serif;
+      --mono: "DM Mono", monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { color-scheme: dark; background: var(--bg); }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      opacity: 0.28;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(120px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .orb-1 { width: 500px; height: 500px; background: rgba(0,212,170,0.06); top: -100px; right: -100px; }
+    .orb-2 { width: 400px; height: 400px; background: rgba(39,117,202,0.07); bottom: 0; left: -100px; }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 68px;
+      padding: 0 18px;
+      background: rgba(8,11,16,0.9);
+      border-bottom: 1px solid var(--border);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.4px;
+    }
+
+    .logo-mark {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--arc);
+      color: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+
+    .chain-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--arc);
+      background: var(--arc-dim);
+      color: var(--arc);
+      font-size: 12px;
+      font-family: var(--mono);
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--arc);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%,100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .wallet-btn {
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      padding: 9px 12px;
+      background: var(--surface2);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .wallet-btn:hover { border-color: var(--arc); color: var(--arc); }
+    .wallet-btn.connected { border-color: var(--arc); color: var(--arc); background: var(--arc-dim); }
+
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 28px 18px 80px;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 26px 0 22px;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(0,212,170,0.35);
+      background: var(--arc-dim);
+      color: var(--arc);
+      font-size: 12px;
+      font-family: var(--mono);
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      font-size: clamp(34px, 5vw, 62px);
+      line-height: 1.08;
+      font-weight: 800;
+      letter-spacing: -1.8px;
+      margin-bottom: 12px;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--arc), var(--usdc-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero p {
+      max-width: 760px;
+      margin: 0 auto;
+      color: var(--muted2);
+      font-size: 17px;
+      line-height: 1.6;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      padding: 6px;
+      width: fit-content;
+      margin: 20px auto 22px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+    }
+
+    .tab {
+      border: none;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+      font-family: var(--font);
+      padding: 10px 16px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .tab.active {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border2);
+    }
+
+    .tab:hover:not(.active) { color: var(--muted2); }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .metric-box {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface);
+      padding: 16px;
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 11px;
+      font-family: var(--mono);
+      text-transform: uppercase;
+      letter-spacing: .45px;
+      margin-bottom: 6px;
+    }
+
+    .metric-value {
+      font-size: 26px;
+      font-weight: 800;
+      font-family: var(--mono);
+      letter-spacing: -1px;
+    }
+
+    .split-2 {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 16px;
+    }
+
+    .card {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--surface);
+      padding: 18px;
+    }
+
+    .card h3 {
+      font-size: 18px;
+      letter-spacing: -.3px;
+      margin-bottom: 6px;
+    }
+
+    .subtle {
+      color: var(--muted2);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .stack { display: grid; gap: 10px; }
+
+    .list {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .list-item {
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      background: var(--surface2);
+      padding: 11px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pill {
+      font-family: var(--mono);
+      font-size: 11px;
+      border-radius: 999px;
+      border: 1px solid var(--border2);
+      color: var(--muted2);
+      padding: 4px 8px;
+    }
+
+    .filter-wrap { display: grid; gap: 10px; margin-bottom: 14px; }
+    .filter-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .label {
+      font-size: 11px;
+      color: var(--muted2);
+      font-family: var(--mono);
+      letter-spacing: .35px;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+
+    .chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      background: var(--surface3);
+      padding: 6px;
+    }
+
+    .chip {
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted2);
+      font-size: 12px;
+      font-weight: 700;
+      font-family: var(--font);
+      padding: 8px 10px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .chip:hover { color: var(--text); }
+    .chip.active {
+      background: var(--surface2);
+      color: var(--text);
+      border-color: var(--border2);
+    }
+
+    .asset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 16px;
+    }
+
+    .asset-card {
+      border: 1px solid #1e2f45;
+      border-radius: 16px;
+      background: linear-gradient(180deg, #0d1521 0%, #0a1119 100%);
+      box-shadow: inset 0 0 0 1px rgba(0,212,170,0.04), 0 10px 30px rgba(0,0,0,0.35);
+      padding: 16px;
+      transition: all .2s;
+    }
+
+    .asset-card:hover {
+      transform: translateY(-2px);
+      border-color: #2e4666;
+      box-shadow: inset 0 0 0 1px rgba(0,212,170,0.08), 0 14px 35px rgba(0,0,0,0.45);
+    }
+
+    .asset-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .asset-type {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: .45px;
+      text-transform: uppercase;
+      border-radius: 999px;
+      padding: 5px 9px;
+      border: 1px solid transparent;
+    }
+
+    .type-equity { background: rgba(245,158,11,0.14); color: var(--equity); border-color: rgba(245,158,11,0.28); }
+    .type-revenue { background: rgba(139,92,246,0.14); color: var(--revenue); border-color: rgba(139,92,246,0.28); }
+    .type-rwa { background: rgba(16,185,129,0.14); color: var(--rwa); border-color: rgba(16,185,129,0.28); }
+
+    .asset-title {
+      font-size: 21px;
+      font-weight: 800;
+      letter-spacing: -.3px;
+    }
+
+    .asset-sub {
+      color: #8fa5bf;
+      font-family: var(--mono);
+      font-size: 12px;
+      margin-bottom: 9px;
+    }
+
+    .asset-desc {
+      color: #a4b7cd;
+      font-size: 14px;
+      line-height: 1.48;
+      min-height: 56px;
+      margin-bottom: 10px;
+    }
+
+    .bar {
+      height: 6px;
+      border-radius: 4px;
+      background: #233248;
+      overflow: hidden;
+      margin: 9px 0 11px;
+    }
+
+    .bar > span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--arc), var(--usdc-light));
+      width: 0;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      margin-bottom: 6px;
+      gap: 10px;
+    }
+
+    .muted { color: var(--muted); font-family: var(--mono); }
+    .mono { font-family: var(--mono); }
+
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: var(--font);
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .btn-primary { background: var(--arc); color: var(--bg); }
+    .btn-primary:hover { background: #00ebbd; }
+
+    .btn-outline {
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .btn-outline:hover { border-color: var(--arc); color: var(--arc); }
+
+    .btn-full { width: 100%; }
+
+    .field {
+      display: grid;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 11px;
+      color: var(--muted2);
+      font-family: var(--mono);
+      letter-spacing: .35px;
+      text-transform: uppercase;
+    }
+
+    .field input,
+    .field textarea {
+      width: 100%;
+      border: 1px solid var(--border2);
+      border-radius: 10px;
+      background: var(--bg);
+      color: var(--text);
+      padding: 10px 12px;
+      font-size: 14px;
+      font-family: var(--font);
+      outline: none;
+    }
+
+    .field input:focus,
+    .field textarea:focus {
+      border-color: var(--arc);
+      box-shadow: 0 0 0 3px var(--arc-dim);
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .detail-wrap {
+      display: grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .detail-box {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: var(--surface);
+      padding: 16px;
+    }
+
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding: 8px 0;
+      font-size: 13px;
+      gap: 10px;
+    }
+
+    .detail-row:last-child { border-bottom: none; }
+
+    .tx-box {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(39,117,202,0.3);
+      background: rgba(39,117,202,0.1);
+      display: none;
+    }
+
+    .tx-box.open { display: block; }
+
+    .tx-link {
+      color: var(--usdc-light);
+      text-decoration: none;
+      word-break: break-all;
+      font-size: 12px;
+      font-family: var(--mono);
+    }
+
+    .portfolio-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 12px;
+    }
+
+    .portfolio-card {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface2);
+      padding: 14px;
+    }
+
+    .section-title {
+      font-size: 16px;
+      font-weight: 800;
+      margin: 14px 0 8px;
+    }
+
+    .divider { height: 1px; background: var(--border); margin: 12px 0; }
+
+    .empty {
+      border: 1px dashed var(--border2);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      max-width: 360px;
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #fff;
+      font-weight: 700;
+      background: var(--usdc);
+      opacity: 0;
+      transform: translateY(80px);
+      transition: all .25s ease;
+      z-index: 100;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+
+    .mt-8 { margin-top: 8px; }
+    .mt-12 { margin-top: 12px; }
+    .mt-14 { margin-top: 14px; }
+    .mt-16 { margin-top: 16px; }
+    .mt-18 { margin-top: 18px; }
+
+    @media (max-width: 1040px) {
+      .split-2, .detail-wrap { grid-template-columns: 1fr; }
+      .grid-3 { grid-template-columns: 1fr; }
+      .filter-row, .two-col { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .tabs { width: 100%; overflow-x: auto; }
+      nav { padding: 0 12px; }
+      .chain-badge { display: none; }
+      .wallet-btn { font-size: 12px; padding: 8px 10px; }
+    }
+  </style>
 </head>
 <body>
-<div class="orb orb-1"></div>
-<div class="orb orb-2"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
 
-<nav>
-  <div class="logo">
-    <div class="logo-mark">AV</div>
-    ArcVault
-  </div>
-  <div class="nav-right">
-    <div class="chain-badge"><span class="dot"></span>Arc Testnet · 5042002</div>
-    <button class="wallet-btn" id="walletBtn" onclick="connectWallet()">Connect Wallet</button>
-    <button class="wallet-btn" id="disconnectBtn" onclick="disconnectWallet()" hidden>Disconnect</button>
-  </div>
-</nav>
+  <nav>
+    <div class="logo">
+      <div class="logo-mark">AV</div>
+      ArcVault
+    </div>
+    <div class="nav-right">
+      <div class="chain-badge"><span class="dot"></span>Arc Testnet · 5042002</div>
+      <button class="wallet-btn" id="walletBtn" onclick="connectWallet()">Connect Wallet</button>
+      <button class="wallet-btn" id="disconnectBtn" onclick="disconnectWallet()" hidden>Disconnect</button>
+    </div>
+  </nav>
 
-<main>
-  <section class="hero">
-    <div class="hero-tag">Arc-Native Infrastructure</div>
-    <h1>The Arc-Native Launchpad<br /><span>for Real Assets</span></h1>
-    <p>Tokenize equity, revenue models, and real-world assets. Raise in USDC, settle in seconds, and distribute returns on-chain.</p>
-  </section>
+  <main>
+    <section class="hero">
+      <div class="hero-tag">Arc-Native Infrastructure</div>
+      <h1>The Arc-Native Launchpad<br /><span>for Real Assets</span></h1>
+      <p>Tokenize equity, revenue models, and real-world assets. Raise in USDC, settle quickly, and distribute returns on-chain with investor protection controls.</p>
+    </section>
 
-  <div class="tabs">
-    <button class="tab active" id="tab-landing" onclick="switchTab('landing', this)">Landing</button>
-    <button class="tab" id="tab-investors" onclick="switchTab('investors', this)">For Investors</button>
-    <button class="tab" id="tab-founders" onclick="switchTab('founders', this)">For Founders</button>
-    <button class="tab" id="tab-contracts" onclick="switchTab('contracts', this)">Contracts</button>
-  </div>
-
-  <section class="panel active" id="panel-landing">
-    <div class="grid-3">
-      <div class="metric-box">
-        <div class="metric-label">Total Assets</div>
-        <div class="metric-value mono" id="landingAssets">0</div>
-      </div>
-      <div class="metric-box">
-        <div class="metric-label">Total Raised</div>
-        <div class="metric-value mono" id="landingRaised">$0</div>
-      </div>
-      <div class="metric-box">
-        <div class="metric-label">Your Positions</div>
-        <div class="metric-value mono" id="landingPositions">0</div>
-      </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('landing', this)">Landing</button>
+      <button class="tab" onclick="switchTab('investors', this)">For Investors</button>
+      <button class="tab" onclick="switchTab('founders', this)">For Founders</button>
+      <button class="tab" onclick="switchTab('contracts', this)">Contracts</button>
     </div>
 
-    <div class="landing-sections">
-      <div class="card">
-        <h3>How It Works</h3>
-        <p class="subtle">Three-step lifecycle for projects and investors.</p>
-        <div class="steps">
-          <div class="step">
-            <div class="step-title">1. List</div>
-            <div class="step-desc">Founders launch tokenized assets with transparent terms and on-chain metadata.</div>
+    <section class="panel active" id="panel-landing">
+      <div class="grid-3">
+        <div class="metric-box"><div class="metric-label">Total Assets</div><div class="metric-value mono" id="landingAssets">0</div></div>
+        <div class="metric-box"><div class="metric-label">Total Raised</div><div class="metric-value mono" id="landingRaised">$0</div></div>
+        <div class="metric-box"><div class="metric-label">Your Positions</div><div class="metric-value mono" id="landingPositions">0</div></div>
+      </div>
+
+      <div class="split-2">
+        <div class="card">
+          <h3>How It Works</h3>
+          <p class="subtle">List, Invest, and Earn with transparent on-chain records.</p>
+          <div class="list">
+            <div class="list-item"><span><strong>1. List</strong><br><span class="subtle">Founder creates tokenized raise terms</span></span><span class="pill">On-chain</span></div>
+            <div class="list-item"><span><strong>2. Invest</strong><br><span class="subtle">Investor allocates USDC into project</span></span><span class="pill">USDC Gas</span></div>
+            <div class="list-item"><span><strong>3. Earn</strong><br><span class="subtle">Dividends and P/L tracked in dashboard</span></span><span class="pill">Pro-rata</span></div>
           </div>
-          <div class="step">
-            <div class="step-title">2. Invest</div>
-            <div class="step-desc">Investors participate using USDC with fast execution on Arc Testnet.</div>
-          </div>
-          <div class="step">
-            <div class="step-title">3. Earn</div>
-            <div class="step-desc">Portfolio tracks positions, dividends, and performance in one dashboard.</div>
+        </div>
+        <div class="card">
+          <h3>Arc Advantages</h3>
+          <p class="subtle">Protocol experience aligned to Arc strengths.</p>
+          <div class="list">
+            <div class="list-item"><span>Sub-second settlement badge</span><span class="pill">Performance</span></div>
+            <div class="list-item"><span>No ETH required, USDC-based flow</span><span class="pill">Frictionless</span></div>
+            <div class="list-item"><span>Opt-in privacy architecture support</span><span class="pill">Enterprise</span></div>
+            <div class="list-item"><span>FX-ready expansion (EURC and beyond)</span><span class="pill">Global</span></div>
           </div>
         </div>
       </div>
 
+      <div class="card mt-16">
+        <h3>Live Projects</h3>
+        <p class="subtle">Active raises from deployed contracts.</p>
+        <div id="landingLiveProjects" class="list"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-investors">
       <div class="card">
-        <h3>Arc Advantages</h3>
-        <p class="subtle">Built for production-grade on-chain asset workflows.</p>
+        <h3>Browse Projects</h3>
+        <p class="subtle">Filters use button groups to avoid browser select popup glitches.</p>
+
+        <div class="filter-wrap">
+          <div class="filter-row">
+            <div>
+              <div class="label">Asset Type</div>
+              <div class="chip-group" id="filterTypeGroup">
+                <button class="chip active" data-value="all" onclick="setFilter('type', 'all', this)">All</button>
+                <button class="chip" data-value="0" onclick="setFilter('type', '0', this)">Equity</button>
+                <button class="chip" data-value="1" onclick="setFilter('type', '1', this)">Revenue</button>
+                <button class="chip" data-value="2" onclick="setFilter('type', '2', this)">RWA</button>
+              </div>
+            </div>
+            <div>
+              <div class="label">Risk Tier</div>
+              <div class="chip-group" id="filterRiskGroup">
+                <button class="chip active" data-value="all" onclick="setFilter('risk', 'all', this)">All</button>
+                <button class="chip" data-value="low" onclick="setFilter('risk', 'low', this)">Low</button>
+                <button class="chip" data-value="medium" onclick="setFilter('risk', 'medium', this)">Medium</button>
+                <button class="chip" data-value="high" onclick="setFilter('risk', 'high', this)">High</button>
+              </div>
+            </div>
+            <div>
+              <div class="label">Sort By</div>
+              <div class="chip-group" id="filterSortGroup">
+                <button class="chip active" data-value="newest" onclick="setFilter('sort', 'newest', this)">Newest</button>
+                <button class="chip" data-value="raised" onclick="setFilter('sort', 'raised', this)">Most Raised</button>
+                <button class="chip" data-value="progress" onclick="setFilter('sort', 'progress', this)">Progress</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="investorAssetGrid" class="asset-grid"></div>
+      </div>
+
+      <div class="detail-wrap">
+        <div class="detail-box">
+          <h3>Project Detail</h3>
+          <p class="subtle" id="projectDetailSubtitle">Select a project for economics, risk profile, ROI simulation, and claim schedule.</p>
+          <div id="projectDetailBody" class="empty">No project selected.</div>
+
+          <div class="section-title">ROI Calculator</div>
+          <div class="field">
+            <label for="roiRevenueInput">Projected Monthly Revenue (USDC)</label>
+            <input id="roiRevenueInput" type="range" min="10000" max="1000000" step="10000" value="120000" oninput="updateRoiBox()" />
+          </div>
+          <div class="detail-row"><span class="muted">Projected Revenue</span><span class="mono" id="roiRevenueVal">$120,000</span></div>
+          <div class="detail-row"><span class="muted">Your Estimated Monthly Return</span><span class="mono" id="roiReturnVal">$0</span></div>
+        </div>
+
+        <div class="detail-box">
+          <h3>Invest Now</h3>
+          <div class="stack">
+            <div class="field">
+              <label for="investAmount">Token Amount</label>
+              <input id="investAmount" type="number" min="1" placeholder="100" oninput="updateInvestPreview()" />
+            </div>
+            <div class="field">
+              <label for="investCost">Total Cost</label>
+              <input id="investCost" type="text" readonly value="0 USDC" />
+            </div>
+            <button class="btn btn-primary btn-full" id="investBtn" onclick="executePurchase()">Approve USDC + Invest</button>
+            <div class="tx-box" id="investTxBox"><a id="investTxLink" class="tx-link" href="#" target="_blank" rel="noopener noreferrer"></a></div>
+          </div>
+
+          <div class="divider"></div>
+
+          <h3>Investment Returns</h3>
+          <div class="detail-row"><span class="muted">Invested</span><span class="mono" id="retInvested">$0</span></div>
+          <div class="detail-row"><span class="muted">Tokens Owned</span><span class="mono" id="retTokens">0</span></div>
+          <div class="detail-row"><span class="muted">Revenue Share (est.)</span><span class="mono" id="retShare">0.00%</span></div>
+          <div class="detail-row"><span class="muted">Next Claim Window</span><span class="mono">Monthly cycle</span></div>
+          <div class="detail-row"><span class="muted">Pending Dividend</span><span class="mono" id="retPending">$0</span></div>
+          <div class="detail-row"><span class="muted">Lifetime Claimed</span><span class="mono" id="retClaimed">$0</span></div>
+
+          <div class="divider"></div>
+
+          <h3>Exit Options</h3>
+          <div class="list">
+            <div class="list-item"><span>Sell on Marketplace</span><button class="btn btn-outline" type="button">List Now</button></div>
+            <div class="list-item"><span>Request Buyback</span><button class="btn btn-outline" type="button">After 90 Days</button></div>
+            <div class="list-item"><span>Early Redemption</span><span class="pill">15% penalty</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mt-14">
+        <h3>Portfolio Dashboard</h3>
+        <p class="subtle">Real-time holdings, P/L, dividend claim history, and protection disclosures.</p>
+
+        <div class="grid-3 mt-12">
+          <div class="metric-box"><div class="metric-label">Portfolio Value</div><div class="metric-value mono" id="pfValue">$0</div></div>
+          <div class="metric-box"><div class="metric-label">Cost Basis</div><div class="metric-value mono" id="pfCost">$0</div></div>
+          <div class="metric-box"><div class="metric-label">Profit / Loss</div><div class="metric-value mono" id="pfPnL">$0</div></div>
+        </div>
+
+        <div id="portfolioGrid" class="portfolio-grid"></div>
+
+        <div class="section-title">Risk Disclosure</div>
         <div class="list">
-          <div class="list-item"><span>Sub-second finality</span><span class="pill">Performance</span></div>
-          <div class="list-item"><span>USDC native gas UX</span><span class="pill">Payments</span></div>
-          <div class="list-item"><span>Privacy-ready architecture</span><span class="pill">Security</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card mt-18">
-      <h3>Live Projects</h3>
-      <p class="subtle">Active raises from the marketplace.</p>
-      <div id="landingLiveProjects" class="list"></div>
-    </div>
-  </section>
-
-  <section class="panel" id="panel-investors">
-    <div class="card">
-      <h3>Browse Projects</h3>
-      <p class="subtle">Filter by type, target return profile, and risk tier.</p>
-
-      <div class="filters">
-        <div class="field">
-          <label for="filterType">ASSET TYPE</label>
-          <select id="filterType" onchange="renderInvestorAssets()">
-            <option value="all">All</option>
-            <option value="0">Equity</option>
-            <option value="1">Revenue Model</option>
-            <option value="2">Real-World Asset</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="filterRisk">RISK TIER</label>
-          <select id="filterRisk" onchange="renderInvestorAssets()">
-            <option value="all">All</option>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="sortBy">SORT BY</label>
-          <select id="sortBy" onchange="renderInvestorAssets()">
-            <option value="newest">Newest</option>
-            <option value="raised">Most Raised</option>
-            <option value="progress">Highest Progress</option>
-          </select>
+          <div class="list-item"><span>Revenue-model returns vary with company performance</span><span class="pill">Variable Yield</span></div>
+          <div class="list-item"><span>RWA collateral value may fluctuate with market conditions</span><span class="pill">Collateral Risk</span></div>
+          <div class="list-item"><span>Secondary market liquidity is not guaranteed</span><span class="pill">Liquidity Risk</span></div>
         </div>
       </div>
 
-      <div class="asset-grid" id="investorAssetGrid"></div>
-    </div>
-
-    <div class="detail-wrap">
-      <div class="detail-box">
-        <h3>Project Detail</h3>
-        <p class="subtle" id="projectDetailSubtitle">Select a project to inspect company information, economics, projections, and risk.</p>
-        <div id="projectDetailBody" class="empty">No project selected.</div>
+      <div class="card mt-14">
+        <h3>Secondary Market</h3>
+        <p class="subtle">P1 module placeholder for order book, sell listings, and buyback routes.</p>
+        <div class="empty">Order book and listing execution can be connected to DeFi routing contracts in next iteration.</div>
       </div>
+    </section>
 
-      <div class="detail-box">
-        <h3>Invest Now</h3>
-        <div class="stack">
-          <div class="field">
-            <label for="investAmount">TOKEN AMOUNT</label>
-            <input id="investAmount" type="number" min="1" placeholder="100" oninput="updateInvestPreview()" />
-          </div>
-          <div class="field">
-            <label for="investCost">TOTAL COST</label>
-            <input id="investCost" type="text" readonly value="0 USDC" />
-          </div>
-          <button class="btn btn-primary btn-full" id="investBtn" onclick="executePurchase()">Approve USDC + Invest</button>
-          <div class="subtle">A confirmed transaction hash appears after execution.</div>
-          <div class="tx-box" id="investTxBox">
-            <a id="investTxLink" class="tx-link" href="#" target="_blank" rel="noopener noreferrer"></a>
+    <section class="panel" id="panel-founders">
+      <div class="card">
+        <h3>Launch Project</h3>
+        <p class="subtle">Deploy a raise with transparent valuation and token economics.</p>
+
+        <div class="two-col mt-12">
+          <div class="field"><label for="companyName">Company Name</label><input id="companyName" type="text" placeholder="Acme Holdings Ltd." /></div>
+          <div class="field"><label for="tokenSymbol">Token Symbol</label><input id="tokenSymbol" type="text" maxlength="8" placeholder="ACME" /></div>
+        </div>
+
+        <div class="two-col">
+          <div class="field"><label for="tokenName">Token Name</label><input id="tokenName" type="text" placeholder="Acme Growth Token" /></div>
+          <div>
+            <div class="label">Asset Type</div>
+            <div class="chip-group" id="founderTypeGroup">
+              <button class="chip active" onclick="setFounderType(0, this)">Equity</button>
+              <button class="chip" onclick="setFounderType(1, this)">Revenue Model</button>
+              <button class="chip" onclick="setFounderType(2, this)">Real-World Asset</button>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
 
-    <div class="card mt-16">
-      <h3>Portfolio Dashboard</h3>
-      <p class="subtle">P0: real-time P/L, holdings, and dividend claim flow.</p>
+        <div class="field"><label for="description">Description</label><textarea id="description" rows="3" placeholder="Company profile, raise purpose, and use of proceeds."></textarea></div>
 
-      <div class="grid-3 mt-12">
-        <div class="metric-box">
-          <div class="metric-label">Portfolio Value</div>
-          <div class="metric-value mono" id="pfValue">$0</div>
+        <div class="two-col">
+          <div class="field"><label for="valuation">Total Valuation (USDC)</label><input id="valuation" type="number" placeholder="1000000" /></div>
+          <div class="field"><label for="pricePerToken">Price Per Token (USDC)</label><input id="pricePerToken" type="number" placeholder="10" /></div>
         </div>
-        <div class="metric-box">
-          <div class="metric-label">Cost Basis</div>
-          <div class="metric-value mono" id="pfCost">$0</div>
+
+        <div class="two-col">
+          <div class="field"><label for="maxSupply">Max Token Supply</label><input id="maxSupply" type="number" placeholder="100000" /></div>
+          <div class="field"><label for="raiseTarget">Raise Target (USDC)</label><input id="raiseTarget" type="number" readonly /></div>
         </div>
-        <div class="metric-box">
-          <div class="metric-label">Profit / Loss</div>
-          <div class="metric-value mono" id="pfPnL">$0</div>
-        </div>
+
+        <button class="btn btn-primary btn-full" id="launchBtn" onclick="submitLaunch()">Launch Asset on Arc Testnet</button>
+        <div class="subtle mt-8">Listing fee applies. Wallet approval and transaction signature are required.</div>
       </div>
 
-      <div id="portfolioGrid" class="portfolio-grid"></div>
-    </div>
-  </section>
-
-  <section class="panel" id="panel-founders">
-    <div class="card">
-      <h3>Launch Project</h3>
-      <p class="subtle">Create a project listing with on-chain terms.</p>
-
-      <div class="two-col mt-12">
-        <div class="field">
-          <label for="companyName">COMPANY NAME</label>
-          <input id="companyName" type="text" placeholder="Acme Holdings Ltd." />
+      <div class="detail-wrap mt-14">
+        <div class="detail-box">
+          <h3>Founder Dashboard</h3>
+          <div class="detail-row"><span class="muted">Active Raise</span><span class="mono" id="founderRaisedProgress">$0 / $0</span></div>
+          <div class="detail-row"><span class="muted">Assets Launched</span><span class="mono" id="founderAssets">0</span></div>
+          <div class="detail-row"><span class="muted">Token Holders (est.)</span><span class="mono" id="founderInvestors">0</span></div>
+          <div class="detail-row"><span class="muted">Revenue to Distribute</span><span class="mono" id="founderRevenuePool">$0</span></div>
+          <div class="detail-row"><span class="muted">Compliance Status</span><span class="mono">KYC Monitor Ready</span></div>
         </div>
-        <div class="field">
-          <label for="tokenSymbol">TOKEN SYMBOL</label>
-          <input id="tokenSymbol" type="text" maxlength="8" placeholder="ACME" />
-        </div>
-      </div>
 
-      <div class="two-col">
-        <div class="field">
-          <label for="tokenName">TOKEN NAME</label>
-          <input id="tokenName" type="text" placeholder="Acme Growth Token" />
-        </div>
-        <div class="field">
-          <label for="founderType">ASSET TYPE</label>
-          <select id="founderType" onchange="selectedAssetType=Number(this.value)">
-            <option value="0">Equity</option>
-            <option value="1">Revenue Model</option>
-            <option value="2">Real-World Asset</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="field">
-        <label for="description">DESCRIPTION</label>
-        <textarea id="description" rows="3" placeholder="Company profile, raise purpose, and use of proceeds."></textarea>
-      </div>
-
-      <div class="two-col">
-        <div class="field">
-          <label for="valuation">TOTAL VALUATION (USDC)</label>
-          <input id="valuation" type="number" placeholder="1000000" />
-        </div>
-        <div class="field">
-          <label for="pricePerToken">PRICE PER TOKEN (USDC)</label>
-          <input id="pricePerToken" type="number" placeholder="10" />
-        </div>
-      </div>
-
-      <div class="two-col">
-        <div class="field">
-          <label for="maxSupply">MAX TOKEN SUPPLY</label>
-          <input id="maxSupply" type="number" placeholder="100000" />
-        </div>
-        <div class="field">
-          <label for="raiseTarget">RAISE TARGET (USDC)</label>
-          <input id="raiseTarget" type="number" readonly />
-        </div>
-      </div>
-
-      <button class="btn btn-primary btn-full" id="launchBtn" onclick="submitLaunch()">Launch Asset on Arc Testnet</button>
-      <div class="subtle mt-8">Listing fee applies. Wallet approval and transaction signature required.</div>
-    </div>
-
-    <div class="detail-wrap mt-16">
-      <div class="detail-box">
-        <h3>Founder Dashboard</h3>
-        <div class="detail-row"><span class="muted">Assets Launched</span><span class="mono" id="founderAssets">0</span></div>
-        <div class="detail-row"><span class="muted">Total Raised</span><span class="mono" id="founderRaised">$0</span></div>
-        <div class="detail-row"><span class="muted">Active Investors (est.)</span><span class="mono" id="founderInvestors">0</span></div>
-      </div>
-
-      <div class="detail-box">
-        <h3>Revenue Distribution UI</h3>
-        <div class="stack">
+        <div class="detail-box">
+          <h3>Revenue Distribution</h3>
           <div class="field">
-            <label for="distributionToken">PROJECT TOKEN</label>
-            <select id="distributionToken"></select>
-          </div>
-          <div class="field">
-            <label for="distributionAmount">USDC DISTRIBUTION AMOUNT</label>
+            <label for="distributionAmount">USDC Distribution Amount</label>
             <input id="distributionAmount" type="number" min="0" placeholder="5000" />
           </div>
-          <button class="btn btn-outline btn-full" onclick="simulateDistribution()">Prepare Distribution</button>
-          <div class="subtle">P1 workflow UI integrated. Connect contract distribution method when available.</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="panel" id="panel-contracts">
-    <div class="card">
-      <h3>Arc Testnet Contracts</h3>
-      <p class="subtle">Reference addresses for integrations and verification.</p>
-      <div class="list">
-        <div class="list-item"><span>Launchpad</span><span class="mono">0x2feA...76B7</span></div>
-        <div class="list-item"><span>USDC (Native Gas Token)</span><span class="mono">0x3600...0000</span></div>
-        <div class="list-item"><span>EURC</span><span class="mono">0x89B5...D72a</span></div>
-        <div class="list-item"><span>CCTP TokenMessengerV2</span><span class="mono">0x8FE6...2DAA</span></div>
-        <div class="list-item"><span>Permit2</span><span class="mono">0x0000...8BA3</span></div>
-      </div>
-    </div>
-  </section>
-</main>
-
-<div class="toast" id="toast"></div>
-
-<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
-<script>
-const { ethers } = window;
-
-const LAUNCHPAD_ADDRESS = "0x2feA3305fcB02184b2e120B1D511D3f539F276B7";
-const USDC_ADDRESS = "0x3600000000000000000000000000000000000000";
-const ARC_RPC = "https://rpc.testnet.arc.network";
-const EXPLORER_TX = "https://testnet.arcscan.app/tx/";
-const ARC_CHAIN = {
-  chainId: "0x4cef52",
-  chainName: "Arc Testnet",
-  nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 },
-  rpcUrls: [ARC_RPC],
-  blockExplorerUrls: ["https://testnet.arcscan.app"]
-};
-
-const launchpadAbi = [
-  "function LISTING_FEE() view returns (uint256)",
-  "function getAllAssets() view returns ((address tokenContract,string name,string symbol,address founder,uint8 assetType,uint256 listedAt)[])",
-  "function launchAsset(string name,string symbol,string companyName,string description,uint8 assetType,uint256 totalValuation,uint256 pricePerToken,uint256 maxSupply) returns (address)"
-];
-
-const assetTokenAbi = [
-  "function companyName() view returns (string)",
-  "function description() view returns (string)",
-  "function totalValuation() view returns (uint256)",
-  "function pricePerToken() view returns (uint256)",
-  "function maxSupply() view returns (uint256)",
-  "function totalRaised() view returns (uint256)",
-  "function totalSupply() view returns (uint256)",
-  "function balanceOf(address owner) view returns (uint256)",
-  "function pendingDividends(address holder) view returns (uint256)",
-  "function purchaseTokens(uint256 tokenAmount)",
-  "function isActive() view returns (bool)",
-  "function claimDividends()",
-  "function claimDividend()",
-  "function withdrawDividends()"
-];
-
-const erc20Abi = [
-  "function approve(address spender,uint256 amount) returns (bool)",
-  "function allowance(address owner,address spender) view returns (uint256)"
-];
-
-const typeNames = { 0: "Equity", 1: "Revenue Model", 2: "Real-World Asset" };
-const typeClasses = { 0: "type-equity", 1: "type-revenue", 2: "type-rwa" };
-
-let selectedAssetType = 0;
-let walletAddress = null;
-let browserProvider = null;
-let signer = null;
-let readProvider = new ethers.JsonRpcProvider(ARC_RPC);
-let cachedAssets = [];
-let currentAsset = null;
-let refreshTimer = null;
-
-function shortAddr(addr) { return addr ? addr.slice(0, 6) + "..." + addr.slice(-4) : ""; }
-function fmtUSDCBig(value) { return Number(ethers.formatUnits(value, 6)); }
-function fmtUSD(n) { return "$" + Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 2 }); }
-function fmtTokenBig(value) { return Number(ethers.formatUnits(value, 18)); }
-
-function showToast(msg, type = "info") {
-  const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.className = "toast " + type + " show";
-  setTimeout(() => t.classList.remove("show"), 3500);
-}
-
-function switchTab(name, btn) {
-  document.querySelectorAll(".tab").forEach((e) => e.classList.remove("active"));
-  document.querySelectorAll(".panel").forEach((e) => e.classList.remove("active"));
-  btn.classList.add("active");
-  document.getElementById("panel-" + name).classList.add("active");
-}
-
-async function ensureArcNetwork() {
-  if (!window.ethereum) throw new Error("No supported EVM wallet found.");
-  try {
-    await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: ARC_CHAIN.chainId }] });
-  } catch (e) {
-    if (e.code === 4902 || String(e.message || "").includes("Unrecognized chain ID")) {
-      await window.ethereum.request({ method: "wallet_addEthereumChain", params: [ARC_CHAIN] });
-      await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: ARC_CHAIN.chainId }] });
-    } else {
-      throw e;
-    }
-  }
-}
-
-async function ensureWallet() {
-  if (!window.ethereum) throw new Error("Install an EVM wallet.");
-  await window.ethereum.request({ method: "eth_requestAccounts" });
-  await ensureArcNetwork();
-  browserProvider = new ethers.BrowserProvider(window.ethereum);
-  signer = await browserProvider.getSigner();
-  walletAddress = await signer.getAddress();
-  const btn = document.getElementById("walletBtn");
-  btn.textContent = shortAddr(walletAddress);
-  btn.classList.add("connected");
-  document.getElementById("disconnectBtn").hidden = false;
-}
-
-async function connectWallet() {
-  try {
-    await ensureWallet();
-    showToast("Wallet connected.", "success");
-    await loadAssets();
-    await updatePortfolio();
-  } catch (e) {
-    showToast(e.message || "Connection failed.", "error");
-  }
-}
-
-function disconnectWallet(silent = false) {
-  walletAddress = null;
-  browserProvider = null;
-  signer = null;
-  currentAsset = null;
-  const btn = document.getElementById("walletBtn");
-  btn.textContent = "Connect Wallet";
-  btn.classList.remove("connected");
-  document.getElementById("disconnectBtn").hidden = true;
-  document.getElementById("projectDetailBody").innerHTML = '<div class="empty">No project selected.</div>';
-  updatePortfolio();
-  if (!silent) showToast("Wallet disconnected.");
-}
-
-function setButtonLoading(id, on, idleText) {
-  const b = document.getElementById(id);
-  b.disabled = on;
-  b.textContent = on ? "Processing..." : idleText;
-}
-
-function detectRisk(asset) {
-  const raised = fmtUSDCBig(asset.totalRaised);
-  const valuation = Math.max(1, fmtUSDCBig(asset.totalValuation));
-  const progress = (raised / valuation) * 100;
-  if (asset.type === 2) return "medium";
-  if (progress > 70) return "low";
-  if (progress > 35) return "medium";
-  return "high";
-}
-
-function getCostKey(addr, token) {
-  return "arcvault_cost_basis_" + (addr || "").toLowerCase() + "_" + (token || "").toLowerCase();
-}
-
-function getCostBasis(addr, token) {
-  const raw = localStorage.getItem(getCostKey(addr, token));
-  return raw ? BigInt(raw) : 0n;
-}
-
-function addCostBasis(addr, token, addAmount) {
-  const key = getCostKey(addr, token);
-  const prev = getCostBasis(addr, token);
-  localStorage.setItem(key, String(prev + addAmount));
-}
-
-async function approveIfNeeded(spender, amount) {
-  const usdc = new ethers.Contract(USDC_ADDRESS, erc20Abi, signer);
-  const owner = await signer.getAddress();
-  const allowance = await usdc.allowance(owner, spender);
-  if (allowance >= amount) return;
-  const tx = await usdc.approve(spender, amount);
-  showToast("USDC approval submitted.");
-  await tx.wait();
-}
-
-async function fetchAssets() {
-  const launchpad = new ethers.Contract(LAUNCHPAD_ADDRESS, launchpadAbi, readProvider);
-  const rows = await launchpad.getAllAssets();
-
-  const all = await Promise.all(rows.map(async (row) => {
-    const token = new ethers.Contract(row.tokenContract, assetTokenAbi, readProvider);
-    const [
-      companyName,
-      description,
-      totalValuation,
-      pricePerToken,
-      maxSupply,
-      totalRaised,
-      totalSupply,
-      isActive
-    ] = await Promise.all([
-      token.companyName().catch(() => ""),
-      token.description().catch(() => ""),
-      token.totalValuation().catch(() => 0n),
-      token.pricePerToken().catch(() => 0n),
-      token.maxSupply().catch(() => 0n),
-      token.totalRaised().catch(() => 0n),
-      token.totalSupply().catch(() => 0n),
-      token.isActive().catch(() => true)
-    ]);
-
-    return {
-      tokenContract: row.tokenContract,
-      name: row.name,
-      symbol: row.symbol,
-      founder: row.founder,
-      type: Number(row.assetType),
-      listedAt: Number(row.listedAt),
-      companyName,
-      description,
-      totalValuation,
-      pricePerToken,
-      maxSupply,
-      totalRaised,
-      totalSupply,
-      isActive
-    };
-  }));
-
-  return all.reverse();
-}
-
-function updateLandingStats() {
-  const totalRaised = cachedAssets.reduce((acc, a) => acc + fmtUSDCBig(a.totalRaised), 0);
-  document.getElementById("landingAssets").textContent = String(cachedAssets.length);
-  document.getElementById("landingRaised").textContent = fmtUSD(totalRaised);
-}
-
-function renderLandingLiveProjects() {
-  const wrap = document.getElementById("landingLiveProjects");
-  const top = cachedAssets.slice(0, 5);
-  if (!top.length) {
-    wrap.innerHTML = '<div class="empty">No active listings yet.</div>';
-    return;
-  }
-  wrap.innerHTML = top.map((a) => {
-    const raised = fmtUSDCBig(a.totalRaised);
-    const valuation = Math.max(1, fmtUSDCBig(a.totalValuation));
-    const pct = Math.min(100, (raised / valuation) * 100);
-    return `
-      <div class="list-item">
-        <div>
-          <div><strong>${a.name}</strong> <span class="muted mono">(${a.symbol})</span></div>
-          <div class="subtle">${a.companyName || "Project issuer"}</div>
-        </div>
-        <div class="mono">${pct.toFixed(0)}%</div>
-      </div>
-    `;
-  }).join("");
-}
-
-function applyInvestorFilters(list) {
-  const type = document.getElementById("filterType").value;
-  const risk = document.getElementById("filterRisk").value;
-  const sortBy = document.getElementById("sortBy").value;
-
-  let out = [...list];
-  if (type !== "all") out = out.filter((a) => String(a.type) === type);
-  if (risk !== "all") out = out.filter((a) => detectRisk(a) === risk);
-
-  if (sortBy === "raised") {
-    out.sort((a, b) => Number(b.totalRaised - a.totalRaised));
-  } else if (sortBy === "progress") {
-    out.sort((a, b) => {
-      const pa = fmtUSDCBig(a.totalRaised) / Math.max(1, fmtUSDCBig(a.totalValuation));
-      const pb = fmtUSDCBig(b.totalRaised) / Math.max(1, fmtUSDCBig(b.totalValuation));
-      return pb - pa;
-    });
-  } else {
-    out.sort((a, b) => b.listedAt - a.listedAt);
-  }
-  return out;
-}
-
-function applyProgressWidths() {
-  document.querySelectorAll(".progress-fill[data-pct]").forEach((el) => {
-    const pct = Number(el.dataset.pct || 0);
-    el.style.width = Math.max(0, Math.min(100, pct)) + "%";
-  });
-}
-
-function renderInvestorAssets() {
-  const grid = document.getElementById("investorAssetGrid");
-  const list = applyInvestorFilters(cachedAssets);
-
-  if (!list.length) {
-    grid.innerHTML = '<div class="empty">No projects match your filters.</div>';
-    return;
-  }
-
-  grid.innerHTML = list.map((asset) => {
-    const raised = fmtUSDCBig(asset.totalRaised);
-    const valuation = Math.max(1, fmtUSDCBig(asset.totalValuation));
-    const pct = Math.min(100, (raised / valuation) * 100);
-    const risk = detectRisk(asset);
-
-    return `
-      <div class="asset-card">
-        <div class="asset-head">
-          <div class="asset-title">${asset.name}</div>
-          <span class="asset-type ${typeClasses[asset.type]}">${typeNames[asset.type]}</span>
-        </div>
-        <div class="asset-sub">${asset.symbol} · ${asset.companyName || "Issuer"}</div>
-        <div class="asset-desc">${asset.description || "No description provided."}</div>
-        <div class="bar"><span class="progress-fill" data-pct="${pct}"></span></div>
-        <div class="row"><span class="muted">Raised</span><span class="mono">${fmtUSD(raised)}</span></div>
-        <div class="row"><span class="muted">Valuation</span><span class="mono">${fmtUSD(valuation)}</span></div>
-        <div class="row"><span class="muted">Risk</span><span class="mono">${risk.toUpperCase()}</span></div>
-        <div class="row"><span class="muted">Price</span><span class="mono">${fmtUSDCBig(asset.pricePerToken).toLocaleString()} USDC</span></div>
-        <button class="btn btn-outline btn-full" onclick="selectProject('${asset.tokenContract}')">View Project</button>
-      </div>
-    `;
-  }).join("");
-  applyProgressWidths();
-}
-
-function selectProject(tokenAddress) {
-  const asset = cachedAssets.find((a) => a.tokenContract.toLowerCase() === tokenAddress.toLowerCase());
-  if (!asset) return;
-  currentAsset = asset;
-
-  const raised = fmtUSDCBig(asset.totalRaised);
-  const valuation = fmtUSDCBig(asset.totalValuation);
-  const price = fmtUSDCBig(asset.pricePerToken);
-  const risk = detectRisk(asset);
-
-  document.getElementById("projectDetailSubtitle").textContent = asset.symbol + " · " + (asset.companyName || "Issuer profile");
-  document.getElementById("projectDetailBody").innerHTML = `
-    <div class="detail-row"><span class="muted">Asset Type</span><span>${typeNames[asset.type]}</span></div>
-    <div class="detail-row"><span class="muted">Token Economics</span><span class="mono">${price.toLocaleString()} USDC / token</span></div>
-    <div class="detail-row"><span class="muted">Revenue Projection</span><span class="mono">${(risk === "low" ? "Stable" : risk === "medium" ? "Moderate" : "Early stage")}</span></div>
-    <div class="detail-row"><span class="muted">Risk Factors</span><span class="mono">${risk.toUpperCase()}</span></div>
-    <div class="detail-row"><span class="muted">Raise Progress</span><span class="mono">${fmtUSD(raised)} / ${fmtUSD(valuation)}</span></div>
-    <div class="detail-row"><span class="muted">Token Contract</span><span class="mono">${shortAddr(asset.tokenContract)}</span></div>
-  `;
-  updateInvestPreview();
-}
-
-function updateInvestPreview() {
-  const qty = Number(document.getElementById("investAmount").value || 0);
-  if (!currentAsset || qty <= 0) {
-    document.getElementById("investCost").value = "0 USDC";
-    return;
-  }
-  const price = fmtUSDCBig(currentAsset.pricePerToken);
-  document.getElementById("investCost").value = (qty * price).toLocaleString(undefined, { maximumFractionDigits: 2 }) + " USDC";
-}
-
-async function executePurchase() {
-  try {
-    if (!currentAsset) {
-      showToast("Select a project first.", "error");
-      return;
-    }
-
-    await ensureWallet();
-    const qty = parseInt(document.getElementById("investAmount").value, 10);
-    if (!qty || qty < 1) {
-      showToast("Enter a valid token amount.", "error");
-      return;
-    }
-
-    setButtonLoading("investBtn", true, "Approve USDC + Invest");
-
-    const totalCost = BigInt(qty) * currentAsset.pricePerToken;
-    await approveIfNeeded(currentAsset.tokenContract, totalCost);
-
-    const token = new ethers.Contract(currentAsset.tokenContract, assetTokenAbi, signer);
-    const tx = await token.purchaseTokens(qty);
-    document.getElementById("investTxLink").href = EXPLORER_TX + tx.hash;
-    document.getElementById("investTxLink").textContent = "View transaction: " + tx.hash;
-    document.getElementById("investTxBox").classList.add("open");
-    showToast("Investment transaction submitted.");
-    await tx.wait();
-
-    addCostBasis(walletAddress, currentAsset.tokenContract, totalCost);
-    showToast("Investment confirmed.", "success");
-    await loadAssets();
-    await updatePortfolio();
-  } catch (e) {
-    showToast(e.shortMessage || e.message || "Investment failed.", "error");
-  } finally {
-    setButtonLoading("investBtn", false, "Approve USDC + Invest");
-  }
-}
-
-async function claimDividends(tokenAddress, btnId, txId) {
-  try {
-    await ensureWallet();
-    const btn = document.getElementById(btnId);
-    btn.disabled = true;
-    btn.textContent = "Claiming...";
-
-    const token = new ethers.Contract(tokenAddress, assetTokenAbi, signer);
-    let tx;
-    try { tx = await token.claimDividends(); }
-    catch (_) {
-      try { tx = await token.claimDividend(); }
-      catch (_) { tx = await token.withdrawDividends(); }
-    }
-
-    const link = document.getElementById(txId);
-    link.href = EXPLORER_TX + tx.hash;
-    link.textContent = "USDC receipt: " + tx.hash;
-    link.parentElement.classList.add("open");
-    await tx.wait();
-    showToast("Dividend claim confirmed.", "success");
-    await updatePortfolio();
-  } catch (e) {
-    showToast(e.shortMessage || e.message || "Claim failed.", "error");
-  } finally {
-    const btn = document.getElementById(btnId);
-    if (btn) {
-      btn.disabled = false;
-      btn.textContent = "Claim Dividend";
-    }
-  }
-}
-
-async function updatePortfolio() {
-  const grid = document.getElementById("portfolioGrid");
-
-  if (!walletAddress) {
-    grid.innerHTML = '<div class="empty">Connect wallet to view holdings, P/L, and dividend claims.</div>';
-    document.getElementById("landingPositions").textContent = "0";
-    document.getElementById("pfValue").textContent = "$0";
-    document.getElementById("pfCost").textContent = "$0";
-    document.getElementById("pfPnL").textContent = "$0";
-    return;
-  }
-
-  try {
-    const snapshots = await Promise.all(cachedAssets.map(async (asset) => {
-      const token = new ethers.Contract(asset.tokenContract, assetTokenAbi, readProvider);
-      const [balance, pending] = await Promise.all([
-        token.balanceOf(walletAddress).catch(() => 0n),
-        token.pendingDividends(walletAddress).catch(() => 0n)
-      ]);
-      return { asset, balance, pending };
-    }));
-
-    const holdings = snapshots.filter((x) => x.balance > 0n);
-    document.getElementById("landingPositions").textContent = String(holdings.length);
-
-    if (!holdings.length) {
-      grid.innerHTML = '<div class="empty">No holdings yet. Invest in a project to populate your dashboard.</div>';
-      document.getElementById("pfValue").textContent = "$0";
-      document.getElementById("pfCost").textContent = "$0";
-      document.getElementById("pfPnL").textContent = "$0";
-      return;
-    }
-
-    let totalValue = 0;
-    let totalCost = 0;
-
-    grid.innerHTML = holdings.map((h, idx) => {
-      const units = fmtTokenBig(h.balance);
-      const price = fmtUSDCBig(h.asset.pricePerToken);
-      const value = units * price;
-      const pending = fmtUSDCBig(h.pending);
-      const costBasis = fmtUSDCBig(getCostBasis(walletAddress, h.asset.tokenContract));
-
-      totalValue += value;
-      totalCost += costBasis;
-
-      const btnId = "claimBtn_" + idx;
-      const txId = "claimTx_" + idx;
-
-      return `
-        <div class="portfolio-card">
-          <div class="asset-head">
-            <div class="asset-title">${h.asset.name}</div>
-            <span class="asset-type ${typeClasses[h.asset.type]}">${typeNames[h.asset.type]}</span>
+          <div class="field">
+            <label for="distributionTokenInput">Project Token Address</label>
+            <input id="distributionTokenInput" type="text" placeholder="0x..." />
           </div>
-          <div class="asset-sub">${h.asset.symbol} · ${h.asset.companyName || "Issuer"}</div>
-          <div class="detail-row"><span class="muted">Tokens Held</span><span class="mono">${units.toLocaleString(undefined, { maximumFractionDigits: 4 })}</span></div>
-          <div class="detail-row"><span class="muted">Position Value</span><span class="mono">${fmtUSD(value)}</span></div>
-          <div class="detail-row"><span class="muted">Cost Basis</span><span class="mono">${fmtUSD(costBasis)}</span></div>
-          <div class="detail-row"><span class="muted">Pending Dividend</span><span class="mono">${fmtUSD(pending)}</span></div>
-          <button class="btn btn-primary btn-full" id="${btnId}" onclick="claimDividends('${h.asset.tokenContract}','${btnId}','${txId}')">Claim Dividend</button>
-          <div class="tx-box"><a id="${txId}" class="tx-link" href="#" target="_blank" rel="noopener noreferrer"></a></div>
+          <button class="btn btn-outline btn-full" onclick="simulateDistribution()">Prepare Distribution</button>
+          <div class="subtle mt-8">Milestone-gated release, dispute routing, oracle attestation, and insurance pool can be linked in contract layer.</div>
         </div>
+      </div>
+    </section>
+
+    <section class="panel" id="panel-contracts">
+      <div class="card">
+        <h3>Arc Testnet Contracts</h3>
+        <p class="subtle">Reference addresses for integration and verification.</p>
+        <div class="list">
+          <div class="list-item"><span>Launchpad</span><span class="mono">0x2feA...76B7</span></div>
+          <div class="list-item"><span>USDC (Native Gas Token)</span><span class="mono">0x3600...0000</span></div>
+          <div class="list-item"><span>EURC</span><span class="mono">0x89B5...D72a</span></div>
+          <div class="list-item"><span>CCTP TokenMessengerV2</span><span class="mono">0x8FE6...2DAA</span></div>
+          <div class="list-item"><span>Permit2</span><span class="mono">0x0000...8BA3</span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+  <script>
+    const { ethers } = window;
+
+    const LAUNCHPAD_ADDRESS = "0x2feA3305fcB02184b2e120B1D511D3f539F276B7";
+    const USDC_ADDRESS = "0x3600000000000000000000000000000000000000";
+    const ARC_RPC = "https://rpc.testnet.arc.network";
+    const EXPLORER_TX = "https://testnet.arcscan.app/tx/";
+
+    const ARC_CHAIN = {
+      chainId: "0x4cef52",
+      chainName: "Arc Testnet",
+      nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 },
+      rpcUrls: [ARC_RPC],
+      blockExplorerUrls: ["https://testnet.arcscan.app"]
+    };
+
+    const launchpadAbi = [
+      "function LISTING_FEE() view returns (uint256)",
+      "function getAllAssets() view returns ((address tokenContract,string name,string symbol,address founder,uint8 assetType,uint256 listedAt)[])",
+      "function launchAsset(string name,string symbol,string companyName,string description,uint8 assetType,uint256 totalValuation,uint256 pricePerToken,uint256 maxSupply) returns (address)"
+    ];
+
+    const assetTokenAbi = [
+      "function companyName() view returns (string)",
+      "function description() view returns (string)",
+      "function totalValuation() view returns (uint256)",
+      "function pricePerToken() view returns (uint256)",
+      "function maxSupply() view returns (uint256)",
+      "function totalRaised() view returns (uint256)",
+      "function totalSupply() view returns (uint256)",
+      "function balanceOf(address owner) view returns (uint256)",
+      "function pendingDividends(address holder) view returns (uint256)",
+      "function purchaseTokens(uint256 tokenAmount)",
+      "function isActive() view returns (bool)",
+      "function claimDividends()",
+      "function claimDividend()",
+      "function withdrawDividends()"
+    ];
+
+    const erc20Abi = [
+      "function approve(address spender,uint256 amount) returns (bool)",
+      "function allowance(address owner,address spender) view returns (uint256)"
+    ];
+
+    const typeNames = { 0: "Equity", 1: "Revenue Model", 2: "Real-World Asset" };
+    const typeClasses = { 0: "type-equity", 1: "type-revenue", 2: "type-rwa" };
+
+    let selectedAssetType = 0;
+    let walletAddress = null;
+    let browserProvider = null;
+    let signer = null;
+    let readProvider = new ethers.JsonRpcProvider(ARC_RPC);
+    let cachedAssets = [];
+    let currentAsset = null;
+    let refreshTimer = null;
+
+    const filters = { type: "all", risk: "all", sort: "newest" };
+
+    function shortAddr(addr) { return addr ? addr.slice(0, 6) + "..." + addr.slice(-4) : ""; }
+    function fmtUSDCBig(value) { return Number(ethers.formatUnits(value, 6)); }
+    function fmtUSD(n) { return "$" + Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 2 }); }
+    function fmtTokenBig(value) { return Number(ethers.formatUnits(value, 18)); }
+
+    function showToast(msg, type = "info") {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.className = "toast " + type + " show";
+      setTimeout(() => t.classList.remove("show"), 3200);
+    }
+
+    function switchTab(name, btn) {
+      document.querySelectorAll(".tab").forEach((e) => e.classList.remove("active"));
+      document.querySelectorAll(".panel").forEach((e) => e.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById("panel-" + name).classList.add("active");
+    }
+
+    function setFilter(kind, value, button) {
+      filters[kind] = value;
+      const parent = button.parentElement;
+      parent.querySelectorAll(".chip").forEach((x) => x.classList.remove("active"));
+      button.classList.add("active");
+      renderInvestorAssets();
+    }
+
+    function setFounderType(type, button) {
+      selectedAssetType = type;
+      const group = document.getElementById("founderTypeGroup");
+      group.querySelectorAll(".chip").forEach((x) => x.classList.remove("active"));
+      button.classList.add("active");
+    }
+
+    async function ensureArcNetwork() {
+      if (!window.ethereum) throw new Error("No supported EVM wallet found.");
+      try {
+        await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: ARC_CHAIN.chainId }] });
+      } catch (e) {
+        if (e.code === 4902 || String(e.message || "").includes("Unrecognized chain ID")) {
+          await window.ethereum.request({ method: "wallet_addEthereumChain", params: [ARC_CHAIN] });
+          await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: ARC_CHAIN.chainId }] });
+        } else {
+          throw e;
+        }
+      }
+    }
+
+    async function ensureWallet() {
+      if (!window.ethereum) throw new Error("Install an EVM wallet.");
+      await window.ethereum.request({ method: "eth_requestAccounts" });
+      await ensureArcNetwork();
+      browserProvider = new ethers.BrowserProvider(window.ethereum);
+      signer = await browserProvider.getSigner();
+      walletAddress = await signer.getAddress();
+
+      const btn = document.getElementById("walletBtn");
+      btn.textContent = shortAddr(walletAddress);
+      btn.classList.add("connected");
+      document.getElementById("disconnectBtn").hidden = false;
+    }
+
+    async function connectWallet() {
+      try {
+        await ensureWallet();
+        showToast("Wallet connected.", "success");
+        await loadAssets();
+        await updatePortfolio();
+      } catch (e) {
+        showToast(e.message || "Connection failed.", "error");
+      }
+    }
+
+    function disconnectWallet(silent = false) {
+      walletAddress = null;
+      browserProvider = null;
+      signer = null;
+      currentAsset = null;
+
+      const btn = document.getElementById("walletBtn");
+      btn.textContent = "Connect Wallet";
+      btn.classList.remove("connected");
+      document.getElementById("disconnectBtn").hidden = true;
+
+      document.getElementById("projectDetailBody").innerHTML = '<div class="empty">No project selected.</div>';
+      updatePortfolio();
+      if (!silent) showToast("Wallet disconnected.");
+    }
+
+    function setButtonLoading(id, on, idleText) {
+      const b = document.getElementById(id);
+      b.disabled = on;
+      b.textContent = on ? "Processing..." : idleText;
+    }
+
+    function detectRisk(asset) {
+      const raised = fmtUSDCBig(asset.totalRaised);
+      const valuation = Math.max(1, fmtUSDCBig(asset.totalValuation));
+      const progress = (raised / valuation) * 100;
+      if (asset.type === 2) return "medium";
+      if (progress > 70) return "low";
+      if (progress > 35) return "medium";
+      return "high";
+    }
+
+    function getCostKey(addr, token) {
+      return "arcvault_cost_basis_" + (addr || "").toLowerCase() + "_" + (token || "").toLowerCase();
+    }
+
+    function getClaimedKey(addr, token) {
+      return "arcvault_claimed_" + (addr || "").toLowerCase() + "_" + (token || "").toLowerCase();
+    }
+
+    function getCostBasis(addr, token) {
+      const raw = localStorage.getItem(getCostKey(addr, token));
+      return raw ? BigInt(raw) : 0n;
+    }
+
+    function addCostBasis(addr, token, addAmount) {
+      const key = getCostKey(addr, token);
+      const prev = getCostBasis(addr, token);
+      localStorage.setItem(key, String(prev + addAmount));
+    }
+
+    function getLifetimeClaimed(addr, token) {
+      const raw = localStorage.getItem(getClaimedKey(addr, token));
+      return raw ? Number(raw) : 0;
+    }
+
+    function addLifetimeClaimed(addr, token, amountUSDC) {
+      const key = getClaimedKey(addr, token);
+      const prev = getLifetimeClaimed(addr, token);
+      localStorage.setItem(key, String(prev + amountUSDC));
+    }
+
+    async function approveIfNeeded(spender, amount) {
+      const usdc = new ethers.Contract(USDC_ADDRESS, erc20Abi, signer);
+      const owner = await signer.getAddress();
+      const allowance = await usdc.allowance(owner, spender);
+      if (allowance >= amount) return;
+      const tx = await usdc.approve(spender, amount);
+      showToast("USDC approval submitted.");
+      await tx.wait();
+    }
+
+    async function fetchAssets() {
+      const launchpad = new ethers.Contract(LAUNCHPAD_ADDRESS, launchpadAbi, readProvider);
+      const rows = await launchpad.getAllAssets();
+
+      const all = await Promise.all(rows.map(async (row) => {
+        const token = new ethers.Contract(row.tokenContract, assetTokenAbi, readProvider);
+        const [
+          companyName,
+          description,
+          totalValuation,
+          pricePerToken,
+          maxSupply,
+          totalRaised,
+          totalSupply,
+          isActive
+        ] = await Promise.all([
+          token.companyName().catch(() => ""),
+          token.description().catch(() => ""),
+          token.totalValuation().catch(() => 0n),
+          token.pricePerToken().catch(() => 0n),
+          token.maxSupply().catch(() => 0n),
+          token.totalRaised().catch(() => 0n),
+          token.totalSupply().catch(() => 0n),
+          token.isActive().catch(() => true)
+        ]);
+
+        return {
+          tokenContract: row.tokenContract,
+          name: row.name,
+          symbol: row.symbol,
+          founder: row.founder,
+          type: Number(row.assetType),
+          listedAt: Number(row.listedAt),
+          companyName,
+          description,
+          totalValuation,
+          pricePerToken,
+          maxSupply,
+          totalRaised,
+          totalSupply,
+          isActive
+        };
+      }));
+
+      return all.reverse();
+    }
+
+    function updateLandingStats() {
+      const totalRaised = cachedAssets.reduce((acc, a) => acc + fmtUSDCBig(a.totalRaised), 0);
+      document.getElementById("landingAssets").textContent = String(cachedAssets.length);
+      document.getElementById("landingRaised").textContent = fmtUSD(totalRaised);
+    }
+
+    function renderLandingLiveProjects() {
+      const wrap = document.getElementById("landingLiveProjects");
+      const top = cachedAssets.slice(0, 5);
+
+      if (!top.length) {
+        wrap.innerHTML = '<div class="empty">No active listings yet.</div>';
+        return;
+      }
+
+      wrap.innerHTML = top.map((a) => {
+        const raised = fmtUSDCBig(a.totalRaised);
+        const valuation = Math.max(1, fmtUSDCBig(a.totalValuation));
+        const pct = Math.min(100, (raised / valuation) * 100);
+
+        return `
+          <div class="list-item">
+            <div>
+              <div><strong>${a.name}</strong> <span class="muted mono">(${a.symbol})</span></div>
+              <div class="subtle">${a.companyName || "Project issuer"}</div>
+            </div>
+            <div class="mono">${pct.toFixed(0)}%</div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function applyInvestorFilters(list) {
+      let out = [...list];
+
+      if (filters.type !== "all") out = out.filter((a) => String(a.type) === filters.type);
+      if (filters.risk !== "all") out = out.filter((a) => detectRisk(a) === filters.risk);
+
+      if (filters.sort === "raised") {
+        out.sort((a, b) => Number(b.totalRaised - a.totalRaised));
+      } else if (filters.sort === "progress") {
+        out.sort((a, b) => {
+          const pa = fmtUSDCBig(a.totalRaised) / Math.max(1, fmtUSDCBig(a.totalValuation));
+          const pb = fmtUSDCBig(b.totalRaised) / Math.max(1, fmtUSDCBig(b.totalValuation));
+          return pb - pa;
+        });
+      } else {
+        out.sort((a, b) => b.listedAt - a.listedAt);
+      }
+
+      return out;
+    }
+
+    function applyProgressWidths() {
+      document.querySelectorAll(".progress-fill[data-pct]").forEach((el) => {
+        const pct = Number(el.dataset.pct || 0);
+        el.style.width = Math.max(0, Math.min(100, pct)) + "%";
+      });
+    }
+
+    function renderInvestorAssets() {
+      const grid = document.getElementById("investorAssetGrid");
+      const list = applyInvestorFilters(cachedAssets);
+
+      if (!list.length) {
+        grid.innerHTML = '<div class="empty">No projects match your filters.</div>';
+        return;
+      }
+
+      grid.innerHTML = list.map((asset) => {
+        const raised = fmtUSDCBig(asset.totalRaised);
+        const valuation = Math.max(1, fmtUSDCBig(asset.totalValuation));
+        const pct = Math.min(100, (raised / valuation) * 100);
+        const risk = detectRisk(asset);
+
+        return `
+          <div class="asset-card">
+            <div class="asset-head">
+              <div class="asset-title">${asset.name}</div>
+              <span class="asset-type ${typeClasses[asset.type]}">${typeNames[asset.type]}</span>
+            </div>
+            <div class="asset-sub">${asset.symbol} · ${asset.companyName || "Issuer"}</div>
+            <div class="asset-desc">${asset.description || "No description provided."}</div>
+            <div class="bar"><span class="progress-fill" data-pct="${pct}"></span></div>
+            <div class="row"><span class="muted">Raised</span><span class="mono">${fmtUSD(raised)}</span></div>
+            <div class="row"><span class="muted">Valuation</span><span class="mono">${fmtUSD(valuation)}</span></div>
+            <div class="row"><span class="muted">Risk</span><span class="mono">${risk.toUpperCase()}</span></div>
+            <div class="row"><span class="muted">Price</span><span class="mono">${fmtUSDCBig(asset.pricePerToken).toLocaleString()} USDC</span></div>
+            <button class="btn btn-outline btn-full" onclick="selectProject('${asset.tokenContract}')">View Project</button>
+          </div>
+        `;
+      }).join("");
+
+      applyProgressWidths();
+    }
+
+    function selectProject(tokenAddress) {
+      const asset = cachedAssets.find((a) => a.tokenContract.toLowerCase() === tokenAddress.toLowerCase());
+      if (!asset) return;
+      currentAsset = asset;
+
+      const raised = fmtUSDCBig(asset.totalRaised);
+      const valuation = Math.max(1, fmtUSDCBig(asset.totalValuation));
+      const price = fmtUSDCBig(asset.pricePerToken);
+      const risk = detectRisk(asset);
+      const share = valuation > 0 ? (price / valuation) * 100 : 0;
+
+      document.getElementById("projectDetailSubtitle").textContent = asset.symbol + " · " + (asset.companyName || "Issuer profile");
+      document.getElementById("projectDetailBody").innerHTML = `
+        <div class="detail-row"><span class="muted">Asset Type</span><span>${typeNames[asset.type]}</span></div>
+        <div class="detail-row"><span class="muted">Token Economics</span><span class="mono">${price.toLocaleString()} USDC / token</span></div>
+        <div class="detail-row"><span class="muted">Revenue Projection</span><span class="mono">${(risk === "low" ? "Stable" : risk === "medium" ? "Moderate" : "Early stage")}</span></div>
+        <div class="detail-row"><span class="muted">Risk Factors</span><span class="mono">${risk.toUpperCase()}</span></div>
+        <div class="detail-row"><span class="muted">Raise Progress</span><span class="mono">${fmtUSD(raised)} / ${fmtUSD(valuation)}</span></div>
+        <div class="detail-row"><span class="muted">Investor Share Per Token</span><span class="mono">${share.toFixed(6)}%</span></div>
+        <div class="detail-row"><span class="muted">Token Contract</span><span class="mono">${shortAddr(asset.tokenContract)}</span></div>
       `;
-    }).join("");
 
-    const pnl = totalValue - totalCost;
-    document.getElementById("pfValue").textContent = fmtUSD(totalValue);
-    document.getElementById("pfCost").textContent = fmtUSD(totalCost);
-    document.getElementById("pfPnL").textContent = fmtUSD(pnl);
-  } catch (e) {
-    grid.innerHTML = '<div class="empty">Unable to load portfolio data. Reconnect wallet and retry.</div>';
-  }
-}
-
-function refreshFounderDashboard() {
-  if (!cachedAssets.length) {
-    document.getElementById("founderAssets").textContent = "0";
-    document.getElementById("founderRaised").textContent = "$0";
-    document.getElementById("founderInvestors").textContent = "0";
-    document.getElementById("distributionToken").innerHTML = '<option value="">No launched assets</option>';
-    return;
-  }
-
-  const totalRaised = cachedAssets.reduce((acc, a) => acc + fmtUSDCBig(a.totalRaised), 0);
-  document.getElementById("founderAssets").textContent = String(cachedAssets.length);
-  document.getElementById("founderRaised").textContent = fmtUSD(totalRaised);
-  document.getElementById("founderInvestors").textContent = String(Math.max(1, Math.round(cachedAssets.length * 7.5)));
-
-  document.getElementById("distributionToken").innerHTML = cachedAssets.map((a) =>
-    '<option value="' + a.tokenContract + '">' + a.symbol + " - " + a.name + "</option>"
-  ).join("");
-}
-
-function simulateDistribution() {
-  const token = document.getElementById("distributionToken").value;
-  const amount = Number(document.getElementById("distributionAmount").value || 0);
-  if (!token || amount <= 0) {
-    showToast("Enter a valid distribution amount.", "error");
-    return;
-  }
-  showToast("Distribution plan prepared for " + amount.toLocaleString() + " USDC.", "success");
-}
-
-async function submitLaunch() {
-  try {
-    await ensureWallet();
-
-    const name = document.getElementById("tokenName").value.trim();
-    const symbol = document.getElementById("tokenSymbol").value.trim().toUpperCase();
-    const companyName = document.getElementById("companyName").value.trim();
-    const description = document.getElementById("description").value.trim();
-    const valuation = document.getElementById("valuation").value.trim();
-    const price = document.getElementById("pricePerToken").value.trim();
-    const maxSupply = document.getElementById("maxSupply").value.trim();
-
-    if (!name || !symbol || !companyName || !description || !valuation || !price || !maxSupply) {
-      showToast("Complete all launch fields.", "error");
-      return;
+      updateInvestPreview();
+      updateRoiBox();
+      syncReturnsBox();
     }
 
-    setButtonLoading("launchBtn", true, "Launch Asset on Arc Testnet");
-
-    const launchpad = new ethers.Contract(LAUNCHPAD_ADDRESS, launchpadAbi, signer);
-    const listingFee = await launchpad.LISTING_FEE();
-    await approveIfNeeded(LAUNCHPAD_ADDRESS, listingFee);
-
-    const tx = await launchpad.launchAsset(
-      name,
-      symbol,
-      companyName,
-      description,
-      selectedAssetType,
-      ethers.parseUnits(valuation, 6),
-      ethers.parseUnits(price, 6),
-      BigInt(maxSupply)
-    );
-
-    showToast("Launch transaction submitted.");
-    await tx.wait();
-
-    showToast("Asset launched successfully.", "success");
-
-    document.getElementById("companyName").value = "";
-    document.getElementById("tokenName").value = "";
-    document.getElementById("tokenSymbol").value = "";
-    document.getElementById("description").value = "";
-    document.getElementById("valuation").value = "";
-    document.getElementById("pricePerToken").value = "";
-    document.getElementById("maxSupply").value = "";
-    document.getElementById("raiseTarget").value = "";
-
-    await loadAssets();
-  } catch (e) {
-    showToast(e.shortMessage || e.message || "Launch failed.", "error");
-  } finally {
-    setButtonLoading("launchBtn", false, "Launch Asset on Arc Testnet");
-  }
-}
-
-async function loadAssets() {
-  try {
-    cachedAssets = await fetchAssets();
-    updateLandingStats();
-    renderLandingLiveProjects();
-    renderInvestorAssets();
-    refreshFounderDashboard();
-    await updatePortfolio();
-  } catch (e) {
-    showToast("Failed to load live assets.", "error");
-  }
-}
-
-document.getElementById("pricePerToken").addEventListener("input", () => {
-  const max = Number(document.getElementById("maxSupply").value || 0);
-  const price = Number(document.getElementById("pricePerToken").value || 0);
-  document.getElementById("raiseTarget").value = max * price;
-});
-
-document.getElementById("maxSupply").addEventListener("input", () => {
-  const max = Number(document.getElementById("maxSupply").value || 0);
-  const price = Number(document.getElementById("pricePerToken").value || 0);
-  document.getElementById("raiseTarget").value = max * price;
-});
-
-if (window.ethereum) {
-  window.ethereum.on("accountsChanged", async (accounts) => {
-    walletAddress = accounts[0] || null;
-    if (!walletAddress) {
-      disconnectWallet(true);
-      return;
+    function updateInvestPreview() {
+      const qty = Number(document.getElementById("investAmount").value || 0);
+      if (!currentAsset || qty <= 0) {
+        document.getElementById("investCost").value = "0 USDC";
+        return;
+      }
+      const price = fmtUSDCBig(currentAsset.pricePerToken);
+      document.getElementById("investCost").value = (qty * price).toLocaleString(undefined, { maximumFractionDigits: 2 }) + " USDC";
     }
-    await ensureWallet();
-    await updatePortfolio();
-  });
 
-  window.ethereum.on("chainChanged", () => window.location.reload());
-}
+    function updateRoiBox() {
+      const slider = document.getElementById("roiRevenueInput");
+      const revenue = Number(slider.value || 0);
+      document.getElementById("roiRevenueVal").textContent = fmtUSD(revenue);
 
-function startRealtimeRefresh() {
-  if (refreshTimer) clearInterval(refreshTimer);
-  refreshTimer = setInterval(async () => {
-    await loadAssets();
-  }, 20000);
-}
+      if (!currentAsset) {
+        document.getElementById("roiReturnVal").textContent = "$0";
+        return;
+      }
 
-loadAssets();
-startRealtimeRefresh();
-</script>
+      const qty = Number(document.getElementById("investAmount").value || 0);
+      const valuation = Math.max(1, fmtUSDCBig(currentAsset.totalValuation));
+      const price = fmtUSDCBig(currentAsset.pricePerToken);
+      const invested = qty * price;
+      const share = invested / valuation;
+      const est = revenue * share;
+      document.getElementById("roiReturnVal").textContent = fmtUSD(est);
+    }
+
+    function syncReturnsBox(pending = 0, tokens = 0) {
+      const qty = Number(document.getElementById("investAmount").value || 0);
+      const price = currentAsset ? fmtUSDCBig(currentAsset.pricePerToken) : 0;
+      const invested = qty * price;
+      const valuation = currentAsset ? Math.max(1, fmtUSDCBig(currentAsset.totalValuation)) : 1;
+      const share = invested / valuation;
+
+      document.getElementById("retInvested").textContent = fmtUSD(invested);
+      document.getElementById("retTokens").textContent = Number(tokens || qty).toLocaleString(undefined, { maximumFractionDigits: 4 });
+      document.getElementById("retShare").textContent = (share * 100).toFixed(4) + "%";
+      document.getElementById("retPending").textContent = fmtUSD(pending);
+
+      if (walletAddress && currentAsset) {
+        const claimed = getLifetimeClaimed(walletAddress, currentAsset.tokenContract);
+        document.getElementById("retClaimed").textContent = fmtUSD(claimed);
+      } else {
+        document.getElementById("retClaimed").textContent = "$0";
+      }
+    }
+
+    async function executePurchase() {
+      try {
+        if (!currentAsset) {
+          showToast("Select a project first.", "error");
+          return;
+        }
+
+        await ensureWallet();
+        const qty = parseInt(document.getElementById("investAmount").value, 10);
+        if (!qty || qty < 1) {
+          showToast("Enter a valid token amount.", "error");
+          return;
+        }
+
+        setButtonLoading("investBtn", true, "Approve USDC + Invest");
+        const totalCost = BigInt(qty) * currentAsset.pricePerToken;
+
+        await approveIfNeeded(currentAsset.tokenContract, totalCost);
+
+        const token = new ethers.Contract(currentAsset.tokenContract, assetTokenAbi, signer);
+        const tx = await token.purchaseTokens(qty);
+
+        document.getElementById("investTxLink").href = EXPLORER_TX + tx.hash;
+        document.getElementById("investTxLink").textContent = "View transaction: " + tx.hash;
+        document.getElementById("investTxBox").classList.add("open");
+
+        await tx.wait();
+
+        addCostBasis(walletAddress, currentAsset.tokenContract, totalCost);
+        showToast("Investment confirmed.", "success");
+        await loadAssets();
+      } catch (e) {
+        showToast(e.shortMessage || e.message || "Investment failed.", "error");
+      } finally {
+        setButtonLoading("investBtn", false, "Approve USDC + Invest");
+      }
+    }
+
+    async function claimDividends(tokenAddress, btnId, txId) {
+      try {
+        await ensureWallet();
+        const btn = document.getElementById(btnId);
+        btn.disabled = true;
+        btn.textContent = "Claiming...";
+
+        const token = new ethers.Contract(tokenAddress, assetTokenAbi, signer);
+        const pendingBefore = fmtUSDCBig(await token.pendingDividends(walletAddress).catch(() => 0n));
+
+        let tx;
+        try { tx = await token.claimDividends(); }
+        catch (_) {
+          try { tx = await token.claimDividend(); }
+          catch (_) { tx = await token.withdrawDividends(); }
+        }
+
+        const link = document.getElementById(txId);
+        link.href = EXPLORER_TX + tx.hash;
+        link.textContent = "USDC receipt: " + tx.hash;
+        link.parentElement.classList.add("open");
+
+        await tx.wait();
+
+        if (pendingBefore > 0) addLifetimeClaimed(walletAddress, tokenAddress, pendingBefore);
+
+        showToast("Dividend claim confirmed.", "success");
+        await updatePortfolio();
+      } catch (e) {
+        showToast(e.shortMessage || e.message || "Claim failed.", "error");
+      } finally {
+        const btn = document.getElementById(btnId);
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = "Claim Dividend";
+        }
+      }
+    }
+
+    async function updatePortfolio() {
+      const grid = document.getElementById("portfolioGrid");
+
+      if (!walletAddress) {
+        grid.innerHTML = '<div class="empty">Connect wallet to view holdings, P/L, dividend history, and exit options.</div>';
+        document.getElementById("landingPositions").textContent = "0";
+        document.getElementById("pfValue").textContent = "$0";
+        document.getElementById("pfCost").textContent = "$0";
+        document.getElementById("pfPnL").textContent = "$0";
+        syncReturnsBox(0, 0);
+        return;
+      }
+
+      try {
+        const snapshots = await Promise.all(cachedAssets.map(async (asset) => {
+          const token = new ethers.Contract(asset.tokenContract, assetTokenAbi, readProvider);
+          const [balance, pending] = await Promise.all([
+            token.balanceOf(walletAddress).catch(() => 0n),
+            token.pendingDividends(walletAddress).catch(() => 0n)
+          ]);
+          return { asset, balance, pending };
+        }));
+
+        const holdings = snapshots.filter((x) => x.balance > 0n);
+        document.getElementById("landingPositions").textContent = String(holdings.length);
+
+        if (!holdings.length) {
+          grid.innerHTML = '<div class="empty">No holdings yet. Invest in a project to populate your dashboard.</div>';
+          document.getElementById("pfValue").textContent = "$0";
+          document.getElementById("pfCost").textContent = "$0";
+          document.getElementById("pfPnL").textContent = "$0";
+          syncReturnsBox(0, 0);
+          return;
+        }
+
+        let totalValue = 0;
+        let totalCost = 0;
+
+        grid.innerHTML = holdings.map((h, idx) => {
+          const units = fmtTokenBig(h.balance);
+          const price = fmtUSDCBig(h.asset.pricePerToken);
+          const value = units * price;
+          const pending = fmtUSDCBig(h.pending);
+          const costBasis = fmtUSDCBig(getCostBasis(walletAddress, h.asset.tokenContract));
+          const claimed = getLifetimeClaimed(walletAddress, h.asset.tokenContract);
+
+          totalValue += value;
+          totalCost += costBasis;
+
+          const btnId = "claimBtn_" + idx;
+          const txId = "claimTx_" + idx;
+
+          return `
+            <div class="portfolio-card">
+              <div class="asset-head">
+                <div class="asset-title">${h.asset.name}</div>
+                <span class="asset-type ${typeClasses[h.asset.type]}">${typeNames[h.asset.type]}</span>
+              </div>
+              <div class="asset-sub">${h.asset.symbol} · ${h.asset.companyName || "Issuer"}</div>
+              <div class="detail-row"><span class="muted">Tokens Held</span><span class="mono">${units.toLocaleString(undefined, { maximumFractionDigits: 4 })}</span></div>
+              <div class="detail-row"><span class="muted">Position Value</span><span class="mono">${fmtUSD(value)}</span></div>
+              <div class="detail-row"><span class="muted">Cost Basis</span><span class="mono">${fmtUSD(costBasis)}</span></div>
+              <div class="detail-row"><span class="muted">Pending Dividend</span><span class="mono">${fmtUSD(pending)}</span></div>
+              <div class="detail-row"><span class="muted">Lifetime Claimed</span><span class="mono">${fmtUSD(claimed)}</span></div>
+              <button class="btn btn-primary btn-full mt-8" id="${btnId}" onclick="claimDividends('${h.asset.tokenContract}','${btnId}','${txId}')">Claim Dividend</button>
+              <div class="tx-box"><a id="${txId}" class="tx-link" href="#" target="_blank" rel="noopener noreferrer"></a></div>
+              <div class="list mt-8">
+                <div class="list-item"><span>Sell on Marketplace</span><span class="pill">P1</span></div>
+                <div class="list-item"><span>Request Buyback</span><span class="pill">After 90 days</span></div>
+                <div class="list-item"><span>Early Redemption</span><span class="pill">15% to holders</span></div>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        const pnl = totalValue - totalCost;
+        document.getElementById("pfValue").textContent = fmtUSD(totalValue);
+        document.getElementById("pfCost").textContent = fmtUSD(totalCost);
+        document.getElementById("pfPnL").textContent = fmtUSD(pnl);
+
+        if (currentAsset) {
+          const currentHolding = holdings.find((h) => h.asset.tokenContract.toLowerCase() === currentAsset.tokenContract.toLowerCase());
+          if (currentHolding) syncReturnsBox(fmtUSDCBig(currentHolding.pending), fmtTokenBig(currentHolding.balance));
+        }
+      } catch (e) {
+        grid.innerHTML = '<div class="empty">Unable to load portfolio data. Reconnect wallet and retry.</div>';
+      }
+    }
+
+    function refreshFounderDashboard() {
+      if (!cachedAssets.length) {
+        document.getElementById("founderAssets").textContent = "0";
+        document.getElementById("founderInvestors").textContent = "0";
+        document.getElementById("founderRaisedProgress").textContent = "$0 / $0";
+        document.getElementById("founderRevenuePool").textContent = "$0";
+        return;
+      }
+
+      const totalRaised = cachedAssets.reduce((acc, a) => acc + fmtUSDCBig(a.totalRaised), 0);
+      const totalTarget = cachedAssets.reduce((acc, a) => acc + fmtUSDCBig(a.totalValuation), 0);
+
+      document.getElementById("founderAssets").textContent = String(cachedAssets.length);
+      document.getElementById("founderInvestors").textContent = String(Math.max(1, Math.round(cachedAssets.length * 7.5)));
+      document.getElementById("founderRaisedProgress").textContent = fmtUSD(totalRaised) + " / " + fmtUSD(totalTarget);
+      document.getElementById("founderRevenuePool").textContent = fmtUSD(totalRaised * 0.08);
+    }
+
+    function simulateDistribution() {
+      const token = document.getElementById("distributionTokenInput").value.trim();
+      const amount = Number(document.getElementById("distributionAmount").value || 0);
+      if (!token || amount <= 0) {
+        showToast("Enter token address and valid distribution amount.", "error");
+        return;
+      }
+      showToast("Distribution prepared for " + amount.toLocaleString() + " USDC.", "success");
+    }
+
+    async function submitLaunch() {
+      try {
+        await ensureWallet();
+
+        const name = document.getElementById("tokenName").value.trim();
+        const symbol = document.getElementById("tokenSymbol").value.trim().toUpperCase();
+        const companyName = document.getElementById("companyName").value.trim();
+        const description = document.getElementById("description").value.trim();
+        const valuation = document.getElementById("valuation").value.trim();
+        const price = document.getElementById("pricePerToken").value.trim();
+        const maxSupply = document.getElementById("maxSupply").value.trim();
+
+        if (!name || !symbol || !companyName || !description || !valuation || !price || !maxSupply) {
+          showToast("Complete all launch fields.", "error");
+          return;
+        }
+
+        setButtonLoading("launchBtn", true, "Launch Asset on Arc Testnet");
+
+        const launchpad = new ethers.Contract(LAUNCHPAD_ADDRESS, launchpadAbi, signer);
+        const listingFee = await launchpad.LISTING_FEE();
+        await approveIfNeeded(LAUNCHPAD_ADDRESS, listingFee);
+
+        const tx = await launchpad.launchAsset(
+          name,
+          symbol,
+          companyName,
+          description,
+          selectedAssetType,
+          ethers.parseUnits(valuation, 6),
+          ethers.parseUnits(price, 6),
+          BigInt(maxSupply)
+        );
+
+        await tx.wait();
+        showToast("Asset launched successfully.", "success");
+
+        document.getElementById("companyName").value = "";
+        document.getElementById("tokenName").value = "";
+        document.getElementById("tokenSymbol").value = "";
+        document.getElementById("description").value = "";
+        document.getElementById("valuation").value = "";
+        document.getElementById("pricePerToken").value = "";
+        document.getElementById("maxSupply").value = "";
+        document.getElementById("raiseTarget").value = "";
+
+        await loadAssets();
+      } catch (e) {
+        showToast(e.shortMessage || e.message || "Launch failed.", "error");
+      } finally {
+        setButtonLoading("launchBtn", false, "Launch Asset on Arc Testnet");
+      }
+    }
+
+    async function loadAssets() {
+      try {
+        cachedAssets = await fetchAssets();
+        updateLandingStats();
+        renderLandingLiveProjects();
+        renderInvestorAssets();
+        refreshFounderDashboard();
+        await updatePortfolio();
+      } catch (e) {
+        showToast("Failed to load live assets.", "error");
+      }
+    }
+
+    document.getElementById("pricePerToken").addEventListener("input", () => {
+      const max = Number(document.getElementById("maxSupply").value || 0);
+      const price = Number(document.getElementById("pricePerToken").value || 0);
+      document.getElementById("raiseTarget").value = max * price;
+      updateRoiBox();
+    });
+
+    document.getElementById("maxSupply").addEventListener("input", () => {
+      const max = Number(document.getElementById("maxSupply").value || 0);
+      const price = Number(document.getElementById("pricePerToken").value || 0);
+      document.getElementById("raiseTarget").value = max * price;
+      updateRoiBox();
+    });
+
+    document.getElementById("investAmount").addEventListener("input", () => {
+      updateInvestPreview();
+      updateRoiBox();
+      syncReturnsBox();
+    });
+
+    if (window.ethereum) {
+      window.ethereum.on("accountsChanged", async (accounts) => {
+        walletAddress = accounts[0] || null;
+        if (!walletAddress) {
+          disconnectWallet(true);
+          return;
+        }
+        await ensureWallet();
+        await updatePortfolio();
+      });
+
+      window.ethereum.on("chainChanged", () => window.location.reload());
+    }
+
+    function startRealtimeRefresh() {
+      if (refreshTimer) clearInterval(refreshTimer);
+      refreshTimer = setInterval(async () => {
+        await loadAssets();
+      }, 20000);
+    }
+
+    loadAssets();
+    startRealtimeRefresh();
+  </script>
 </body>
 </html>
-
