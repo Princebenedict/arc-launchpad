@@ -385,26 +385,52 @@
     box-shadow: 0 0 0 3px var(--arc-dim);
   }
 
-  .field select {
+  /* Force dark select controls */
+.field select,
+#filterType,
+#filterRisk,
+#sortBy,
+#founderType,
+#distributionToken {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  background: #0b111a;
-  color: #e8edf5;
-  border: 1px solid #243040;
+  background-color: #0b111a !important;
+  color: #e8edf5 !important;
+  border: 1px solid #243040 !important;
   border-radius: 10px;
+  color-scheme: dark;
 }
 
-  .field select:focus {
-    border-color: #00d4aa;
-    box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.15);
-  }
+.field select:focus,
+#filterType:focus,
+#filterRisk:focus,
+#sortBy:focus,
+#founderType:focus,
+#distributionToken:focus {
+  border-color: #00d4aa !important;
+  box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.18) !important;
+  outline: none;
+}
 
-  .field select option,
-  .field select optgroup {
-    background-color: #0b111a;
-    color: #e8edf5;
-  }
+.field select option,
+.field select optgroup {
+  background: #0b111a !important;
+  color: #e8edf5 !important;
+}
+
+/* Selected/hovered option colors */
+.field select option:checked {
+  background: #132033 !important;
+  color: #00d4aa !important;
+}
+
+/* IE/old Edge arrow */
+.field select::-ms-expand {
+  background: #0b111a;
+  color: #e8edf5;
+}
+
 
   .asset-grid {
     display: grid;
