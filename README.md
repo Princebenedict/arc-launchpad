@@ -1,113 +1,200 @@
-# ArcVault Launchpad
+# ArcVault
 
-ArcVault Launchpad is a tokenized asset launchpad built on Arc Testnet. It lets founders launch equity, revenue-share, and real-world asset offerings, raise in USDC, and give investors a clean onchain interface for discovery and participation.
+> Arc-native launchpad for real-world assets. Launch onchain asset tokens, fund them with USDC, and manage investor positions through a contract-backed frontend.
 
-## Live Contract
+[![Foundry](https://img.shields.io/badge/Built%20With-Foundry-f0b90b)](#local-development)
+[![Arc Testnet](https://img.shields.io/badge/Network-Arc%20Testnet-00d4aa)](#deployed-addresses)
+[![Vercel](https://img.shields.io/badge/Frontend-Vercel-black)](#live-demo)
+[![License](https://img.shields.io/badge/License-MIT-green)](#license)
 
-- Launchpad: `0x2feA3305fcB02184b2e120B1D511D3f539F276B7`
-- Network: Arc Testnet
-- Chain ID: `5042002`
-- RPC: `https://rpc.testnet.arc.network`
-- Explorer: [https://testnet.arcscan.app](https://testnet.arcscan.app)
+## Live Demo
+[https://arc-launchpad.vercel.app/](https://arc-launchpad.vercel.app/)
 
-## What It Does
+## One-Line Pitch
+ArcVault turns asset issuance and investment into an onchain experience: founders launch tokenized offerings, investors discover real contract-created listings, buy with USDC, and claim dividends directly from the app.
 
-- Launch tokenized assets on Arc Testnet
-- Support multiple asset classes:
-  - Equity
-  - Revenue Share
-  - Real-World Assets
-- Raise in USDC
-- Connect wallet with MetaMask
-- Browse listed offerings
-- Simulate investing through the frontend
-- Display Arc-native deploy references and contract info
+## The Problem
+Access to real-world asset participation is still fragmented:
+- founders rely on slow, manual fundraising flows
+- investors face opaque access and weak transparency
+- product experiences often show mock data instead of real contract state
+- portfolio visibility is rarely tied directly to deployed token contracts
 
-## Project Structure
+## The Solution
+ArcVault solves that with a launchpad built around real onchain primitives:
+- a factory contract deploys an asset token per listing
+- the frontend reads only actual launchpad-created assets
+- risk tier is stored onchain
+- purchase cost basis is stored onchain
+- investors interact with live contracts through wallet actions
 
+## Why It Stands Out
+- Real contract-backed asset listings, not seeded mock cards
+- Onchain risk metadata
+- Onchain investor cost basis tracking
+- USDC-denominated asset purchase flow
+- Clean explorer, launch, and portfolio UX in one interface
+- Built specifically around Arc Testnet deployment
+
+## Core Features
+- Launch new asset tokens from `AssetLaunchpad`
+- Deploy dedicated `AssetToken` contracts for each asset
+- Explore only onchain-created listings
+- Buy tokens with USDC
+- Track portfolio positions by wallet
+- Claim dividends directly from token contracts
+- View asset metadata including type, risk tier, valuation, and pricing
+
+## Product Flow
 ```text
-arc-launchpad/
-├── contracts/
-│   ├── AssetLaunchpad.sol
-│   └── AssetToken.sol
-├── script/
-│   └── DeployLaunchpad.s.sol
-├── src/
-├── test/
-├── broadcast/
-├── cache/
-├── out/
-├── index.html
-├── foundry.toml
-└── README.md
+Founder
+  -> launches asset via AssetLaunchpad
+  -> AssetLaunchpad deploys AssetToken
+  -> asset becomes visible in Explore
 
-Smart Contract Deployment
-The launchpad contract has already been deployed successfully to Arc Testnet.
+Investor
+  -> Explore reads launchpad contract
+  -> Selects an onchain asset
+  -> Approves USDC
+  -> Purchases tokens
+  -> Portfolio reads holdings from token contracts
+  -> Claims dividends from token contract
 
-Deployment summary:
+Contract Design
+AssetLaunchpad
+Factory contract responsible for:
 
-Deployer:          0x98ba9B32699F148940E6785E0A1aceF8b38a828D
-Launchpad address: 0x2feA3305fcB02184b2e120B1D511D3f539F276B7
-Fee recipient:     0x98ba9B32699F148940E6785E0A1aceF8b38a828D
-Network:           Arc Testnet
-Chain ID:          5042002
-RPC:               https://rpc.testnet.arc.network
-Explorer:          https://testnet.arcscan.app
-Frontend
-The frontend is app built with:
+charging listing fee in USDC
+deploying new AssetToken contracts
+storing asset registry data
+exposing all launched assets to the frontend
+AssetToken
+Per-asset contract responsible for:
 
+asset metadata
+company information
+asset type
+risk tier
+valuation
+token price
+max supply
+total raised
+total invested per wallet
+total purchased tokens per wallet
+dividend distribution and claiming
+
+Deployed Addresses
+Launchpad: 0x705C2b9D3B06eeF72831F463Ca6eBc5A9B543e3b
+USDC:      0x3600000000000000000000000000000000000000
+Network:   Arc Testnet
+Chain ID:  5042002
+RPC:       https://rpc.testnet.arc.network
+Explorer:  https://testnet.arcscan.app
+
+Frontend Highlights
+The frontend is intentionally wired to real chain data:
+
+Explore Assets reads directly from AssetLaunchpad.getAllAssets()
+each asset card is enriched from the live AssetToken contract
+Launch Asset writes directly onchain
+Portfolio reads balances, pending dividends, and cost basis from contracts
+risk tier is not guessed in the UI
+
+
+Tech Stack
+Solidity
+Foundry
+Ethers.js
 HTML
 CSS
-Vanilla JavaScript
-It is designed to be deployed easily on Vercel and connected to the already deployed Arc Testnet contract.
+JavaScript
+GitHub Actions
+Vercel
 
 
-Foundry Setup
-Install Foundry:
-
-curl -L https://foundry.paradigm.xyz | bash
-foundryup
-Clone the repo and install dependencies:
-
-git clone https://github.com/YOUR_USERNAME/arc-launchpad.git
-cd arc-launchpad
-forge install
-Create your environment file:
-
-cp .env.example .env
-Example .env:
-
-ARC_TESTNET_RPC_URL=https://rpc.testnet.arc.network
-PRIVATE_KEY=0xYOUR_PRIVATE_KEY
-Redeploy Smart Contracts
-If you want to redeploy the launchpad contract to Arc Testnet again:
-
-forge script script/DeployLaunchpad.s.sol \
-  --rpc-url $ARC_TESTNET_RPC_URL \
-  --private-key $PRIVATE_KEY \
-  --broadcast
-After deploy:
-
-Copy the new launchpad contract address from the terminal output
-Replace the LAUNCHPAD_ADDRESS constant inside index.html
-Commit and push the updated frontend
-Redeploy on Vercel
-GitHub Deployment
+Repository Structure
+arc-launchpad/
+├── contracts/
+│   ├── AssetToken.sol          ← ERC-20 per asset + dividends
+│   └── AssetLaunchpad.sol      ← Factory that deploys AssetTokens
+├── script/
+│   └── DeployLaunchpad.s.sol   ← Foundry deploy script
+├── test/
+│   └── AssetLaunchpad.t.sol    ← Unit tests
+├── .env                        ← your secrets (never commit)
+├── foundry.toml                ← Foundry config
+├── .gitignore
+└── index.html                  ← Full frontend wired to Arc
 
 
+Local Development
+Build
+forge build
+Test
+forge test
+Format
+forge fmt
+Check formatting
+forge fmt --check
+Deploy Contracts
+Deployment uses the Foundry script and reads PRIVATE_KEY from the environment.
 
-Wallet / Network Details
-To use the app in MetaMask:
+PRIVATE_KEY=0xYOUR_PRIVATE_KEY forge script script/DeployLaunchpad.s.sol:DeployLaunchpad --rpc-url https://rpc.testnet.arc.network --broadcast
+After deployment:
 
-Network name: Arc Testnet
-RPC URL: https://rpc.testnet.arc.network
-Chain ID: 5042002
-Currency symbol: USDC
-Explorer: https://testnet.arcscan.app
-Notes
-The current deployment is on Arc Testnet, not mainnet
-The frontend contains demo/mock asset data
-To make the app fully onchain-driven, the frontend should read actual asset listings from the deployed contract
+copy the new launchpad address from the logs
+update LAUNCHPAD_ADDRESS in index.html
+update the address in this README
+push the changes to GitHub
+Redeploy Frontend
+After updating index.html:
+
+git add .
+git commit -m "Update frontend for redeployed launchpad"
+git push origin main
+If Vercel is connected to GitHub, the site redeploys automatically.
+
+CI Notes
+This repo uses Foundry CI checks. If CI fails on formatting:
+
+forge fmt
+git add .
+git commit -m "chore: format solidity files"
+git push origin main
+Demo Walkthrough
+Connect wallet
+Launch asset from the launch form
+Explore live contract-created listings
+Select a tokenized asset
+Approve USDC
+Invest onchain
+View live portfolio holdings
+Claim dividends
+Screenshots
+Add screenshots here for stronger presentation.
+
+Explore Assets
+![Explore Assets](./screenshots/explore-assets.png)
+Launch Asset
+![Launch Asset](./screenshots/launch-asset.png)
+Portfolio
+![Portfolio](./screenshots/portfolio.png)
+What Makes This Hackathon-Ready
+clear user problem
+clear contract architecture
+real onchain interactions
+contract-address-driven frontend
+production-style deployment path
+simple demo flow judges can follow quickly
+Future Improvements
+event indexing for faster data loading
+founder analytics dashboard
+deeper portfolio analytics
+stronger secondary market settlement
+onchain buyback / redemption mechanics
+richer investor protection logic
+Author
+Princebenedict
+
 License
 MIT
-
