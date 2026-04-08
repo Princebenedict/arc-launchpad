@@ -91,6 +91,8 @@ Chain ID:  5042002
 RPC:       https://rpc.testnet.arc.network
 Explorer:  https://testnet.arcscan.app
 
+
+
 Frontend Highlights
 The frontend is intentionally wired to real chain data:
 
@@ -99,6 +101,7 @@ each asset card is enriched from the live AssetToken contract
 Launch Asset writes directly onchain
 Portfolio reads balances, pending dividends, and cost basis from contracts
 risk tier is not guessed in the UI
+
 
 
 Tech Stack
@@ -110,6 +113,9 @@ CSS
 JavaScript
 GitHub Actions
 Vercel
+
+
+
 
 
 Repository Structure
@@ -127,15 +133,23 @@ arc-launchpad/
 └── index.html                  ← Full frontend wired to Arc
 
 
+
+
 Local Development
+
 Build
 forge build
+
 Test
 forge test
+
 Format
 forge fmt
+
 Check formatting
 forge fmt --check
+
+
 Deploy Contracts
 Deployment uses the Foundry script and reads PRIVATE_KEY from the environment.
 
@@ -161,6 +175,10 @@ forge fmt
 git add .
 git commit -m "chore: format solidity files"
 git push origin main
+
+
+
+
 Demo Walkthrough
 Connect wallet
 Launch asset from the launch form
@@ -170,22 +188,9 @@ Approve USDC
 Invest onchain
 View live portfolio holdings
 Claim dividends
-Screenshots
-Add screenshots here for stronger presentation.
 
-Explore Assets
-![Explore Assets](./screenshots/explore-assets.png)
-Launch Asset
-![Launch Asset](./screenshots/launch-asset.png)
-Portfolio
-![Portfolio](./screenshots/portfolio.png)
-What Makes This Hackathon-Ready
-clear user problem
-clear contract architecture
-real onchain interactions
-contract-address-driven frontend
-production-style deployment path
-simple demo flow judges can follow quickly
+
+
 Future Improvements
 event indexing for faster data loading
 founder analytics dashboard
@@ -193,8 +198,13 @@ deeper portfolio analytics
 stronger secondary market settlement
 onchain buyback / redemption mechanics
 richer investor protection logic
+
+
+
 Author
 Princebenedict
+
+
 
 License
 MIT
