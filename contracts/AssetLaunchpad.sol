@@ -88,15 +88,7 @@ contract AssetLaunchpad {
         founderAssets[msg.sender].push(tokenAddr);
         isRegistered[tokenAddr] = true;
 
-        emit AssetLaunched(
-            tokenAddr,
-            msg.sender,
-            name,
-            symbol,
-            assetType,
-            riskTier,
-            block.timestamp
-        );
+        emit AssetLaunched(tokenAddr, msg.sender, name, symbol, assetType, riskTier, block.timestamp);
 
         return tokenAddr;
     }
