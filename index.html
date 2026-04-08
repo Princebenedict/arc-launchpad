@@ -473,6 +473,11 @@
       font-size: 12px;
     }
 
+    .action-row {
+      display: flex;
+      gap: 6px;
+    }
+
     .portfolio-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
@@ -837,6 +842,7 @@
     const EXPLORER_TX = "https://testnet.arcscan.app/tx/";
     const RPC_URL = "https://rpc.testnet.arc.network";
     const CHAIN_ID = 5042002;
+    const ARC_CHAIN_HEX = "0x4cf472";
     const LAUNCHPAD_ADDRESS = "0x705C2b9D3B06eeF72831F463Ca6eBc5A9B543e3b";
     const USDC_ADDRESS = "0x3600000000000000000000000000000000000000";
     const LISTING_FEE = 1000000n;
@@ -977,15 +983,61 @@
       return 2;
     }
 
+    async function ensureArcNetwork() {
+      if (!window.ethereum) {
+        throw new Error("No wallet detected.");
+      }
+
+      try {
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: ARC_CHAIN_HEX }]
+        });
+      } catch (error) {
+        const code = error?.code ?? error?.data?.originalError?.code;
+
+        if (code === 4902) {
+          await window.ethereum.request({
+            method: "wallet_addEthereumChain",
+            params: [
+              {
+                chainId: ARC_CHAIN_HEX,
+                chainName: "Arc Testnet",
+                nativeCurrency: {
+                  name: "Arc",
+                  symbol: "ARC",
+                  decimals: 18
+                },
+                rpcUrls: ["https://rpc.testnet.arc.network"],
+                blockExplorerUrls: ["https://testnet.arcscan.app"]
+              }
+            ]
+          });
+
+          await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: ARC_CHAIN_HEX }]
+          });
+        } else {
+          throw error;
+        }
+      }
+    }
+
     async function getWriteContext() {
       if (!window.ethereum) throw new Error("No wallet detected.");
+
+      await ensureArcNetwork();
+
       const provider = new ethers.BrowserProvider(window.ethereum);
       await provider.send("eth_requestAccounts", []);
       const signer = await provider.getSigner();
       const network = await provider.getNetwork();
+
       if (Number(network.chainId) !== CHAIN_ID) {
-        throw new Error("Switch wallet to Arc Testnet (5042002).");
+        throw new Error("Failed to switch wallet to Arc Testnet.");
       }
+
       return { provider, signer };
     }
 
@@ -1635,7 +1687,7 @@
             <div><strong>${a.symbol}</strong> investor wants to sell ${a.amount} tokens</div>
             <div class="subtle">Asking ${fmtUsd(a.price)} USDC / token (Total ${fmtUsd(a.total)})</div>
           </div>
-          <div style="display:flex;gap:6px">
+          <div class="action-row">
             <button class="btn" onclick="acceptBid('${a.id}')">Accept</button>
             <button class="btn" onclick="counterBid('${a.id}')">Counter</button>
             <button class="btn btn-danger" onclick="ignoreAlert('${a.id}')">Ignore</button>
