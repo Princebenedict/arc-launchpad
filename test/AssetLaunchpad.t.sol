@@ -18,9 +18,10 @@ contract AssetLaunchpadTest is Test {
             "Acme Corporation",
             "Leading tech startup in Lagos",
             AssetToken.AssetType.EQUITY,
-            1_000_000_000_000, // $1M valuation (6 decimals)
-            10_000_000, // $10 per token (6 decimals)
-            100_000, // 100k max tokens
+            AssetToken.RiskTier.MEDIUM,
+            1_000_000_000_000,
+            10_000_000,
+            100_000,
             founder
         );
     }
@@ -34,6 +35,7 @@ contract AssetLaunchpadTest is Test {
         assertTrue(token.isActive());
         assertEq(token.founder(), founder);
         assertEq(uint256(token.assetType()), uint256(AssetToken.AssetType.EQUITY));
+        assertEq(uint256(token.riskTier()), uint256(AssetToken.RiskTier.MEDIUM));
     }
 
     function testDeactivateByFounder() public {

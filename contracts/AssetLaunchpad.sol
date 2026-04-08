@@ -13,7 +13,7 @@ contract AssetLaunchpad {
     using SafeERC20 for IERC20;
 
     address public constant USDC = 0x3600000000000000000000000000000000000000;
-    uint256 public constant LISTING_FEE = 1_000_000; // 1 USDC (6 decimals)
+    uint256 public constant LISTING_FEE = 1_000_000;
 
     address public immutable FEE_RECIPIENT;
 
@@ -23,6 +23,7 @@ contract AssetLaunchpad {
         string symbol;
         address founder;
         AssetToken.AssetType assetType;
+        AssetToken.RiskTier riskTier;
         uint256 listedAt;
     }
 
@@ -36,6 +37,7 @@ contract AssetLaunchpad {
         string name,
         string symbol,
         AssetToken.AssetType assetType,
+        AssetToken.RiskTier riskTier,
         uint256 listedAt
     );
 
@@ -43,26 +45,30 @@ contract AssetLaunchpad {
         FEE_RECIPIENT = _feeRecipient;
     }
 
-    /**
-     * @notice Deploy a new tokenized asset
-     * @dev Charges 1 USDC listing fee. Make sure to approve USDC first.
-     */
     function launchAsset(
         string memory name,
         string memory symbol,
         string memory companyName,
         string memory description,
         AssetToken.AssetType assetType,
+        AssetToken.RiskTier riskTier,
         uint256 totalValuation,
         uint256 pricePerToken,
         uint256 maxSupply
     ) external returns (address) {
-        // Collect 1 USDC listing fee
         IERC20(USDC).safeTransferFrom(msg.sender, FEE_RECIPIENT, LISTING_FEE);
 
-        // Deploy a new AssetToken contract for this asset
         AssetToken token = new AssetToken(
-            name, symbol, companyName, description, assetType, totalValuation, pricePerToken, maxSupply, msg.sender
+            name,
+            symbol,
+            companyName,
+            description,
+            assetType,
+            riskTier,
+            totalValuation,
+            pricePerToken,
+            maxSupply,
+            msg.sender
         );
 
         address tokenAddr = address(token);
@@ -74,6 +80,7 @@ contract AssetLaunchpad {
                 symbol: symbol,
                 founder: msg.sender,
                 assetType: assetType,
+                riskTier: riskTier,
                 listedAt: block.timestamp
             })
         );
@@ -81,7 +88,16 @@ contract AssetLaunchpad {
         founderAssets[msg.sender].push(tokenAddr);
         isRegistered[tokenAddr] = true;
 
-        emit AssetLaunched(tokenAddr, msg.sender, name, symbol, assetType, block.timestamp);
+        emit AssetLaunched(
+            tokenAddr,
+            msg.sender,
+            name,
+            symbol,
+            assetType,
+            riskTier,
+            block.timestamp
+        );
+
         return tokenAddr;
     }
 

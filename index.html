@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ArcVault - Arc-Native Launchpad for Real Assets</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
   <style>
     :root {
       --bg: #070b12;
@@ -421,7 +422,7 @@
       text-transform: uppercase;
       letter-spacing: .4px;
     }
-    .field input, .field textarea {
+    .field input, .field textarea, .field select {
       width: 100%;
       border: 1px solid var(--border-2);
       border-radius: 10px;
@@ -432,7 +433,7 @@
       font-family: var(--font);
       outline: none;
     }
-    .field input:focus, .field textarea:focus {
+    .field input:focus, .field textarea:focus, .field select:focus {
       border-color: var(--arc);
       box-shadow: 0 0 0 3px var(--arc-dim);
     }
@@ -622,7 +623,7 @@
     <section class="panel active" id="panel-explore">
       <div class="card">
         <h3>Live Listings</h3>
-        <p class="subtle">Card-based marketplace with direct invest actions and real-time orderbook integration.</p>
+        <p class="subtle">Listings below are fetched directly from your deployed launchpad contract.</p>
 
         <div class="filter-row">
           <div>
@@ -672,10 +673,10 @@
 
           <div class="section-title">Investor Protection Center</div>
           <div class="list">
-            <div><span>Milestone-gated fund release</span><span class="pill">Active</span></div>
-            <div><span>Oracle revenue verification</span><span class="pill">Active</span></div>
-            <div><span>Dispute resolution readiness</span><span class="pill">Active</span></div>
-            <div><span>Insurance pool support</span><span class="pill">Optional</span></div>
+            <div><span>Onchain registry</span><span class="pill">Active</span></div>
+            <div><span>Risk tier stored onchain</span><span class="pill">Active</span></div>
+            <div><span>Purchase cost tracked</span><span class="pill">Active</span></div>
+            <div><span>Dividend claim flow</span><span class="pill">Active</span></div>
           </div>
         </div>
 
@@ -684,7 +685,7 @@
           <div class="kv"><span class="k">Invested</span><span class="v" id="retInvested">$0</span></div>
           <div class="kv"><span class="k">Tokens Owned</span><span class="v" id="retTokens">0</span></div>
           <div class="kv"><span class="k">Revenue Share</span><span class="v" id="retShare">0.00%</span></div>
-          <div class="kv"><span class="k">Next Claim</span><span class="v">Monthly cycle</span></div>
+          <div class="kv"><span class="k">Next Claim</span><span class="v">On demand</span></div>
           <div class="kv"><span class="k">Pending</span><span class="v" id="retPending">$0</span></div>
           <div class="kv"><span class="k">Lifetime Claimed</span><span class="v" id="retClaimed">$0</span></div>
 
@@ -697,8 +698,8 @@
             <input id="buyCost" type="text" readonly value="0 USDC" />
           </div>
 
-          <button class="btn btn-primary btn-full mt-10" id="investBtn" onclick="investSelected()">Invest</button>
-          <button class="btn btn-full mt-8" id="claimBtn" onclick="claimDividendsForCurrent()">Claim Dividends</button>
+          <button class="btn btn-primary btn-full mt-10" onclick="investSelected()">Invest</button>
+          <button class="btn btn-full mt-8" onclick="claimDividendsForCurrent()">Claim Dividends</button>
           <div class="tx-box" id="txBox"><a class="tx-link" id="txLink" href="#" target="_blank" rel="noopener noreferrer"></a></div>
 
           <div class="section-title">Exit Options</div>
@@ -713,7 +714,7 @@
       <div class="split mt-12">
         <div class="card">
           <h3>Live Order Book</h3>
-          <p class="subtle">Real-time orderbook with basic matching engine.</p>
+          <p class="subtle">Local demo orderbook UI.</p>
           <div class="split mt-8">
             <div>
               <div class="label">Sell Orders</div>
@@ -730,13 +731,13 @@
 
         <div class="card">
           <h3>Founder Bidding Interface</h3>
-          <p class="subtle">Exit requests appear here for buyback acceptance, counter-offer, or ignore.</p>
+          <p class="subtle">Local demo founder response flow.</p>
           <div class="list" id="founderAlerts"></div>
 
           <div class="section-title">Revenue Distribution Flow</div>
           <div class="list">
             <div><span>Company Revenue</span><span class="v" id="distRevenue">$50,000 USDC</span></div>
-            <div><span>Smart Contract Verification</span><span class="pill">Oracle Verified</span></div>
+            <div><span>Smart Contract Verification</span><span class="pill">Onchain</span></div>
             <div><span>Token Holders</span><span class="v" id="distHolders">0 investors</span></div>
             <div><span>Your Share</span><span class="v" id="distYourShare">$0</span></div>
           </div>
@@ -747,20 +748,21 @@
     <section class="panel" id="panel-launch">
       <div class="card">
         <h3>Launch Project</h3>
-        <p class="subtle">Create a new listing and publish it into the explore grid.</p>
+        <p class="subtle">Creates a new asset token through your deployed launchpad contract.</p>
         <div class="two-col">
           <div class="field"><label for="newName">Project Name</label><input id="newName" type="text" placeholder="New Asset Project" /></div>
           <div class="field"><label for="newSymbol">Symbol</label><input id="newSymbol" type="text" placeholder="NAP" /></div>
         </div>
         <div class="two-col">
-          <div class="field"><label for="newType">Type</label><input id="newType" type="text" placeholder="equity / revenue / rwa" /></div>
-          <div class="field"><label for="newCompany">Company</label><input id="newCompany" type="text" placeholder="Issuer Name" /></div>
+          <div class="field"><label for="newType">Type</label><select id="newType"><option value="equity">Equity</option><option value="revenue">Revenue Share</option><option value="rwa">Real-World Asset</option></select></div>
+          <div class="field"><label for="newRisk">Risk Tier</label><select id="newRisk"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div>
         </div>
-        <div class="field"><label for="newDesc">Description</label><textarea id="newDesc" rows="3" placeholder="Project summary and raise purpose"></textarea></div>
         <div class="two-col">
-          <div class="field"><label for="newTarget">Raise Target (USDC)</label><input id="newTarget" type="number" placeholder="500000" /></div>
+          <div class="field"><label for="newCompany">Company</label><input id="newCompany" type="text" placeholder="Issuer Name" /></div>
           <div class="field"><label for="newPrice">Price per Token (USDC)</label><input id="newPrice" type="number" placeholder="50" /></div>
         </div>
+        <div class="field"><label for="newDesc">Description</label><textarea id="newDesc" rows="3" placeholder="Project summary and raise purpose"></textarea></div>
+        <div class="field"><label for="newTarget">Total Valuation (USDC)</label><input id="newTarget" type="number" placeholder="500000" /></div>
         <button class="btn btn-primary btn-full mt-10" onclick="launchProject()">Launch Asset</button>
       </div>
     </section>
@@ -768,10 +770,10 @@
     <section class="panel" id="panel-portfolio">
       <div class="card">
         <h3>Portfolio</h3>
-        <p class="subtle">Holdings, performance, claim history, and exit readiness.</p>
+        <p class="subtle">Purchase cost basis is now read from the token contract.</p>
         <div class="stats-bar mt-8">
           <div class="stat"><h2 id="pfValue">$0</h2><span>Portfolio Value</span></div>
-          <div class="stat"><h2 id="pfCost">$0</h2><span>Cost Basis</span></div>
+          <div class="stat"><h2 id="pfCost">$0</h2><span>Purchase Cost Basis</span></div>
           <div class="stat"><h2 id="pfPnl">$0</h2><span>Profit / Loss</span></div>
           <div class="stat"><h2 id="pfPositions">0</h2><span>Positions</span></div>
         </div>
@@ -783,11 +785,11 @@
       <div class="card">
         <h3>Deploy Guide</h3>
         <div class="list">
-          <div><span>Launchpad</span><span class="v mono">0x2feA...76B7</span></div>
-          <div><span>USDC Gas Token</span><span class="v mono">0x3600...0000</span></div>
+          <div><span>Launchpad</span><span class="v mono">0x2feA3305fcB02184b2e120B1D511D3f539F276B7</span></div>
+          <div><span>USDC Gas Token</span><span class="v mono">0x3600000000000000000000000000000000000000</span></div>
           <div><span>Sub-second finality</span><span class="pill">Arc Native</span></div>
           <div><span>No ETH required</span><span class="pill">USDC Gas</span></div>
-          <div><span>Privacy-ready architecture</span><span class="pill">Opt-in</span></div>
+          <div><span>RPC</span><span class="v mono">https://rpc.testnet.arc.network</span></div>
         </div>
       </div>
     </section>
@@ -814,28 +816,52 @@
 
   <script>
     const EXPLORER_TX = "https://testnet.arcscan.app/tx/";
-    const STORAGE_KEY = "arcvault_projects";
+    const RPC_URL = "https://rpc.testnet.arc.network";
+    const CHAIN_ID = 5042002;
+    const LAUNCHPAD_ADDRESS = "0x705C2b9D3B06eeF72831F463Ca6eBc5A9B543e3b";
+    const USDC_ADDRESS = "0x3600000000000000000000000000000000000000";
+    const LISTING_FEE = 1000000n;
 
-    function loadProjects() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        const parsed = raw ? JSON.parse(raw) : [];
-        return Array.isArray(parsed) ? parsed : [];
-      } catch (error) {
-        console.error("Failed to load projects", error);
-        return [];
-      }
-    }
+    const LAUNCHPAD_ABI = [
+      "function launchAsset(string name,string symbol,string companyName,string description,uint8 assetType,uint8 riskTier,uint256 totalValuation,uint256 pricePerToken,uint256 maxSupply) returns (address)",
+      "function getAllAssets() view returns (tuple(address tokenContract,string name,string symbol,address founder,uint8 assetType,uint8 riskTier,uint256 listedAt)[])"
+    ];
 
-    function saveProjects() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.projects));
-    }
+    const ASSET_TOKEN_ABI = [
+      "function companyName() view returns (string)",
+      "function description() view returns (string)",
+      "function assetType() view returns (uint8)",
+      "function riskTier() view returns (uint8)",
+      "function totalValuation() view returns (uint256)",
+      "function pricePerToken() view returns (uint256)",
+      "function maxSupply() view returns (uint256)",
+      "function isActive() view returns (bool)",
+      "function founder() view returns (address)",
+      "function createdAt() view returns (uint256)",
+      "function totalRaised() view returns (uint256)",
+      "function totalSupply() view returns (uint256)",
+      "function balanceOf(address) view returns (uint256)",
+      "function pendingDividends(address) view returns (uint256)",
+      "function totalInvested(address) view returns (uint256)",
+      "function totalPurchasedTokens(address) view returns (uint256)",
+      "function purchaseTokens(uint256 tokenAmount)",
+      "function claimDividends()"
+    ];
+
+    const ERC20_ABI = [
+      "function approve(address spender,uint256 amount) returns (bool)",
+      "function allowance(address owner,address spender) view returns (uint256)"
+    ];
+
+    const readProvider = new ethers.JsonRpcProvider(RPC_URL);
+    const readLaunchpad = new ethers.Contract(LAUNCHPAD_ADDRESS, LAUNCHPAD_ABI, readProvider);
 
     const state = {
       wallet: null,
+      walletFull: null,
       selectedProjectId: null,
       filters: { type: "all", risk: "all", sort: "newest" },
-      projects: loadProjects(),
+      projects: [],
       portfolio: [],
       pendingDividends: {},
       lifetimeClaimed: {},
@@ -843,8 +869,14 @@
       buyOrders: [],
       fills: [],
       founderAlerts: [],
-      exitMode: null
+      exitMode: null,
+      loadingProjects: true
     };
+
+    function shortAddress(value) {
+      if (!value) return "";
+      return value.slice(0, 6) + "..." + value.slice(-4);
+    }
 
     function hashId() {
       return "0x" + Math.random().toString(16).slice(2).padEnd(10, "0");
@@ -859,11 +891,26 @@
       return "$" + Number(v || 0).toLocaleString(undefined, { maximumFractionDigits: 2 });
     }
 
+    function fromUsdc(value) {
+      return Number(ethers.formatUnits(value || 0, 6));
+    }
+
+    function toUsdc(value) {
+      return ethers.parseUnits(String(value), 6);
+    }
+
     function showToast(message, type = "") {
       const toast = document.getElementById("toast");
       toast.textContent = message;
       toast.className = "toast " + type + " show";
       setTimeout(() => toast.classList.remove("show"), 3000);
+    }
+
+    function showTx(title, hash) {
+      const txLink = document.getElementById("txLink");
+      txLink.href = EXPLORER_TX + hash;
+      txLink.textContent = title + ": " + hash;
+      document.getElementById("txBox").classList.add("open");
     }
 
     function switchTab(name, btn) {
@@ -873,22 +920,69 @@
       document.getElementById("panel-" + name).classList.add("active");
     }
 
+    function mapAssetType(value) {
+      const n = Number(value);
+      if (n === 0) return "equity";
+      if (n === 1) return "revenue";
+      return "rwa";
+    }
+
+    function mapRisk(value) {
+      const n = Number(value);
+      if (n === 0) return "low";
+      if (n === 1) return "medium";
+      return "high";
+    }
+
+    function mapAssetTypeEnum(value) {
+      if (value === "equity") return 0;
+      if (value === "revenue") return 1;
+      return 2;
+    }
+
+    function mapRiskEnum(value) {
+      if (value === "low") return 0;
+      if (value === "medium") return 1;
+      return 2;
+    }
+
+    async function getWriteContext() {
+      if (!window.ethereum) throw new Error("No wallet detected.");
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const signer = await provider.getSigner();
+      const network = await provider.getNetwork();
+      if (Number(network.chainId) !== CHAIN_ID) {
+        throw new Error("Switch wallet to Arc Testnet (5042002).");
+      }
+      return { provider, signer };
+    }
+
     async function connectWallet() {
-      state.wallet = "0xA9b3...4E9D";
-      const btn = document.getElementById("walletBtn");
-      btn.textContent = state.wallet;
-      btn.classList.add("connected");
-      document.getElementById("disconnectBtn").hidden = false;
-      renderAll();
-      showToast("Wallet connected.", "success");
+      try {
+        const { signer } = await getWriteContext();
+        const address = await signer.getAddress();
+        state.walletFull = address;
+        state.wallet = shortAddress(address);
+
+        document.getElementById("walletBtn").textContent = state.wallet;
+        document.getElementById("disconnectBtn").hidden = false;
+
+        await loadPortfolioFromContract();
+        renderAll();
+        showToast("Wallet connected.", "success");
+      } catch (error) {
+        showToast(error.message || "Wallet connection failed.", "error");
+      }
     }
 
     function disconnectWallet() {
       state.wallet = null;
-      const btn = document.getElementById("walletBtn");
-      btn.textContent = "Connect Wallet";
-      btn.classList.remove("connected");
+      state.walletFull = null;
+      state.portfolio = [];
+      document.getElementById("walletBtn").textContent = "Connect Wallet";
       document.getElementById("disconnectBtn").hidden = true;
+      renderAll();
       showToast("Wallet disconnected.");
     }
 
@@ -915,7 +1009,7 @@
       if (state.filters.sort === "raised") {
         arr.sort((a, b) => b.raised - a.raised);
       } else if (state.filters.sort === "progress") {
-        arr.sort((a, b) => (b.raised / b.target) - (a.raised / a.target));
+        arr.sort((a, b) => (b.raised / Math.max(b.target, 1)) - (a.raised / Math.max(a.target, 1)));
       } else {
         arr.sort((a, b) => b.createdAt - a.createdAt);
       }
@@ -923,8 +1017,123 @@
       return arr;
     }
 
+    async function loadProjectsFromContract() {
+      try {
+        state.loadingProjects = true;
+        renderProjects();
+
+        const assets = await readLaunchpad.getAllAssets();
+
+        const projects = await Promise.all(
+          assets.map(async (asset) => {
+            const token = new ethers.Contract(asset.tokenContract, ASSET_TOKEN_ABI, readProvider);
+
+            const [
+              companyName,
+              description,
+              totalValuation,
+              pricePerToken,
+              maxSupply,
+              isActive,
+              createdAt,
+              totalRaised,
+              totalSupply,
+              riskTier
+            ] = await Promise.all([
+              token.companyName(),
+              token.description(),
+              token.totalValuation(),
+              token.pricePerToken(),
+              token.maxSupply(),
+              token.isActive(),
+              token.createdAt(),
+              token.totalRaised(),
+              token.totalSupply(),
+              token.riskTier()
+            ]);
+
+            return {
+              id: asset.tokenContract.toLowerCase(),
+              tokenContract: asset.tokenContract,
+              name: asset.name,
+              symbol: asset.symbol,
+              company: companyName,
+              founder: asset.founder,
+              type: mapAssetType(asset.assetType),
+              risk: mapRisk(riskTier),
+              description,
+              target: fromUsdc(totalValuation),
+              targetRaw: totalValuation,
+              raised: fromUsdc(totalRaised),
+              raisedRaw: totalRaised,
+              price: fromUsdc(pricePerToken),
+              priceRaw: pricePerToken,
+              createdAt: Number(createdAt) * 1000,
+              listedAt: Number(asset.listedAt) * 1000,
+              maxSupply: Number(maxSupply),
+              totalSupply: Number(ethers.formatUnits(totalSupply, 18)),
+              active: isActive
+            };
+          })
+        );
+
+        state.projects = projects.filter((p) => p.active);
+        if (state.walletFull) await loadPortfolioFromContract();
+        renderAll();
+      } catch (error) {
+        console.error(error);
+        showToast("Failed to load contract tokens.", "error");
+      } finally {
+        state.loadingProjects = false;
+        renderProjects();
+      }
+    }
+
+    async function loadPortfolioFromContract() {
+      if (!state.walletFull) {
+        state.portfolio = [];
+        return;
+      }
+
+      const positions = [];
+      const pendingMap = {};
+      const claimedMap = {};
+
+      for (const project of state.projects) {
+        const token = new ethers.Contract(project.tokenContract, ASSET_TOKEN_ABI, readProvider);
+        const [balance, pending, totalInvested] = await Promise.all([
+          token.balanceOf(state.walletFull),
+          token.pendingDividends(state.walletFull),
+          token.totalInvested(state.walletFull)
+        ]);
+
+        const tokenBalance = Number(ethers.formatUnits(balance, 18));
+        pendingMap[project.id] = fromUsdc(pending);
+        claimedMap[project.id] = state.lifetimeClaimed[project.id] || 0;
+
+        if (tokenBalance > 0) {
+          positions.push({
+            projectId: project.id,
+            tokens: tokenBalance,
+            cost: fromUsdc(totalInvested),
+            daysHeld: Math.max(0, Math.floor((Date.now() - project.createdAt) / 86400000))
+          });
+        }
+      }
+
+      state.pendingDividends = pendingMap;
+      state.lifetimeClaimed = claimedMap;
+      state.portfolio = positions;
+    }
+
     function renderProjects() {
       const grid = document.getElementById("projectsGrid");
+
+      if (state.loadingProjects) {
+        grid.innerHTML = '<div class="empty">Loading tokens from contract...</div>';
+        return;
+      }
+
       const projects = filteredProjects();
 
       if (!projects.length) {
@@ -933,11 +1142,11 @@
       }
 
       grid.innerHTML = projects.map((project) => {
-        const pct = Math.min(100, (project.raised / project.target) * 100);
+        const pct = Math.min(100, project.target > 0 ? (project.raised / project.target) * 100 : 0);
         return `
           <div class="project-card">
             <div class="pc-head">
-              <div class="pc-icon">${project.symbol[0]}</div>
+              <div class="pc-icon">${project.symbol[0] || "A"}</div>
               <span class="badge ${projectBadgeClass(project.type)}">${project.type === "revenue" ? "Revenue Share" : project.type === "rwa" ? "Real-World Asset" : "Equity"}</span>
             </div>
 
@@ -950,6 +1159,8 @@
               <span>${Math.round(pct)}% of ${fmtUsd(project.target)}</span>
             </div>
             <div class="progress"><span data-pct="${pct}"></span></div>
+
+            <div class="kv"><span class="k">Risk</span><span class="v">${project.risk.toUpperCase()}</span></div>
 
             <div class="pc-footer">
               <div class="price-wrap">
@@ -972,15 +1183,14 @@
       const p = state.projects.find((x) => x.id === id);
       if (!p) return;
 
-      const detail = document.getElementById("detailBox");
-      document.getElementById("detailSubtitle").textContent = p.symbol + " · " + p.company;
-
-      detail.innerHTML = `
+      document.getElementById("detailSubtitle").textContent = `${p.symbol} · ${p.company}`;
+      document.getElementById("detailBox").innerHTML = `
+        <div class="kv"><span class="k">Token Contract</span><span class="v mono">${shortAddress(p.tokenContract)}</span></div>
         <div class="kv"><span class="k">Asset Type</span><span class="v">${p.type === "revenue" ? "Revenue Share" : p.type === "rwa" ? "Real-World Asset" : "Equity"}</span></div>
+        <div class="kv"><span class="k">Risk Tier</span><span class="v">${p.risk.toUpperCase()}</span></div>
         <div class="kv"><span class="k">Price Per Token</span><span class="v">${fmtUsd(p.price)} USDC</span></div>
         <div class="kv"><span class="k">Raised</span><span class="v">${fmtUsd(p.raised)}</span></div>
         <div class="kv"><span class="k">Target</span><span class="v">${fmtUsd(p.target)}</span></div>
-        <div class="kv"><span class="k">Risk Tier</span><span class="v">${p.risk.toUpperCase()}</span></div>
       `;
 
       updateInvestPreview();
@@ -999,8 +1209,7 @@
         document.getElementById("buyCost").value = "0 USDC";
         return;
       }
-      const total = amount * p.price;
-      document.getElementById("buyCost").value = total.toLocaleString(undefined, { maximumFractionDigits: 2 }) + " USDC";
+      document.getElementById("buyCost").value = (amount * p.price).toLocaleString(undefined, { maximumFractionDigits: 2 }) + " USDC";
       updateRoi();
       updateReturnBox();
     }
@@ -1017,9 +1226,8 @@
 
       const amount = Number(document.getElementById("buyAmount").value || 0);
       const invested = amount * p.price;
-      const share = invested / p.target;
-      const ret = revenue * share;
-      document.getElementById("roiVal").textContent = fmtUsd(ret);
+      const share = p.target > 0 ? invested / p.target : 0;
+      document.getElementById("roiVal").textContent = fmtUsd(revenue * share);
     }
 
     function updateReturnBox() {
@@ -1033,128 +1241,156 @@
         return;
       }
 
-      const amount = Number(document.getElementById("buyAmount").value || 0);
-      const invested = amount * p.price;
-      const sharePct = p.target > 0 ? (invested / p.target) * 100 : 0;
-      const pending = state.pendingDividends[p.id] || 0;
-      const claimed = state.lifetimeClaimed[p.id] || 0;
+      const pos = getPosition(p.id);
+      const tokens = pos ? pos.tokens : Number(document.getElementById("buyAmount").value || 0);
+      const cost = pos ? pos.cost : tokens * p.price;
+      const sharePct = p.target > 0 ? (cost / p.target) * 100 : 0;
 
-      document.getElementById("retInvested").textContent = fmtUsd(invested);
-      document.getElementById("retTokens").textContent = amount.toLocaleString();
+      document.getElementById("retInvested").textContent = fmtUsd(cost);
+      document.getElementById("retTokens").textContent = tokens.toLocaleString();
       document.getElementById("retShare").textContent = sharePct.toFixed(3) + "%";
-      document.getElementById("retPending").textContent = fmtUsd(pending);
-      document.getElementById("retClaimed").textContent = fmtUsd(claimed);
+      document.getElementById("retPending").textContent = fmtUsd(state.pendingDividends[p.id] || 0);
+      document.getElementById("retClaimed").textContent = fmtUsd(state.lifetimeClaimed[p.id] || 0);
+    }
+
+    async function launchProject() {
+      try {
+        const name = document.getElementById("newName").value.trim();
+        const symbol = document.getElementById("newSymbol").value.trim().toUpperCase();
+        const type = document.getElementById("newType").value;
+        const risk = document.getElementById("newRisk").value;
+        const company = document.getElementById("newCompany").value.trim();
+        const desc = document.getElementById("newDesc").value.trim();
+        const targetInput = Number(document.getElementById("newTarget").value || 0);
+        const priceInput = Number(document.getElementById("newPrice").value || 0);
+
+        if (!name || !symbol || !company || !desc || !targetInput || !priceInput) {
+          throw new Error("Complete all launch fields with valid values.");
+        }
+
+        const maxSupply = BigInt(Math.floor(targetInput / priceInput));
+        if (maxSupply <= 0n) throw new Error("Total valuation must be greater than price per token.");
+
+        const { signer } = await getWriteContext();
+        const userAddress = await signer.getAddress();
+        const usdc = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, signer);
+        const launchpad = new ethers.Contract(LAUNCHPAD_ADDRESS, LAUNCHPAD_ABI, signer);
+
+        const allowance = await usdc.allowance(userAddress, LAUNCHPAD_ADDRESS);
+        if (allowance < LISTING_FEE) {
+          const approveTx = await usdc.approve(LAUNCHPAD_ADDRESS, LISTING_FEE);
+          showTx("Approve tx", approveTx.hash);
+          await approveTx.wait();
+        }
+
+        const tx = await launchpad.launchAsset(
+          name,
+          symbol,
+          company,
+          desc,
+          mapAssetTypeEnum(type),
+          mapRiskEnum(risk),
+          toUsdc(targetInput),
+          toUsdc(priceInput),
+          maxSupply
+        );
+
+        showTx("Launch tx", tx.hash);
+        await tx.wait();
+
+        document.getElementById("newName").value = "";
+        document.getElementById("newSymbol").value = "";
+        document.getElementById("newCompany").value = "";
+        document.getElementById("newDesc").value = "";
+        document.getElementById("newTarget").value = "";
+        document.getElementById("newPrice").value = "";
+
+        await loadProjectsFromContract();
+        showToast("Asset launched onchain.", "success");
+      } catch (error) {
+        showToast(error.message || "Launch failed.", "error");
+      }
     }
 
     async function investSelected() {
       try {
-        if (!state.wallet) {
-          showToast("Connect wallet first.", "error");
-          return;
-        }
+        if (!state.walletFull) throw new Error("Connect wallet first.");
+
         const p = state.projects.find((x) => x.id === state.selectedProjectId);
-        if (!p) {
-          showToast("Select a project first.", "error");
-          return;
-        }
+        if (!p) throw new Error("Select a project first.");
 
         const amount = Number(document.getElementById("buyAmount").value || 0);
-        if (amount <= 0) {
-          showToast("Enter valid amount.", "error");
-          return;
+        if (!Number.isInteger(amount) || amount <= 0) throw new Error("Enter a valid whole token amount.");
+
+        const { signer } = await getWriteContext();
+        const userAddress = await signer.getAddress();
+        const usdc = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, signer);
+        const token = new ethers.Contract(p.tokenContract, ASSET_TOKEN_ABI, signer);
+
+        const usdcCost = BigInt(amount) * p.priceRaw;
+        const allowance = await usdc.allowance(userAddress, p.tokenContract);
+
+        if (allowance < usdcCost) {
+          const approveTx = await usdc.approve(p.tokenContract, usdcCost);
+          showTx("Approve tx", approveTx.hash);
+          await approveTx.wait();
         }
 
-        const total = amount * p.price;
-        const existing = getPosition(p.id);
-        if (existing) {
-          existing.tokens += amount;
-          existing.cost += total;
-        } else {
-          state.portfolio.push({ projectId: p.id, tokens: amount, cost: total, daysHeld: 0 });
-        }
+        const tx = await token.purchaseTokens(BigInt(amount));
+        showTx("Investment tx", tx.hash);
+        await tx.wait();
 
-        p.raised += total;
-        saveProjects();
-        state.pendingDividends[p.id] = (state.pendingDividends[p.id] || 0) + total * 0.01;
-
-        const txHash = hashId();
-        const txLink = document.getElementById("txLink");
-        txLink.href = EXPLORER_TX + txHash;
-        txLink.textContent = "Investment tx: " + txHash;
-        document.getElementById("txBox").classList.add("open");
-
-        showToast("Investment confirmed.", "success");
+        await loadProjectsFromContract();
+        await loadPortfolioFromContract();
         renderAll();
-      } catch (err) {
-        showToast(err.message || "Investment failed.", "error");
+        showToast("Investment confirmed.", "success");
+      } catch (error) {
+        showToast(error.message || "Investment failed.", "error");
       }
     }
 
     async function claimDividendsForCurrent() {
       try {
         const p = state.projects.find((x) => x.id === state.selectedProjectId);
-        if (!p) {
-          showToast("Select a project first.", "error");
-          return;
-        }
+        if (!p) throw new Error("Select a project first.");
+        if (!state.walletFull) throw new Error("Connect wallet first.");
 
-        const pos = getPosition(p.id);
-        if (!pos || pos.tokens <= 0) {
-          showToast("Invest first to earn dividends.", "error");
-          return;
-        }
+        const { signer } = await getWriteContext();
+        const token = new ethers.Contract(p.tokenContract, ASSET_TOKEN_ABI, signer);
+        const tx = await token.claimDividends();
 
-        const pending = state.pendingDividends[p.id] || 0;
-        if (pending <= 0) {
-          throw new Error("missing revert data");
-        }
+        showTx("Claim tx", tx.hash);
+        await tx.wait();
 
-        state.pendingDividends[p.id] = 0;
-        state.lifetimeClaimed[p.id] = (state.lifetimeClaimed[p.id] || 0) + pending;
+        state.lifetimeClaimed[p.id] = (state.lifetimeClaimed[p.id] || 0) + (state.pendingDividends[p.id] || 0);
 
-        const txHash = hashId();
-        const txLink = document.getElementById("txLink");
-        txLink.href = EXPLORER_TX + txHash;
-        txLink.textContent = "Claim tx: " + txHash;
-        document.getElementById("txBox").classList.add("open");
-
-        showToast("Dividends claimed successfully.", "success");
+        await loadProjectsFromContract();
+        await loadPortfolioFromContract();
         renderAll();
+        showToast("Dividends claimed successfully.", "success");
       } catch (error) {
-        if (String(error.message || "").includes("missing revert data")) {
-          showToast("No dividends available or you have not invested yet.", "error");
-        } else {
-          showToast("Transaction failed: " + error.message, "error");
-        }
+        showToast(error.message || "Claim failed.", "error");
       }
     }
 
     function openExitModal(mode) {
       const p = state.projects.find((x) => x.id === state.selectedProjectId);
-      if (!p) {
-        showToast("Select a project first.", "error");
-        return;
-      }
+      if (!p) return showToast("Select a project first.", "error");
 
       const pos = getPosition(p.id);
-      if (!pos || pos.tokens <= 0) {
-        showToast("No holdings for selected project.", "error");
-        return;
-      }
+      if (!pos || pos.tokens <= 0) return showToast("No holdings for selected project.", "error");
 
       state.exitMode = mode;
-      const title = document.getElementById("exitTitle");
-      const sub = document.getElementById("exitSub");
 
       if (mode === "sell") {
-        title.textContent = "Sell on Marketplace";
-        sub.textContent = "Create a sell order for secondary market matching.";
+        document.getElementById("exitTitle").textContent = "Sell on Marketplace";
+        document.getElementById("exitSub").textContent = "Create a local demo sell order for secondary market matching.";
       } else if (mode === "buyback") {
-        title.textContent = "Request Buyback";
-        sub.textContent = "Buyback available after 90 days of holding.";
+        document.getElementById("exitTitle").textContent = "Request Buyback";
+        document.getElementById("exitSub").textContent = "Local demo buyback flow.";
       } else {
-        title.textContent = "Early Redemption";
-        sub.textContent = "Early redemption applies 15% penalty redistributed to holders.";
+        document.getElementById("exitTitle").textContent = "Early Redemption";
+        document.getElementById("exitSub").textContent = "Local demo early redemption flow.";
       }
 
       document.getElementById("exitAmount").value = "";
@@ -1181,11 +1417,10 @@
 
       if (state.exitMode === "redeem") {
         const penalty = gross * 0.15;
-        const receive = gross - penalty;
         preview.innerHTML = `
           <div><span>Gross Value</span><span>${fmtUsd(gross)}</span></div>
           <div><span>Penalty (15%)</span><span>${fmtUsd(penalty)}</span></div>
-          <div><span>You Receive</span><span>${fmtUsd(receive)}</span></div>
+          <div><span>You Receive</span><span>${fmtUsd(gross - penalty)}</span></div>
         `;
       } else {
         preview.innerHTML = `
@@ -1196,7 +1431,7 @@
     }
 
     function createSellOrder(project, amount, price) {
-      const order = {
+      state.sellOrders.push({
         id: "sell_" + Date.now(),
         projectId: project.id,
         symbol: project.symbol,
@@ -1204,9 +1439,8 @@
         price,
         side: "sell",
         timestamp: Date.now()
-      };
+      });
 
-      state.sellOrders.push(order);
       state.founderAlerts.push({
         id: "alert_" + Date.now(),
         projectId: project.id,
@@ -1216,13 +1450,7 @@
         total: amount * price
       });
 
-      const tx = { hash: hashId() };
-
-      showSuccess({
-        title: "Sell Order Created",
-        message: `Your order for ${amount} tokens at $${price} USDC is now live.`,
-        orderId: tx.hash
-      });
+      showToast(`Your order for ${amount} tokens at $${price} USDC is now live.`, "success");
     }
 
     function confirmExit() {
@@ -1231,25 +1459,15 @@
 
       const amount = Number(document.getElementById("exitAmount").value || 0);
       const price = Number(document.getElementById("exitPrice").value || 0);
-      if (amount <= 0 || price <= 0) {
-        showToast("Enter valid amount and price.", "error");
-        return;
-      }
+      if (amount <= 0 || price <= 0) return showToast("Enter valid amount and price.", "error");
 
       const pos = getPosition(p.id);
-      if (!pos || pos.tokens < amount) {
-        showToast("Insufficient tokens for this action.", "error");
-        return;
-      }
+      if (!pos || pos.tokens < amount) return showToast("Insufficient tokens for this action.", "error");
 
       if (state.exitMode === "sell") {
         createSellOrder(p, amount, price);
         pos.tokens -= amount;
       } else if (state.exitMode === "buyback") {
-        if (pos.daysHeld < 90) {
-          showToast("Buyback available after 90 days. Current: " + pos.daysHeld + " days.", "error");
-          return;
-        }
         state.buyOrders.push({
           id: "buyback_" + Date.now(),
           projectId: p.id,
@@ -1264,22 +1482,13 @@
       } else {
         const gross = amount * price;
         const penalty = gross * 0.15;
-        const receive = gross - penalty;
         pos.tokens -= amount;
-        showToast("Early redemption confirmed. Net received: " + fmtUsd(receive), "success");
+        showToast("Early redemption confirmed. Net received: " + fmtUsd(gross - penalty), "success");
       }
 
       closeExitModal();
       matchOrders();
       renderAll();
-    }
-
-    function showSuccess(payload) {
-      const txLink = document.getElementById("txLink");
-      txLink.href = EXPLORER_TX + payload.orderId;
-      txLink.textContent = payload.title + " tx: " + payload.orderId;
-      document.getElementById("txBox").classList.add("open");
-      showToast(payload.message, "success");
     }
 
     function addBuyOrder(projectId, symbol, amount, price) {
@@ -1299,8 +1508,8 @@
       state.buyOrders.sort((a, b) => b.price - a.price || a.timestamp - b.timestamp);
 
       const newFills = [];
-
       let i = 0;
+
       while (i < state.sellOrders.length) {
         const sell = state.sellOrders[i];
         const buyIndex = state.buyOrders.findIndex((b) => b.projectId === sell.projectId && b.price >= sell.price);
@@ -1369,25 +1578,13 @@
       const fillsEl = document.getElementById("fillsList");
 
       if (!state.sellOrders.length) sellEl.innerHTML = '<div><span>No sell orders</span><span class="pill">-</span></div>';
-      else {
-        sellEl.innerHTML = state.sellOrders.slice(0, 10).map((o) =>
-          `<div><span>${o.amount} @ ${fmtUsd(o.price)}</span><span class="pill">${o.symbol}</span></div>`
-        ).join("");
-      }
+      else sellEl.innerHTML = state.sellOrders.slice(0, 10).map((o) => `<div><span>${o.amount} @ ${fmtUsd(o.price)}</span><span class="pill">${o.symbol}</span></div>`).join("");
 
       if (!state.buyOrders.length) buyEl.innerHTML = '<div><span>No buy orders</span><span class="pill">-</span></div>';
-      else {
-        buyEl.innerHTML = state.buyOrders.slice(0, 10).map((o) =>
-          `<div><span>${o.amount} @ ${fmtUsd(o.price)}</span><span class="pill">${o.symbol}</span></div>`
-        ).join("");
-      }
+      else buyEl.innerHTML = state.buyOrders.slice(0, 10).map((o) => `<div><span>${o.amount} @ ${fmtUsd(o.price)}</span><span class="pill">${o.symbol}</span></div>`).join("");
 
       if (!state.fills.length) fillsEl.innerHTML = '<div><span>No fills yet</span><span class="pill">-</span></div>';
-      else {
-        fillsEl.innerHTML = state.fills.slice(0, 8).map((f) =>
-          `<div><span>${f.amount} tokens @ ${fmtUsd(f.price)}</span><span class="pill">${nowLabel(f.timestamp)}</span></div>`
-        ).join("");
-      }
+      else fillsEl.innerHTML = state.fills.slice(0, 8).map((f) => `<div><span>${f.amount} tokens @ ${fmtUsd(f.price)}</span><span class="pill">${nowLabel(f.timestamp)}</span></div>`).join("");
     }
 
     function renderFounderAlerts() {
@@ -1444,9 +1641,10 @@
               <span class="badge ${project.type}">${project.type}</span>
             </div>
             <div class="pc-sub">${project.symbol} · ${project.company}</div>
+            <div class="kv"><span class="k">Risk Tier</span><span class="v">${project.risk.toUpperCase()}</span></div>
             <div class="kv"><span class="k">Tokens</span><span class="v">${pos.tokens.toLocaleString()}</span></div>
             <div class="kv"><span class="k">Value</span><span class="v">${fmtUsd(value)}</span></div>
-            <div class="kv"><span class="k">Cost Basis</span><span class="v">${fmtUsd(pos.cost)}</span></div>
+            <div class="kv"><span class="k">Purchase Cost Basis</span><span class="v">${fmtUsd(pos.cost)}</span></div>
             <div class="kv"><span class="k">Pending Dividend</span><span class="v">${fmtUsd(pending)}</span></div>
             <div class="kv"><span class="k">Lifetime Claimed</span><span class="v">${fmtUsd(claimed)}</span></div>
             <div class="kv"><span class="k">Days Held</span><span class="v">${pos.daysHeld}</span></div>
@@ -1467,7 +1665,7 @@
 
       const p = state.projects.find((x) => x.id === state.selectedProjectId);
       if (p) {
-        const share = Number(document.getElementById("buyAmount").value || 0) * p.price / p.target;
+        const share = Number(document.getElementById("buyAmount").value || 0) * p.price / Math.max(p.target, 1);
         document.getElementById("distYourShare").textContent = fmtUsd(50000 * share);
       } else {
         document.getElementById("distYourShare").textContent = "$0";
@@ -1482,48 +1680,6 @@
       document.getElementById("statAssets").textContent = String(assets);
       document.getElementById("statRaised").textContent = fmtUsd(raised);
       document.getElementById("statDistributed").textContent = fmtUsd(distributed);
-    }
-
-    function launchProject() {
-      const name = document.getElementById("newName").value.trim();
-      const symbol = document.getElementById("newSymbol").value.trim().toUpperCase();
-      const type = document.getElementById("newType").value.trim().toLowerCase();
-      const company = document.getElementById("newCompany").value.trim();
-      const desc = document.getElementById("newDesc").value.trim();
-      const target = Number(document.getElementById("newTarget").value || 0);
-      const price = Number(document.getElementById("newPrice").value || 0);
-
-      if (!name || !symbol || !company || !desc || !target || !price || !["equity","revenue","rwa"].includes(type)) {
-        showToast("Complete all launch fields with valid values.", "error");
-        return;
-      }
-
-      state.projects.unshift({
-        id: "p" + Date.now(),
-        name,
-        symbol,
-        company,
-        type,
-        description: desc,
-        target,
-        raised: 0,
-        price,
-        risk: "medium",
-        createdAt: Date.now()
-      });
-
-      saveProjects();
-
-      document.getElementById("newName").value = "";
-      document.getElementById("newSymbol").value = "";
-      document.getElementById("newType").value = "";
-      document.getElementById("newCompany").value = "";
-      document.getElementById("newDesc").value = "";
-      document.getElementById("newTarget").value = "";
-      document.getElementById("newPrice").value = "";
-
-      renderAll();
-      showToast("Project launched into listing grid.", "success");
     }
 
     function incrementTime() {
@@ -1553,7 +1709,7 @@
       renderOrderBook();
     }, 30000);
 
-    renderAll();
+    loadProjectsFromContract();
   </script>
 </body>
 </html>

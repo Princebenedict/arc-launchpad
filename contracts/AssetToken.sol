@@ -12,10 +12,8 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 contract AssetToken {
     using SafeERC20 for IERC20;
 
-    // Arc Testnet native USDC address
     address public constant USDC = 0x3600000000000000000000000000000000000000;
 
-    // ---- ERC-20 state ----
     string public name;
     string public symbol;
     uint8 public constant DECIMALS = 18;
@@ -24,29 +22,36 @@ contract AssetToken {
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
 
-    // ---- Asset metadata ----
     enum AssetType {
         EQUITY,
         REVENUE_SHARE,
         RWA
     }
 
+    enum RiskTier {
+        LOW,
+        MEDIUM,
+        HIGH
+    }
+
     string public companyName;
     string public description;
     AssetType public assetType;
-    uint256 public totalValuation; // USDC, 6 decimals
-    uint256 public pricePerToken; // USDC, 6 decimals
-    uint256 public maxSupply; // token units (no decimals)
+    RiskTier public riskTier;
+    uint256 public totalValuation;
+    uint256 public pricePerToken;
+    uint256 public maxSupply;
     bool public isActive;
     address public founder;
     uint256 public createdAt;
 
-    // ---- Financials ----
     uint256 public totalRaised;
-    uint256 public dividendsPerTokenScaled; // scaled by 1e18
-    mapping(address => uint256) public dividendDebt; // per holder
+    uint256 public dividendsPerTokenScaled;
+    mapping(address => uint256) public dividendDebt;
 
-    // ---- Events ----
+    mapping(address => uint256) public totalInvested;
+    mapping(address => uint256) public totalPurchasedTokens;
+
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed owner, address indexed spender, uint256 value);
     event TokensPurchased(address indexed buyer, uint256 tokenAmount, uint256 usdcPaid);
@@ -78,6 +83,7 @@ contract AssetToken {
         string memory _companyName,
         string memory _description,
         AssetType _assetType,
+        RiskTier _riskTier,
         uint256 _totalValuation,
         uint256 _pricePerToken,
         uint256 _maxSupply,
@@ -88,6 +94,7 @@ contract AssetToken {
         companyName = _companyName;
         description = _description;
         assetType = _assetType;
+        riskTier = _riskTier;
         totalValuation = _totalValuation;
         pricePerToken = _pricePerToken;
         maxSupply = _maxSupply;
@@ -96,12 +103,9 @@ contract AssetToken {
         createdAt = block.timestamp;
     }
 
-    // ERC-20 compatibility
     function decimals() external pure returns (uint8) {
         return DECIMALS;
     }
-
-    // ---- ERC-20 functions ----
 
     function transfer(address to, uint256 amount) public returns (bool) {
         _transfer(msg.sender, to, amount);
@@ -135,8 +139,6 @@ contract AssetToken {
         emit Transfer(address(0), to, amount);
     }
 
-    // ---- Core launchpad logic ----
-
     function purchaseTokens(uint256 tokenAmount) external onlyActive {
         require(tokenAmount > 0, "Amount must be > 0");
         uint256 tokenAmountScaled = tokenAmount * 1e18;
@@ -147,6 +149,9 @@ contract AssetToken {
         IERC20(USDC).safeTransferFrom(msg.sender, address(this), usdcCost);
 
         totalRaised += usdcCost;
+        totalInvested[msg.sender] += usdcCost;
+        totalPurchasedTokens[msg.sender] += tokenAmount;
+
         dividendDebt[msg.sender] = dividendsPerTokenScaled;
 
         _mint(msg.sender, tokenAmountScaled);
