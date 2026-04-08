@@ -252,6 +252,7 @@
     }
     .card h3 { font-size: 18px; margin-bottom: 6px; letter-spacing: -0.3px; }
     .subtle { color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .mono { font-family: var(--mono); }
 
     .filter-row {
       display: grid;
@@ -346,6 +347,17 @@
     .badge.equity { color: var(--equity); border-color: rgba(245,158,11,.3); background: rgba(245,158,11,.12); }
     .badge.revenue { color: var(--revenue); border-color: rgba(139,92,246,.3); background: rgba(139,92,246,.12); }
     .badge.rwa { color: var(--rwa); border-color: rgba(16,185,129,.3); background: rgba(16,185,129,.12); }
+
+    .pill {
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      border: 1px solid var(--border-2);
+      background: #0b121b;
+      white-space: nowrap;
+    }
 
     .pc-title { font-size: 20px; letter-spacing: -.3px; margin-bottom: 2px; }
     .pc-sub { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 8px; }
@@ -483,7 +495,7 @@
     }
     .tx-box.open { display: block; }
     .tx-link {
-      color: var(--usdc-light);
+      color: #7cb6ff;
       text-decoration: none;
       font-family: var(--mono);
       font-size: 11px;
@@ -802,65 +814,28 @@
 
   <script>
     const EXPLORER_TX = "https://testnet.arcscan.app/tx/";
+    const STORAGE_KEY = "arcvault_projects";
+
+    function loadProjects() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (error) {
+        console.error("Failed to load projects", error);
+        return [];
+      }
+    }
+
+    function saveProjects() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.projects));
+    }
 
     const state = {
       wallet: null,
       selectedProjectId: null,
       filters: { type: "all", risk: "all", sort: "newest" },
-      projects: [
-        {
-          id: "p1",
-          name: "Lagos Tech Ventures",
-          symbol: "LTV",
-          company: "Lagos Tech Ventures Ltd.",
-          type: "equity",
-          description: "Series A equity in a growth-stage B2B SaaS operation serving West African SMEs.",
-          target: 5000000,
-          raised: 1250000,
-          price: 50,
-          risk: "medium",
-          createdAt: Date.now() - 9000000
-        },
-        {
-          id: "p2",
-          name: "Savanna Revenue Share",
-          symbol: "SVRN",
-          company: "Savanna Logistics",
-          type: "revenue",
-          description: "Revenue share exposure to pan-African logistics throughput with monthly settlement.",
-          target: 2000000,
-          raised: 800000,
-          price: 20,
-          risk: "high",
-          createdAt: Date.now() - 8000000
-        },
-        {
-          id: "p3",
-          name: "Abuja Commercial Tower",
-          symbol: "ACT",
-          company: "Skyline Properties NG",
-          type: "rwa",
-          description: "Fractional ownership structure for Grade-A commercial real estate cash flow.",
-          target: 10000000,
-          raised: 3200000,
-          price: 100,
-          risk: "low",
-          createdAt: Date.now() - 7000000
-        },
-        {
-          id: "p4",
-          name: "AgriFinance Token",
-          symbol: "AGFT",
-          company: "GreenField Nigeria",
-          type: "revenue",
-          description: "Seasonal crop financing receipts with performance-linked distribution windows.",
-          target: 800000,
-          raised: 240000,
-          price: 15,
-          risk: "medium",
-          createdAt: Date.now() - 6000000
-        }
-      ],
+      projects: loadProjects(),
       portfolio: [],
       pendingDividends: {},
       lifetimeClaimed: {},
@@ -953,7 +928,7 @@
       const projects = filteredProjects();
 
       if (!projects.length) {
-        grid.innerHTML = '<div class="empty">No projects match your filters.</div>';
+        grid.innerHTML = '<div class="empty">No tokens created under your contract yet.</div>';
         return;
       }
 
@@ -1049,7 +1024,14 @@
 
     function updateReturnBox() {
       const p = state.projects.find((x) => x.id === state.selectedProjectId);
-      if (!p) return;
+      if (!p) {
+        document.getElementById("retInvested").textContent = "$0";
+        document.getElementById("retTokens").textContent = "0";
+        document.getElementById("retShare").textContent = "0.00%";
+        document.getElementById("retPending").textContent = "$0";
+        document.getElementById("retClaimed").textContent = "$0";
+        return;
+      }
 
       const amount = Number(document.getElementById("buyAmount").value || 0);
       const invested = amount * p.price;
@@ -1092,6 +1074,7 @@
         }
 
         p.raised += total;
+        saveProjects();
         state.pendingDividends[p.id] = (state.pendingDividends[p.id] || 0) + total * 0.01;
 
         const txHash = hashId();
@@ -1238,8 +1221,7 @@
       showSuccess({
         title: "Sell Order Created",
         message: `Your order for ${amount} tokens at $${price} USDC is now live.`,
-        orderId: tx.hash,
-        viewOrderBook: true
+        orderId: tx.hash
       });
     }
 
@@ -1517,7 +1499,7 @@
       }
 
       state.projects.unshift({
-        id: "p" + (Date.now()),
+        id: "p" + Date.now(),
         name,
         symbol,
         company,
@@ -1529,6 +1511,8 @@
         risk: "medium",
         createdAt: Date.now()
       });
+
+      saveProjects();
 
       document.getElementById("newName").value = "";
       document.getElementById("newSymbol").value = "";
@@ -1573,4 +1557,3 @@
   </script>
 </body>
 </html>
-
