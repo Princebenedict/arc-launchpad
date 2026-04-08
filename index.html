@@ -422,7 +422,7 @@
       text-transform: uppercase;
       letter-spacing: .4px;
     }
-    .field input, .field textarea, .field select {
+    .field input, .field textarea {
       width: 100%;
       border: 1px solid var(--border-2);
       border-radius: 10px;
@@ -433,7 +433,7 @@
       font-family: var(--font);
       outline: none;
     }
-    .field input:focus, .field textarea:focus, .field select:focus {
+    .field input:focus, .field textarea:focus {
       border-color: var(--arc);
       box-shadow: 0 0 0 3px var(--arc-dim);
     }
@@ -753,10 +753,29 @@
           <div class="field"><label for="newName">Project Name</label><input id="newName" type="text" placeholder="New Asset Project" /></div>
           <div class="field"><label for="newSymbol">Symbol</label><input id="newSymbol" type="text" placeholder="NAP" /></div>
         </div>
+
         <div class="two-col">
-          <div class="field"><label for="newType">Type</label><select id="newType"><option value="equity">Equity</option><option value="revenue">Revenue Share</option><option value="rwa">Real-World Asset</option></select></div>
-          <div class="field"><label for="newRisk">Risk Tier</label><select id="newRisk"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div>
+          <div>
+            <div class="label">Type</div>
+            <div class="chip-group" id="launchTypeGroup">
+              <button type="button" class="chip active" onclick="setLaunchType('equity', this)">Equity</button>
+              <button type="button" class="chip" onclick="setLaunchType('revenue', this)">Revenue Share</button>
+              <button type="button" class="chip" onclick="setLaunchType('rwa', this)">Real-World Asset</button>
+            </div>
+            <input id="newType" type="hidden" value="equity" />
+          </div>
+
+          <div>
+            <div class="label">Risk Tier</div>
+            <div class="chip-group" id="launchRiskGroup">
+              <button type="button" class="chip" onclick="setLaunchRisk('low', this)">Low</button>
+              <button type="button" class="chip active" onclick="setLaunchRisk('medium', this)">Medium</button>
+              <button type="button" class="chip" onclick="setLaunchRisk('high', this)">High</button>
+            </div>
+            <input id="newRisk" type="hidden" value="medium" />
+          </div>
         </div>
+
         <div class="two-col">
           <div class="field"><label for="newCompany">Company</label><input id="newCompany" type="text" placeholder="Issuer Name" /></div>
           <div class="field"><label for="newPrice">Price per Token (USDC)</label><input id="newPrice" type="number" placeholder="50" /></div>
@@ -785,7 +804,7 @@
       <div class="card">
         <h3>Deploy Guide</h3>
         <div class="list">
-          <div><span>Launchpad</span><span class="v mono">0x2feA3305fcB02184b2e120B1D511D3f539F276B7</span></div>
+          <div><span>Launchpad</span><span class="v mono">0x705C2b9D3B06eeF72831F463Ca6eBc5A9B543e3b</span></div>
           <div><span>USDC Gas Token</span><span class="v mono">0x3600000000000000000000000000000000000000</span></div>
           <div><span>Sub-second finality</span><span class="pill">Arc Native</span></div>
           <div><span>No ETH required</span><span class="pill">USDC Gas</span></div>
@@ -918,6 +937,18 @@
       document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
       btn.classList.add("active");
       document.getElementById("panel-" + name).classList.add("active");
+    }
+
+    function setLaunchType(value, el) {
+      document.getElementById("newType").value = value;
+      el.parentElement.querySelectorAll(".chip").forEach((chip) => chip.classList.remove("active"));
+      el.classList.add("active");
+    }
+
+    function setLaunchRisk(value, el) {
+      document.getElementById("newRisk").value = value;
+      el.parentElement.querySelectorAll(".chip").forEach((chip) => chip.classList.remove("active"));
+      el.classList.add("active");
     }
 
     function mapAssetType(value) {
@@ -1304,6 +1335,10 @@
         document.getElementById("newDesc").value = "";
         document.getElementById("newTarget").value = "";
         document.getElementById("newPrice").value = "";
+        document.getElementById("newType").value = "equity";
+        document.getElementById("newRisk").value = "medium";
+        document.querySelectorAll("#launchTypeGroup .chip").forEach((chip, index) => chip.classList.toggle("active", index === 0));
+        document.querySelectorAll("#launchRiskGroup .chip").forEach((chip, index) => chip.classList.toggle("active", index === 1));
 
         await loadProjectsFromContract();
         showToast("Asset launched onchain.", "success");
