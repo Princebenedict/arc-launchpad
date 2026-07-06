@@ -1,1802 +1,1162 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ArcVault - Arc-Native Launchpad for Real Assets</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
-  <style>
-    :root {
-      --bg: #070b12;
-      --surface: #0d131d;
-      --surface-2: #111a26;
-      --border: #1f2b3a;
-      --border-2: #27374a;
-      --text: #e6edf7;
-      --muted: #89a0bc;
-      --muted-2: #6f87a4;
-      --arc: #00d4aa;
-      --arc-dim: rgba(0, 212, 170, 0.12);
-      --usdc: #3d8fe0;
-      --danger: #ef4444;
-      --success: #22c55e;
-      --equity: #f59e0b;
-      --revenue: #8b5cf6;
-      --rwa: #10b981;
-      --font: "Syne", sans-serif;
-      --mono: "DM Mono", monospace;
-    }
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ArcVault — The Intelligence Layer for Arc</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+<style>
+:root{
+  --bg:#070b12; --surface:#0d131d; --surface2:#111a26; --surface3:#15202e;
+  --border:#1f2b3a; --border2:#27374a;
+  --text:#e6edf7; --muted:#89a0bc; --muted2:#6f87a4;
+  --arc:#00d4aa; --arc-dim:rgba(0,212,170,.12); --arc-glow:rgba(0,212,170,.25);
+  --usdc:#3d8fe0; --usdc-dim:rgba(61,143,224,.12);
+  --danger:#ef4444; --success:#22c55e; --warn:#f59e0b;
+  --equity:#f59e0b; --revenue:#8b5cf6; --rwa:#10b981;
+  --font:"Syne",sans-serif; --mono:"DM Mono",monospace;
+  --sidebar-w:232px; --r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{color-scheme:dark;background:var(--bg)}
+body{font-family:var(--font);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-index:0;
+  background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);
+  background-size:46px 46px}
+.orb{position:fixed;border-radius:50%;filter:blur(130px);pointer-events:none;z-index:0}
+.orb1{width:520px;height:520px;background:rgba(0,212,170,.06);top:-140px;right:-120px;animation:drift 14s ease-in-out infinite alternate}
+.orb2{width:420px;height:420px;background:rgba(61,143,224,.07);bottom:-80px;left:-100px;animation:drift 18s ease-in-out infinite alternate-reverse}
+@keyframes drift{from{transform:translate(0,0)}to{transform:translate(40px,30px)}}
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { color-scheme: dark; background: var(--bg); }
-    body { font-family: var(--font); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+/* SIDEBAR */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar-w);z-index:90;
+  background:rgba(13,19,29,.85);backdrop-filter:blur(18px);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;padding:18px 12px;overflow-y:auto}
+.brand{display:flex;align-items:center;gap:10px;padding:6px 10px 20px;font-size:17px;font-weight:800;letter-spacing:-.4px}
+.brand-mark{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--arc),var(--usdc));
+  display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--bg);flex-shrink:0;font-family:var(--mono)}
+.brand small{display:block;font-size:9px;font-family:var(--mono);color:var(--muted2);font-weight:400;letter-spacing:.8px}
+.nav-sec{font-size:9px;font-family:var(--mono);color:var(--muted2);letter-spacing:1.4px;padding:14px 12px 6px;text-transform:uppercase}
+.nitem{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:600;
+  color:var(--muted);cursor:pointer;transition:all .15s;border:1px solid transparent;margin-bottom:2px;background:none;width:100%;font-family:var(--font);text-align:left}
+.nitem:hover{color:var(--text);background:var(--surface2)}
+.nitem.on{color:var(--arc);background:var(--arc-dim);border-color:rgba(0,212,170,.25)}
+.nitem .ic{width:24px;height:24px;border-radius:7px;background:var(--surface2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:8.5px;font-family:var(--mono);font-weight:500;flex-shrink:0;letter-spacing:.3px}
+.nitem.on .ic{background:var(--arc-dim);border-color:rgba(0,212,170,.3);color:var(--arc)}
+.side-foot{margin-top:auto;padding:12px;font-size:10px;font-family:var(--mono);color:var(--muted2);line-height:1.7}
+.net-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--arc);margin-right:5px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
 
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0.22;
-      background-image:
-        linear-gradient(var(--border) 1px, transparent 1px),
-        linear-gradient(90deg, var(--border) 1px, transparent 1px);
-      background-size: 46px 46px;
-      z-index: 0;
-    }
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:80;margin-left:var(--sidebar-w);height:60px;
+  display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 26px;
+  background:rgba(7,11,18,.8);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.searchbar{flex:1;max-width:440px;display:flex;align-items:center;gap:10px;padding:9px 14px;
+  background:var(--surface);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .15s}
+.searchbar:hover{border-color:var(--border2)}
+.searchbar span{font-size:12px;color:var(--muted2)}
+.searchbar kbd{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--muted2);border:1px solid var(--border2);border-radius:5px;padding:2px 6px}
+.top-right{display:flex;align-items:center;gap:10px}
+.chain-pill{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:18px;background:var(--arc-dim);border:1px solid rgba(0,212,170,.35);font-size:10px;font-family:var(--mono);color:var(--arc)}
+.wbtn{padding:8px 16px;border-radius:10px;font-size:12px;font-weight:700;font-family:var(--font);border:1px solid var(--border2);background:var(--surface2);color:var(--text);cursor:pointer;transition:all .15s}
+.wbtn:hover{border-color:var(--arc);color:var(--arc)}
+.wbtn.on{border-color:var(--arc);color:var(--arc);background:var(--arc-dim)}
 
-    .orb {
-      position: fixed;
-      border-radius: 50%;
-      filter: blur(120px);
-      pointer-events: none;
-      z-index: 0;
-    }
-    .orb.a { width: 420px; height: 420px; top: -130px; right: -120px; background: rgba(0,212,170,0.08); }
-    .orb.b { width: 340px; height: 340px; left: -80px; bottom: -90px; background: rgba(61,143,224,0.08); }
+/* MAIN */
+.main{margin-left:var(--sidebar-w);padding:28px 26px 90px;position:relative;z-index:1;max-width:1240px}
+.page{display:none;animation:up .3s ease both}
+.page.active{display:block}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.page-head{margin-bottom:24px}
+.page-head h1{font-size:26px;font-weight:800;letter-spacing:-1px}
+.page-head p{font-size:13px;color:var(--muted);margin-top:4px}
+.ph-row{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap}
 
-    nav {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      height: 68px;
-      padding: 0 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: rgba(7, 11, 18, 0.9);
-      border-bottom: 1px solid var(--border);
-      -webkit-backdrop-filter: blur(10px);
-      backdrop-filter: blur(10px);
-    }
+/* GRID / CARDS */
+.gridN{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;transition:all .18s;position:relative;overflow:hidden}
+.card.hover:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 14px 44px rgba(0,0,0,.45)}
+.kpi .kv{font-size:24px;font-weight:800;font-family:var(--mono);letter-spacing:-1px}
+.kpi .kl{font-size:10px;font-family:var(--mono);color:var(--muted2);letter-spacing:.8px;margin-top:3px;text-transform:uppercase}
+.kpi .kt{font-size:10px;font-family:var(--mono);margin-top:6px}
+.kt.pos{color:var(--success)}.kt.neu{color:var(--muted2)}
+.sect-title{font-size:11px;font-family:var(--mono);color:var(--muted2);letter-spacing:1.2px;text-transform:uppercase;margin:26px 0 12px}
 
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 800;
-      font-size: 18px;
-      letter-spacing: -0.4px;
-    }
-    .logo-mark {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      display: grid;
-      place-items: center;
-      background: var(--arc);
-      color: #06261f;
-      font-family: var(--mono);
-      font-size: 12px;
-      font-weight: 700;
-    }
+/* skeleton */
+.skel{background:linear-gradient(90deg,var(--surface2) 25%,var(--surface3) 50%,var(--surface2) 75%);background-size:200% 100%;animation:shim 1.4s infinite;border-radius:8px}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-    .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+/* FEED */
+.feed-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}
+.feed-item:last-child{border:none}
+.feed-ic{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font-size:8.5px;font-family:var(--mono);font-weight:500;flex-shrink:0;background:var(--surface2);border:1px solid var(--border2);color:var(--arc);letter-spacing:.4px}
+.feed-tx{font-size:12.5px;line-height:1.45}
+.feed-tx b{font-weight:700}
+.feed-time{margin-left:auto;font-size:10px;font-family:var(--mono);color:var(--muted2);flex-shrink:0}
 
-    .chain-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      border: 1px solid var(--arc);
-      border-radius: 999px;
-      padding: 6px 12px;
-      background: var(--arc-dim);
-      color: var(--arc);
-      font-size: 11px;
-      font-family: var(--mono);
-    }
-    .dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--arc);
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+/* ASSET CARDS */
+.acard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
+.acard::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--tc,var(--arc));transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.acard:hover{border-color:var(--border2);transform:translateY(-3px);box-shadow:0 16px 48px rgba(0,0,0,.5)}
+.acard:hover::after{transform:scaleX(1)}
+.ac-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px}
+.ac-ico{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;font-family:var(--mono);background:var(--tc,var(--arc));color:var(--bg);letter-spacing:.5px}
+.badges{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.tbadge{padding:3px 9px;border-radius:16px;font-size:9.5px;font-weight:700;font-family:var(--mono);letter-spacing:.6px;text-transform:uppercase}
+.b-eq{background:rgba(245,158,11,.14);color:var(--equity)}
+.b-rev{background:rgba(139,92,246,.14);color:var(--revenue)}
+.b-rwa{background:rgba(16,185,129,.14);color:var(--rwa)}
+.b-low{background:rgba(34,197,94,.12);color:var(--success)}
+.b-med{background:rgba(245,158,11,.12);color:var(--warn)}
+.b-high{background:rgba(239,68,68,.12);color:var(--danger)}
+.ac-name{font-size:16.5px;font-weight:800;letter-spacing:-.3px;margin-bottom:2px}
+.ac-co{font-size:11px;font-family:var(--mono);color:var(--muted2);margin-bottom:10px}
+.ac-desc{font-size:12.5px;color:var(--muted);line-height:1.5;margin-bottom:14px;min-height:36px}
+.ai-strip{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:9px;background:var(--usdc-dim);border:1px solid rgba(61,143,224,.2);margin-bottom:14px}
+.ai-strip .as-tag{font-size:8.5px;font-family:var(--mono);color:var(--usdc);border:1px solid rgba(61,143,224,.35);border-radius:5px;padding:2px 6px;letter-spacing:.5px}
+.ai-strip .as-score{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--usdc)}
+.ai-strip .as-label{font-size:10px;font-family:var(--mono);color:var(--muted)}
+.ai-strip .as-conf{margin-left:auto;font-size:9.5px;font-family:var(--mono);color:var(--muted2)}
+.pmeta{display:flex;justify-content:space-between;font-size:11px;font-family:var(--mono);margin-bottom:6px}
+.pmeta .pr{color:var(--arc)}.pmeta .pt{color:var(--muted2)}
+.pbar{height:5px;background:var(--border2);border-radius:3px;overflow:hidden;margin-bottom:14px}
+.pfill{height:100%;background:linear-gradient(90deg,var(--arc),var(--usdc));border-radius:3px;transition:width .9s ease}
+.ac-foot{display:flex;justify-content:space-between;align-items:center;padding-top:12px;border-top:1px solid var(--border)}
+.pv{font-size:15px;font-weight:800;font-family:var(--mono);color:var(--usdc)}
+.pl{font-size:9.5px;font-family:var(--mono);color:var(--muted2)}
+.btn{padding:9px 18px;border-radius:9px;font-size:12.5px;font-weight:700;font-family:var(--font);border:none;cursor:pointer;background:var(--arc);color:var(--bg);transition:all .16s}
+.btn:hover{filter:brightness(1.15);transform:scale(1.03)}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn-ghost{background:var(--surface2);border:1px solid var(--border2);color:var(--text)}
+.btn-ghost:hover{border-color:var(--arc);color:var(--arc);filter:none;transform:none}
+.btn-full{width:100%}
+.mt-8{margin-top:8px}
 
-    .btn {
-      border: 1px solid var(--border-2);
-      background: var(--surface-2);
-      color: var(--text);
-      border-radius: 10px;
-      padding: 9px 12px;
-      cursor: pointer;
-      transition: .2s ease;
-      font-size: 12px;
-      font-weight: 700;
-      font-family: var(--font);
-    }
-    .btn:hover { border-color: var(--arc); color: var(--arc); }
-    .btn-primary {
-      border-color: transparent;
-      background: var(--arc);
-      color: #04261f;
-    }
-    .btn-primary:hover { background: #08e7bb; color: #03201a; }
-    .btn-danger {
-      border-color: transparent;
-      background: var(--danger);
-      color: #fff;
-    }
-    .btn-full { width: 100%; }
+/* filters */
+.fbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.fchip{padding:7px 14px;border-radius:18px;font-size:11px;font-weight:600;font-family:var(--mono);background:var(--surface);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .14s}
+.fchip:hover{color:var(--text)}
+.fchip.on{background:var(--arc-dim);border-color:var(--arc);color:var(--arc)}
 
-    main {
-      position: relative;
-      z-index: 1;
-      max-width: 1240px;
-      margin: 0 auto;
-      padding: 24px 18px 80px;
-    }
+/* WIZARD */
+.wizard{max-width:720px}
+.wsteps{display:flex;gap:6px;margin-bottom:22px;flex-wrap:wrap}
+.wstep{display:flex;align-items:center;gap:7px;padding:7px 13px;border-radius:18px;font-size:10.5px;font-family:var(--mono);background:var(--surface);border:1px solid var(--border);color:var(--muted2);transition:all .2s}
+.wstep.on{border-color:var(--arc);color:var(--arc);background:var(--arc-dim)}
+.wstep.done{border-color:var(--success);color:var(--success)}
+.wstep .n{width:16px;height:16px;border-radius:50%;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:9px}
+.wstep.on .n{background:var(--arc);color:var(--bg)}
+.wstep.done .n{background:var(--success);color:var(--bg)}
+.wpane{display:none}
+.wpane.on{display:block;animation:up .25s ease}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.ffull{grid-column:1/-1}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:10px;font-weight:700;font-family:var(--mono);color:var(--muted);letter-spacing:.6px}
+.field input,.field select,.field textarea{background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:11px 13px;font-size:13.5px;font-family:var(--font);color:var(--text);outline:none;transition:all .15s;width:100%}
+.field textarea{resize:vertical;min-height:78px}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--arc);box-shadow:0 0 0 3px var(--arc-dim)}
+.field input::placeholder,.field textarea::placeholder{color:var(--muted2)}
+.field select option{background:var(--surface2)}
+.wnav{display:flex;justify-content:space-between;gap:10px;margin-top:20px}
+.review-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:12.5px}
+.review-row:last-child{border:none}
+.rk{color:var(--muted2);font-family:var(--mono);font-size:10.5px}
+.rv{font-weight:700;font-family:var(--mono)}
+.ai-review-box{padding:16px;border-radius:12px;background:var(--usdc-dim);border:1px solid rgba(61,143,224,.25);margin-top:14px}
+.ai-review-box h4{font-size:12px;color:var(--usdc);margin-bottom:8px;letter-spacing:.3px}
+.ai-review-box ul{list-style:none;font-size:12px;color:var(--muted);line-height:1.9}
+.ai-review-box li::before{content:'— ';color:var(--usdc)}
 
-    .hero {
-      text-align: center;
-      margin-bottom: 16px;
-    }
-    .hero-tag {
-      display: inline-flex;
-      align-items: center;
-      border-radius: 999px;
-      border: 1px solid rgba(0,212,170,.35);
-      background: var(--arc-dim);
-      color: var(--arc);
-      font-family: var(--mono);
-      font-size: 11px;
-      padding: 6px 12px;
-      margin-bottom: 12px;
-    }
-    .hero h1 {
-      font-size: clamp(32px, 5vw, 56px);
-      line-height: 1.08;
-      letter-spacing: -1.6px;
-      margin-bottom: 10px;
-    }
-    .hero h1 span {
-      background: linear-gradient(135deg, var(--arc), var(--usdc));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .hero p {
-      max-width: 780px;
-      margin: 0 auto;
-      color: var(--muted);
-      line-height: 1.55;
-      font-size: 15px;
-    }
+/* BUILDER SCORE */
+.bscore-ring{width:74px;height:74px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:800;font-size:18px;flex-shrink:0;position:relative}
+.score-rows{display:flex;flex-direction:column;gap:7px;flex:1}
+.score-row{display:flex;align-items:center;gap:10px;font-size:11px;font-family:var(--mono)}
+.score-row .sn{width:96px;color:var(--muted2)}
+.score-row .sb{flex:1;height:4px;background:var(--border2);border-radius:2px;overflow:hidden}
+.score-row .sf{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--arc),var(--usdc))}
+.score-row .sv{width:30px;text-align:right;color:var(--text)}
 
-    .stats-bar {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap: 12px;
-      margin: 16px 0 14px;
-    }
-    .stat {
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--surface);
-      padding: 14px;
-    }
-    .stat h2 {
-      font-family: var(--mono);
-      font-size: 24px;
-      letter-spacing: -0.8px;
-      margin-bottom: 3px;
-    }
-    .stat span {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--muted-2);
-      text-transform: uppercase;
-      letter-spacing: .4px;
-    }
+/* VAULT */
+.vrow{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid var(--border);font-size:13px}
+.vrow:last-child{border:none}
+.vk{color:var(--muted2);font-family:var(--mono);font-size:11px}
+.vv{font-weight:700;font-family:var(--mono)}
 
-    .tabs {
-      display: flex;
-      gap: 6px;
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--surface);
-      padding: 6px;
-      width: fit-content;
-      margin-bottom: 16px;
-    }
-    .tab {
-      border: none;
-      border-radius: 8px;
-      background: transparent;
-      color: var(--muted);
-      padding: 10px 14px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      font-family: var(--font);
-    }
-    .tab.active {
-      color: var(--text);
-      background: var(--surface-2);
-      border: 1px solid var(--border-2);
-    }
+/* MODAL */
+.ov{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:18px}
+.ov.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:18px;padding:28px;max-width:540px;width:100%;animation:up .22s ease;max-height:92vh;overflow-y:auto}
+.mh{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
+.mt-title{font-size:20px;font-weight:800;letter-spacing:-.5px}
+.ms{font-size:11px;font-family:var(--mono);color:var(--muted2);margin-top:3px}
+.xb{width:30px;height:30px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .13s;font-family:var(--mono)}
+.xb:hover{border-color:var(--border2);color:var(--text)}
+.buybox{margin-top:16px;padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:12px}
+.buybox h4{font-size:10px;font-family:var(--mono);color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px}
+.brow2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.calc{padding:11px 13px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;font-family:var(--mono);font-size:14px;color:var(--usdc)}
+.chip{font-family:var(--mono);font-size:10px;color:var(--arc);background:var(--arc-dim);padding:2px 8px;border-radius:6px;text-decoration:none}
 
-    .panel { display: none; }
-    .panel.active { display: block; }
+/* AI COPILOT */
+.copilot-fab{position:fixed;bottom:24px;right:24px;z-index:150;height:46px;padding:0 20px;border-radius:23px;
+  background:linear-gradient(135deg,var(--arc),var(--usdc));border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 10px 34px var(--arc-glow);transition:transform .2s;
+  font-family:var(--mono);font-size:12px;font-weight:700;color:var(--bg);letter-spacing:.5px}
+.copilot-fab:hover{transform:scale(1.05)}
+.copilot{display:none;position:fixed;bottom:84px;right:24px;z-index:160;width:360px;max-height:520px;
+  background:var(--surface);border:1px solid var(--border2);border-radius:18px;flex-direction:column;overflow:hidden;
+  box-shadow:0 24px 70px rgba(0,0,0,.6);animation:up .25s ease}
+.copilot.open{display:flex}
+.cp-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--surface2)}
+.cp-head .cp-ic{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--arc),var(--usdc));display:flex;align-items:center;justify-content:center;font-size:10px;font-family:var(--mono);font-weight:700;color:var(--bg)}
+.cp-head b{font-size:13px}
+.cp-head small{display:block;font-size:9px;font-family:var(--mono);color:var(--muted2)}
+.cp-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:220px;max-height:330px}
+.cp-msg{max-width:88%;padding:10px 13px;border-radius:13px;font-size:12.5px;line-height:1.55;white-space:pre-wrap}
+.cp-msg.bot{background:var(--surface2);border:1px solid var(--border);align-self:flex-start}
+.cp-msg.user{background:var(--arc-dim);border:1px solid rgba(0,212,170,.25);align-self:flex-end;color:var(--arc)}
+.cp-quick{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 10px}
+.cpq{padding:5px 11px;border-radius:14px;font-size:10px;font-family:var(--mono);background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;transition:all .14s}
+.cpq:hover{border-color:var(--arc);color:var(--arc)}
+.cp-input{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--border)}
+.cp-input input{flex:1;background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:9px 12px;font-size:12.5px;color:var(--text);font-family:var(--font);outline:none}
+.cp-input input:focus{border-color:var(--arc)}
+.cp-input button{padding:9px 16px;border-radius:10px;border:none;background:var(--arc);color:var(--bg);font-weight:700;cursor:pointer;font-size:12px;font-family:var(--font)}
 
-    .card {
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      background: var(--surface);
-      padding: 16px;
-      margin-bottom: 14px;
-    }
-    .card h3 { font-size: 18px; margin-bottom: 6px; letter-spacing: -0.3px; }
-    .subtle { color: var(--muted); font-size: 13px; line-height: 1.5; }
-    .mono { font-family: var(--mono); }
+/* COMMAND PALETTE */
+.cmdk{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);align-items:flex-start;justify-content:center;padding-top:14vh}
+.cmdk.open{display:flex}
+.cmdk-box{width:520px;max-width:92vw;background:var(--surface);border:1px solid var(--border2);border-radius:16px;overflow:hidden;animation:up .18s ease}
+.cmdk-box input{width:100%;background:transparent;border:none;outline:none;padding:16px 18px;font-size:15px;color:var(--text);font-family:var(--font);border-bottom:1px solid var(--border)}
+.cmdk-list{max-height:320px;overflow-y:auto;padding:8px}
+.cmdk-item{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:10px;font-size:13px;cursor:pointer;color:var(--muted)}
+.cmdk-item:hover{background:var(--surface2);color:var(--text)}
+.cmdk-item .ci{width:34px;height:22px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:8px;font-family:var(--mono);color:var(--arc);flex-shrink:0;letter-spacing:.4px}
 
-    .filter-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 10px;
-      margin: 12px 0 10px;
-    }
-    .label {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--muted-2);
-      text-transform: uppercase;
-      margin-bottom: 6px;
-      letter-spacing: .4px;
-    }
+/* toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,70px);z-index:400;padding:13px 20px;border-radius:12px;font-size:12.5px;font-weight:700;max-width:400px;opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1)}
+.toast.show{transform:translate(-50%,0);opacity:1}
+.toast.ok{background:var(--success);color:#04140a}
+.toast.err{background:var(--danger);color:#fff}
+.toast.inf{background:var(--usdc);color:#fff}
 
-    .chip-group {
-      border: 1px solid var(--border-2);
-      border-radius: 10px;
-      background: #0b121b;
-      padding: 6px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .chip {
-      border: 1px solid transparent;
-      border-radius: 8px;
-      background: transparent;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 700;
-      padding: 8px 10px;
-      cursor: pointer;
-      font-family: var(--font);
-      transition: .2s ease;
-    }
-    .chip:hover { color: var(--text); }
-    .chip.active {
-      background: var(--surface-2);
-      border-color: var(--border-2);
-      color: var(--text);
-    }
+/* empty */
+.empty{text-align:center;padding:64px 20px;color:var(--muted2)}
+.empty .ei{width:46px;height:46px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-family:var(--mono);font-size:10px;color:var(--muted2)}
+.empty h3{font-size:16px;margin-bottom:6px;color:var(--muted)}
+.empty p{font-size:11.5px;font-family:var(--mono)}
 
-    .projects-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 12px;
-    }
-    .project-card {
-      border: 1px solid #1e2f45;
-      border-radius: 14px;
-      background: linear-gradient(180deg, #0d1521 0%, #0a1119 100%);
-      padding: 14px;
-      box-shadow: inset 0 0 0 1px rgba(0,212,170,.04), 0 10px 28px rgba(0,0,0,.35);
-      transition: .2s ease;
-    }
-    .project-card:hover {
-      transform: translateY(-2px);
-      border-color: #2e4666;
-      box-shadow: inset 0 0 0 1px rgba(0,212,170,.08), 0 14px 34px rgba(0,0,0,.45);
-    }
-
-    .pc-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-    .pc-icon {
-      width: 34px;
-      height: 34px;
-      border-radius: 10px;
-      display: grid;
-      place-items: center;
-      font-family: var(--mono);
-      font-size: 12px;
-      font-weight: 700;
-      color: #05151f;
-      background: var(--arc);
-    }
-    .badge {
-      border-radius: 999px;
-      padding: 5px 8px;
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: .35px;
-      text-transform: uppercase;
-      border: 1px solid transparent;
-    }
-    .badge.equity { color: var(--equity); border-color: rgba(245,158,11,.3); background: rgba(245,158,11,.12); }
-    .badge.revenue { color: var(--revenue); border-color: rgba(139,92,246,.3); background: rgba(139,92,246,.12); }
-    .badge.rwa { color: var(--rwa); border-color: rgba(16,185,129,.3); background: rgba(16,185,129,.12); }
-
-    .pill {
-      border-radius: 999px;
-      padding: 4px 8px;
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--muted);
-      border: 1px solid var(--border-2);
-      background: #0b121b;
-      white-space: nowrap;
-    }
-
-    .pc-title { font-size: 20px; letter-spacing: -.3px; margin-bottom: 2px; }
-    .pc-sub { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-bottom: 8px; }
-    .pc-desc { font-size: 13px; line-height: 1.45; color: #a3b4c9; min-height: 52px; margin-bottom: 8px; }
-
-    .raise-row {
-      display: flex;
-      justify-content: space-between;
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-    .raise-row .raised { color: var(--arc); }
-
-    .progress {
-      height: 6px;
-      border-radius: 4px;
-      background: #213247;
-      overflow: hidden;
-      margin-bottom: 10px;
-    }
-    .progress > span {
-      display: block;
-      height: 100%;
-      width: 0;
-      background: linear-gradient(90deg, var(--arc), var(--usdc));
-    }
-
-    .pc-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
-    .price-wrap small {
-      color: var(--muted-2);
-      font-size: 10px;
-      display: block;
-      font-family: var(--mono);
-      margin-bottom: 3px;
-    }
-    .price-wrap strong {
-      font-family: var(--mono);
-      color: var(--usdc);
-      font-size: 20px;
-      letter-spacing: -.6px;
-    }
-
-    .split {
-      display: grid;
-      grid-template-columns: 1.25fr .75fr;
-      gap: 12px;
-    }
-
-    .field { display: grid; gap: 6px; margin-top: 10px; }
-    .field label {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--muted-2);
-      text-transform: uppercase;
-      letter-spacing: .4px;
-    }
-    .field input, .field textarea {
-      width: 100%;
-      border: 1px solid var(--border-2);
-      border-radius: 10px;
-      background: #0a1119;
-      color: var(--text);
-      padding: 10px 11px;
-      font-size: 13px;
-      font-family: var(--font);
-      outline: none;
-    }
-    .field input:focus, .field textarea:focus {
-      border-color: var(--arc);
-      box-shadow: 0 0 0 3px var(--arc-dim);
-    }
-
-    .two-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    .kv {
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      border-bottom: 1px solid var(--border);
-      padding: 8px 0;
-      font-size: 12px;
-    }
-    .kv:last-child { border-bottom: none; }
-    .kv .k { color: var(--muted); font-family: var(--mono); }
-    .kv .v { font-family: var(--mono); }
-
-    .list {
-      display: grid;
-      gap: 8px;
-      margin-top: 10px;
-    }
-    .list > div {
-      border: 1px solid var(--border-2);
-      border-radius: 10px;
-      background: var(--surface-2);
-      padding: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-    }
-
-    .action-row {
-      display: flex;
-      gap: 6px;
-    }
-
-    .portfolio-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-      gap: 10px;
-      margin-top: 10px;
-    }
-    .portfolio-card {
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      background: var(--surface-2);
-      padding: 12px;
-    }
-
-    .tx-box {
-      border: 1px solid rgba(61,143,224,.35);
-      background: rgba(61,143,224,.12);
-      border-radius: 10px;
-      padding: 10px;
-      margin-top: 10px;
-      display: none;
-    }
-    .tx-box.open { display: block; }
-    .tx-link {
-      color: #7cb6ff;
-      text-decoration: none;
-      font-family: var(--mono);
-      font-size: 11px;
-      word-break: break-all;
-    }
-
-    .empty {
-      border: 1px dashed var(--border-2);
-      border-radius: 10px;
-      text-align: center;
-      padding: 20px;
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 10px;
-    }
-
-    .toast {
-      position: fixed;
-      right: 16px;
-      bottom: 16px;
-      max-width: 360px;
-      background: var(--usdc);
-      color: #fff;
-      border-radius: 12px;
-      padding: 11px 12px;
-      transform: translateY(80px);
-      opacity: 0;
-      transition: .25s ease;
-      z-index: 120;
-    }
-    .toast.show { opacity: 1; transform: translateY(0); }
-    .toast.success { background: var(--success); }
-    .toast.error { background: var(--danger); }
-
-    .modal {
-      position: fixed;
-      inset: 0;
-      z-index: 100;
-      background: rgba(0,0,0,.72);
-      -webkit-backdrop-filter: blur(5px);
-      backdrop-filter: blur(5px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
-    .modal.open { display: flex; }
-    .modal-card {
-      width: min(560px, 100%);
-      border: 1px solid var(--border-2);
-      border-radius: 14px;
-      background: var(--surface);
-      padding: 14px;
-    }
-    .modal-title { font-size: 18px; margin-bottom: 4px; }
-    .modal-sub { color: var(--muted); font-size: 13px; margin-bottom: 10px; }
-    .modal-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .section-title {
-      font-size: 15px;
-      margin-top: 12px;
-      margin-bottom: 8px;
-      font-weight: 800;
-    }
-
-    .mt-8 { margin-top: 8px; }
-    .mt-10 { margin-top: 10px; }
-    .mt-12 { margin-top: 12px; }
-
-    @media (max-width: 1000px) {
-      .stats-bar { grid-template-columns: 1fr 1fr; }
-      .split, .two-col, .filter-row { grid-template-columns: 1fr; }
-    }
-
-    @media (max-width: 720px) {
-      .chain-badge { display: none; }
-      .tabs { width: 100%; overflow-x: auto; }
-      .stats-bar { grid-template-columns: 1fr; }
-    }
-  </style>
+/* mobile */
+.bottom-nav{display:none}
+@media(max-width:900px){
+  .sidebar{display:none}
+  .topbar,.main{margin-left:0}
+  .g4{grid-template-columns:1fr 1fr}
+  .g3,.g2{grid-template-columns:1fr}
+  .fgrid{grid-template-columns:1fr}
+  .brow2{grid-template-columns:1fr}
+  .copilot{right:12px;left:12px;width:auto}
+  .bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:120;background:rgba(13,19,29,.94);backdrop-filter:blur(16px);border-top:1px solid var(--border);padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
+  .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;font-size:9px;font-family:var(--mono);color:var(--muted2);background:none;border:none;cursor:pointer}
+  .bn-item.on{color:var(--arc)}
+  .bn-item .bi{font-size:10px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;padding:3px 8px}
+  .bn-item.on .bi{border-color:var(--arc)}
+  .main{padding-bottom:130px}
+  .copilot-fab{bottom:84px}
+}
+</style>
 </head>
 <body>
-  <div class="orb a"></div>
-  <div class="orb b"></div>
 
-  <nav>
-    <div class="logo">
-      <div class="logo-mark">AV</div>
-      ArcVault
+<div class="orb orb1"></div><div class="orb orb2"></div>
+
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-mark">AV</div>
+    <div>ArcVault<small>INTELLIGENCE LAYER</small></div>
+  </div>
+  <div class="nav-sec">Platform</div>
+  <button class="nitem on" data-page="dash" onclick="nav('dash',this)"><span class="ic">HQ</span>Dashboard</button>
+  <button class="nitem" data-page="discover" onclick="nav('discover',this)"><span class="ic">DS</span>Discover</button>
+  <button class="nitem" data-page="studio" onclick="nav('studio',this)"><span class="ic">BS</span>Builder Studio</button>
+  <button class="nitem" data-page="vault" onclick="nav('vault',this)"><span class="ic">VA</span>Vault</button>
+  <div class="nav-sec">Intelligence</div>
+  <button class="nitem" data-page="stable" onclick="nav('stable',this)"><span class="ic">US</span>Stablecoin Hub</button>
+  <button class="nitem" data-page="analytics" onclick="nav('analytics',this)"><span class="ic">AN</span>Analytics</button>
+  <button class="nitem" onclick="toggleCopilot()"><span class="ic">AI</span>AI Copilot</button>
+  <div class="side-foot">
+    <div><span class="net-dot"></span>Arc Testnet · 5042002</div>
+    <div id="sideBlock">Block —</div>
+    <div>USDC gas · ~0.5s finality</div>
+  </div>
+</aside>
+
+<div class="topbar">
+  <div class="searchbar" onclick="openCmdk()">
+    <span>Search projects, builders, actions</span><kbd>Ctrl K</kbd>
+  </div>
+  <div class="top-right">
+    <div class="chain-pill"><span class="net-dot"></span>ARC TESTNET</div>
+    <button class="wbtn" id="wbtn" onclick="connectWallet()">Connect Wallet</button>
+  </div>
+</div>
+
+<main class="main">
+
+<div class="page active" id="page-dash">
+  <div class="page-head">
+    <h1>Mission Control</h1>
+    <p>Live view of the ArcVault ecosystem on Arc Testnet — assets, capital, builders and network state.</p>
+  </div>
+
+  <div class="gridN g4" id="kpiRow">
+    <div class="card kpi"><div class="kv" id="kAssets"><div class="skel" style="width:60px;height:26px"></div></div><div class="kl">Projects Live</div><div class="kt neu" id="kAssetsT"></div></div>
+    <div class="card kpi"><div class="kv" id="kRaised"><div class="skel" style="width:80px;height:26px"></div></div><div class="kl">USDC Raised</div><div class="kt pos" id="kRaisedT"></div></div>
+    <div class="card kpi"><div class="kv" id="kBuilders"><div class="skel" style="width:50px;height:26px"></div></div><div class="kl">Builders</div><div class="kt neu">unique founders</div></div>
+    <div class="card kpi"><div class="kv" id="kBlock"><div class="skel" style="width:90px;height:26px"></div></div><div class="kl">Arc Block Height</div><div class="kt pos">live · ~0.5s finality</div></div>
+  </div>
+
+  <div class="sect-title">Ecosystem Radar</div>
+  <div class="gridN g2">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <b style="font-size:13px">Live Activity Feed</b>
+        <button class="fchip" onclick="loadEverything()">Refresh</button>
+      </div>
+      <div id="feedList"><div class="skel" style="height:44px;margin-bottom:8px"></div><div class="skel" style="height:44px;margin-bottom:8px"></div><div class="skel" style="height:44px"></div></div>
     </div>
-    <div class="nav-right">
-      <div class="chain-badge"><span class="dot"></span>Arc Testnet · 5042002</div>
-      <button class="btn" id="walletBtn" onclick="connectWallet()">Connect Wallet</button>
-      <button class="btn" id="disconnectBtn" onclick="disconnectWallet()" hidden>Disconnect</button>
-    </div>
-  </nav>
-
-  <main>
-    <section class="hero">
-      <div class="hero-tag">Arc-Native Launchpad</div>
-      <h1>The Arc-Native Launchpad<br /><span>for Real Assets</span></h1>
-      <p>Professional investment lifecycle for listing, investing, claiming dividends, and managing exit options with USDC-native execution.</p>
-    </section>
-
-    <div class="stats-bar">
-      <div class="stat"><h2 id="statAssets">0</h2><span>Assets Listed</span></div>
-      <div class="stat"><h2 id="statRaised">$0</h2><span>Total Raised</span></div>
-      <div class="stat"><h2 id="statDistributed">$0</h2><span>Total Distributed</span></div>
-      <div class="stat"><h2>~0.8s</h2><span>Settlement</span></div>
-    </div>
-
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('explore', this)">Explore Assets</button>
-      <button class="tab" onclick="switchTab('launch', this)">Launch Asset</button>
-      <button class="tab" onclick="switchTab('portfolio', this)">My Portfolio</button>
-      <button class="tab" onclick="switchTab('deploy', this)">Deploy Guide</button>
-    </div>
-
-    <section class="panel active" id="panel-explore">
-      <div class="card">
-        <h3>Live Listings</h3>
-        <p class="subtle">Listings below are fetched directly from your deployed launchpad contract.</p>
-
-        <div class="filter-row">
-          <div>
-            <div class="label">Asset Type</div>
-            <div class="chip-group">
-              <button class="chip active" onclick="setFilter('type','all',this)">All</button>
-              <button class="chip" onclick="setFilter('type','equity',this)">Equity</button>
-              <button class="chip" onclick="setFilter('type','revenue',this)">Revenue Share</button>
-              <button class="chip" onclick="setFilter('type','rwa',this)">Real-World Asset</button>
-            </div>
-          </div>
-          <div>
-            <div class="label">Risk Tier</div>
-            <div class="chip-group">
-              <button class="chip active" onclick="setFilter('risk','all',this)">All</button>
-              <button class="chip" onclick="setFilter('risk','low',this)">Low</button>
-              <button class="chip" onclick="setFilter('risk','medium',this)">Medium</button>
-              <button class="chip" onclick="setFilter('risk','high',this)">High</button>
-            </div>
-          </div>
-          <div>
-            <div class="label">Sort</div>
-            <div class="chip-group">
-              <button class="chip active" onclick="setFilter('sort','newest',this)">Newest</button>
-              <button class="chip" onclick="setFilter('sort','raised',this)">Most Raised</button>
-              <button class="chip" onclick="setFilter('sort','progress',this)">Progress</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="projects-grid" id="projectsGrid"></div>
-      </div>
-
-      <div class="split">
-        <div class="card">
-          <h3>Project Detail</h3>
-          <p class="subtle" id="detailSubtitle">Select a listing to view economics and risk.</p>
-          <div id="detailBox" class="empty">No project selected.</div>
-
-          <div class="section-title">ROI Calculator</div>
-          <div class="field">
-            <label for="revSlider">Projected Monthly Revenue (USDC)</label>
-            <input id="revSlider" type="range" min="10000" max="1000000" step="10000" value="120000" oninput="updateRoi()" />
-          </div>
-          <div class="kv"><span class="k">Projected Revenue</span><span class="v" id="revVal">$120,000</span></div>
-          <div class="kv"><span class="k">Estimated Monthly Return</span><span class="v" id="roiVal">$0</span></div>
-
-          <div class="section-title">Investor Protection Center</div>
-          <div class="list">
-            <div><span>Onchain registry</span><span class="pill">Active</span></div>
-            <div><span>Risk tier stored onchain</span><span class="pill">Active</span></div>
-            <div><span>Purchase cost tracked</span><span class="pill">Active</span></div>
-            <div><span>Dividend claim flow</span><span class="pill">Active</span></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <h3>Investment Returns</h3>
-          <div class="kv"><span class="k">Invested</span><span class="v" id="retInvested">$0</span></div>
-          <div class="kv"><span class="k">Tokens Owned</span><span class="v" id="retTokens">0</span></div>
-          <div class="kv"><span class="k">Revenue Share</span><span class="v" id="retShare">0.00%</span></div>
-          <div class="kv"><span class="k">Next Claim</span><span class="v">On demand</span></div>
-          <div class="kv"><span class="k">Pending</span><span class="v" id="retPending">$0</span></div>
-          <div class="kv"><span class="k">Lifetime Claimed</span><span class="v" id="retClaimed">$0</span></div>
-
-          <div class="field">
-            <label for="buyAmount">Token Amount</label>
-            <input id="buyAmount" type="number" min="1" placeholder="100" oninput="updateInvestPreview()" />
-          </div>
-          <div class="field">
-            <label for="buyCost">Total Cost</label>
-            <input id="buyCost" type="text" readonly value="0 USDC" />
-          </div>
-
-          <button class="btn btn-primary btn-full mt-10" onclick="investSelected()">Invest</button>
-          <button class="btn btn-full mt-8" onclick="claimDividendsForCurrent()">Claim Dividends</button>
-          <div class="tx-box" id="txBox"><a class="tx-link" id="txLink" href="#" target="_blank" rel="noopener noreferrer"></a></div>
-
-          <div class="section-title">Exit Options</div>
-          <div class="list">
-            <div><span>Sell on Marketplace</span><button class="btn" onclick="openExitModal('sell')">List Now</button></div>
-            <div><span>Request Buyback</span><button class="btn" onclick="openExitModal('buyback')">Request</button></div>
-            <div><span>Early Redemption</span><button class="btn" onclick="openExitModal('redeem')">Redeem</button></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="split mt-12">
-        <div class="card">
-          <h3>Live Order Book</h3>
-          <p class="subtle">Local demo orderbook UI.</p>
-          <div class="split mt-8">
-            <div>
-              <div class="label">Sell Orders</div>
-              <div class="list" id="sellOrders"></div>
-            </div>
-            <div>
-              <div class="label">Buy Orders</div>
-              <div class="list" id="buyOrders"></div>
-            </div>
-          </div>
-          <div class="section-title">Recent Fills</div>
-          <div class="list" id="fillsList"></div>
-        </div>
-
-        <div class="card">
-          <h3>Founder Bidding Interface</h3>
-          <p class="subtle">Local demo founder response flow.</p>
-          <div class="list" id="founderAlerts"></div>
-
-          <div class="section-title">Revenue Distribution Flow</div>
-          <div class="list">
-            <div><span>Company Revenue</span><span class="v" id="distRevenue">$50,000 USDC</span></div>
-            <div><span>Smart Contract Verification</span><span class="pill">Onchain</span></div>
-            <div><span>Token Holders</span><span class="v" id="distHolders">0 investors</span></div>
-            <div><span>Your Share</span><span class="v" id="distYourShare">$0</span></div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel" id="panel-launch">
-      <div class="card">
-        <h3>Launch Project</h3>
-        <p class="subtle">Creates a new asset token through your deployed launchpad contract.</p>
-        <div class="two-col">
-          <div class="field"><label for="newName">Project Name</label><input id="newName" type="text" placeholder="New Asset Project" /></div>
-          <div class="field"><label for="newSymbol">Symbol</label><input id="newSymbol" type="text" placeholder="NAP" /></div>
-        </div>
-
-        <div class="two-col">
-          <div>
-            <div class="label">Type</div>
-            <div class="chip-group" id="launchTypeGroup">
-              <button type="button" class="chip active" onclick="setLaunchType('equity', this)">Equity</button>
-              <button type="button" class="chip" onclick="setLaunchType('revenue', this)">Revenue Share</button>
-              <button type="button" class="chip" onclick="setLaunchType('rwa', this)">Real-World Asset</button>
-            </div>
-            <input id="newType" type="hidden" value="equity" />
-          </div>
-
-          <div>
-            <div class="label">Risk Tier</div>
-            <div class="chip-group" id="launchRiskGroup">
-              <button type="button" class="chip" onclick="setLaunchRisk('low', this)">Low</button>
-              <button type="button" class="chip active" onclick="setLaunchRisk('medium', this)">Medium</button>
-              <button type="button" class="chip" onclick="setLaunchRisk('high', this)">High</button>
-            </div>
-            <input id="newRisk" type="hidden" value="medium" />
-          </div>
-        </div>
-
-        <div class="two-col">
-          <div class="field"><label for="newCompany">Company</label><input id="newCompany" type="text" placeholder="Issuer Name" /></div>
-          <div class="field"><label for="newPrice">Price per Token (USDC)</label><input id="newPrice" type="number" placeholder="50" /></div>
-        </div>
-        <div class="field"><label for="newDesc">Description</label><textarea id="newDesc" rows="3" placeholder="Project summary and raise purpose"></textarea></div>
-        <div class="field"><label for="newTarget">Total Valuation (USDC)</label><input id="newTarget" type="number" placeholder="500000" /></div>
-        <button class="btn btn-primary btn-full mt-10" onclick="launchProject()">Launch Asset</button>
-      </div>
-    </section>
-
-    <section class="panel" id="panel-portfolio">
-      <div class="card">
-        <h3>Portfolio</h3>
-        <p class="subtle">Purchase cost basis is now read from the token contract.</p>
-        <div class="stats-bar mt-8">
-          <div class="stat"><h2 id="pfValue">$0</h2><span>Portfolio Value</span></div>
-          <div class="stat"><h2 id="pfCost">$0</h2><span>Purchase Cost Basis</span></div>
-          <div class="stat"><h2 id="pfPnl">$0</h2><span>Profit / Loss</span></div>
-          <div class="stat"><h2 id="pfPositions">0</h2><span>Positions</span></div>
-        </div>
-        <div class="portfolio-grid" id="portfolioGrid"></div>
-      </div>
-    </section>
-
-    <section class="panel" id="panel-deploy">
-      <div class="card">
-        <h3>Deploy Guide</h3>
-        <div class="list">
-          <div><span>Launchpad</span><span class="v mono">0x705C2b9D3B06eeF72831F463Ca6eBc5A9B543e3b</span></div>
-          <div><span>USDC Gas Token</span><span class="v mono">0x3600000000000000000000000000000000000000</span></div>
-          <div><span>Sub-second finality</span><span class="pill">Arc Native</span></div>
-          <div><span>No ETH required</span><span class="pill">USDC Gas</span></div>
-          <div><span>RPC</span><span class="v mono">https://rpc.testnet.arc.network</span></div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <div class="modal" id="exitModal">
-    <div class="modal-card">
-      <div class="modal-title" id="exitTitle">Exit Order</div>
-      <div class="modal-sub" id="exitSub">Configure your exit action.</div>
-
-      <div class="field"><label for="exitAmount">Amount</label><input id="exitAmount" type="number" min="1" placeholder="100" oninput="updateExitPreview()" /></div>
-      <div class="field"><label for="exitPrice">Price (USDC)</label><input id="exitPrice" type="number" min="0.01" placeholder="45" oninput="updateExitPreview()" /></div>
-
-      <div class="list" id="exitPreview"></div>
-
-      <div class="modal-actions">
-        <button class="btn" onclick="closeExitModal()">Cancel</button>
-        <button class="btn btn-primary" onclick="confirmExit()">Confirm</button>
+    <div class="card">
+      <b style="font-size:13px">AI Insights</b>
+      <div id="insightList" style="margin-top:10px;font-size:12.5px;color:var(--muted);line-height:1.8">
+        <div class="skel" style="height:16px;margin-bottom:10px"></div>
+        <div class="skel" style="height:16px;margin-bottom:10px"></div>
+        <div class="skel" style="height:16px;width:70%"></div>
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
-
-  <script>
-    const EXPLORER_TX = "https://testnet.arcscan.app/tx/";
-    const RPC_URL = "https://rpc.testnet.arc.network";
-    const CHAIN_ID = 5042002;
-    const ARC_CHAIN_HEX = "0x4cef52";
-    const LAUNCHPAD_ADDRESS = "0x705C2b9D3B06eeF72831F463Ca6eBc5A9B543e3b";
-    const USDC_ADDRESS = "0x3600000000000000000000000000000000000000";
-    const LISTING_FEE = 1000000n;
-
-    const LAUNCHPAD_ABI = [
-      "function launchAsset(string name,string symbol,string companyName,string description,uint8 assetType,uint8 riskTier,uint256 totalValuation,uint256 pricePerToken,uint256 maxSupply) returns (address)",
-      "function getAllAssets() view returns (tuple(address tokenContract,string name,string symbol,address founder,uint8 assetType,uint8 riskTier,uint256 listedAt)[])"
-    ];
-
-    const ASSET_TOKEN_ABI = [
-      "function companyName() view returns (string)",
-      "function description() view returns (string)",
-      "function assetType() view returns (uint8)",
-      "function riskTier() view returns (uint8)",
-      "function totalValuation() view returns (uint256)",
-      "function pricePerToken() view returns (uint256)",
-      "function maxSupply() view returns (uint256)",
-      "function isActive() view returns (bool)",
-      "function founder() view returns (address)",
-      "function createdAt() view returns (uint256)",
-      "function totalRaised() view returns (uint256)",
-      "function totalSupply() view returns (uint256)",
-      "function balanceOf(address) view returns (uint256)",
-      "function pendingDividends(address) view returns (uint256)",
-      "function totalInvested(address) view returns (uint256)",
-      "function totalPurchasedTokens(address) view returns (uint256)",
-      "function purchaseTokens(uint256 tokenAmount)",
-      "function claimDividends()"
-    ];
-
-    const ERC20_ABI = [
-      "function approve(address spender,uint256 amount) returns (bool)",
-      "function allowance(address owner,address spender) view returns (uint256)"
-    ];
-
-    const readProvider = new ethers.JsonRpcProvider(RPC_URL);
-    const readLaunchpad = new ethers.Contract(LAUNCHPAD_ADDRESS, LAUNCHPAD_ABI, readProvider);
-
-    const state = {
-      wallet: null,
-      walletFull: null,
-      selectedProjectId: null,
-      filters: { type: "all", risk: "all", sort: "newest" },
-      projects: [],
-      portfolio: [],
-      pendingDividends: {},
-      lifetimeClaimed: {},
-      sellOrders: [],
-      buyOrders: [],
-      fills: [],
-      founderAlerts: [],
-      exitMode: null,
-      loadingProjects: true
-    };
-
-    function shortAddress(value) {
-      if (!value) return "";
-      return value.slice(0, 6) + "..." + value.slice(-4);
-    }
-
-    function hashId() {
-      return "0x" + Math.random().toString(16).slice(2).padEnd(10, "0");
-    }
-
-    function nowLabel(ts) {
-      const minutes = Math.max(1, Math.floor((Date.now() - ts) / 60000));
-      return minutes + " min ago";
-    }
-
-    function fmtUsd(v) {
-      return "$" + Number(v || 0).toLocaleString(undefined, { maximumFractionDigits: 2 });
-    }
-
-    function fromUsdc(value) {
-      return Number(ethers.formatUnits(value || 0, 6));
-    }
-
-    function toUsdc(value) {
-      return ethers.parseUnits(String(value), 6);
-    }
-
-    function showToast(message, type = "") {
-      const toast = document.getElementById("toast");
-      toast.textContent = message;
-      toast.className = "toast " + type + " show";
-      setTimeout(() => toast.classList.remove("show"), 3000);
-    }
-
-    function showTx(title, hash) {
-      const txLink = document.getElementById("txLink");
-      txLink.href = EXPLORER_TX + hash;
-      txLink.textContent = title + ": " + hash;
-      document.getElementById("txBox").classList.add("open");
-    }
-
-    function switchTab(name, btn) {
-      document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
-      document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
-      btn.classList.add("active");
-      document.getElementById("panel-" + name).classList.add("active");
-    }
-
-    function setLaunchType(value, el) {
-      document.getElementById("newType").value = value;
-      el.parentElement.querySelectorAll(".chip").forEach((chip) => chip.classList.remove("active"));
-      el.classList.add("active");
-    }
-
-    function setLaunchRisk(value, el) {
-      document.getElementById("newRisk").value = value;
-      el.parentElement.querySelectorAll(".chip").forEach((chip) => chip.classList.remove("active"));
-      el.classList.add("active");
-    }
-
-    function mapAssetType(value) {
-      const n = Number(value);
-      if (n === 0) return "equity";
-      if (n === 1) return "revenue";
-      return "rwa";
-    }
-
-    function mapRisk(value) {
-      const n = Number(value);
-      if (n === 0) return "low";
-      if (n === 1) return "medium";
-      return "high";
-    }
-
-    function mapAssetTypeEnum(value) {
-      if (value === "equity") return 0;
-      if (value === "revenue") return 1;
-      return 2;
-    }
-
-    function mapRiskEnum(value) {
-      if (value === "low") return 0;
-      if (value === "medium") return 1;
-      return 2;
-    }
-
-    async function ensureArcNetwork() {
-      if (!window.ethereum) {
-        throw new Error("No wallet detected.");
-      }
-
-      try {
-        await window.ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: ARC_CHAIN_HEX }]
-        });
-      } catch (error) {
-        const code = error?.code ?? error?.data?.originalError?.code;
-
-        if (code === 4902) {
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [
-              {
-                chainId: ARC_CHAIN_HEX,
-                chainName: "Arc Testnet",
-                nativeCurrency: {
-                  name: "Arc",
-                  symbol: "ARC",
-                  decimals: 18
-                },
-                rpcUrls: ["https://rpc.testnet.arc.network"],
-                blockExplorerUrls: ["https://testnet.arcscan.app"]
-              }
-            ]
-          });
-
-          await window.ethereum.request({
-            method: "wallet_switchEthereumChain",
-            params: [{ chainId: ARC_CHAIN_HEX }]
-          });
-        } else {
-          throw error;
-        }
-      }
-    }
-
-    async function getWriteContext() {
-      if (!window.ethereum) throw new Error("No wallet detected.");
-
-      await ensureArcNetwork();
-
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      await provider.send("eth_requestAccounts", []);
-      const signer = await provider.getSigner();
-      const network = await provider.getNetwork();
-
-      if (Number(network.chainId) !== CHAIN_ID) {
-        throw new Error("Failed to switch wallet to Arc Testnet.");
-      }
-
-      return { provider, signer };
-    }
-
-    async function connectWallet() {
-      try {
-        const { signer } = await getWriteContext();
-        const address = await signer.getAddress();
-        state.walletFull = address;
-        state.wallet = shortAddress(address);
-
-        document.getElementById("walletBtn").textContent = state.wallet;
-        document.getElementById("disconnectBtn").hidden = false;
-
-        await loadPortfolioFromContract();
-        renderAll();
-        showToast("Wallet connected.", "success");
-      } catch (error) {
-        showToast(error.message || "Wallet connection failed.", "error");
-      }
-    }
-
-    function disconnectWallet() {
-      state.wallet = null;
-      state.walletFull = null;
-      state.portfolio = [];
-      document.getElementById("walletBtn").textContent = "Connect Wallet";
-      document.getElementById("disconnectBtn").hidden = true;
-      renderAll();
-      showToast("Wallet disconnected.");
-    }
-
-    function setFilter(kind, value, el) {
-      state.filters[kind] = value;
-      const parent = el.parentElement;
-      parent.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
-      el.classList.add("active");
-      renderProjects();
-    }
-
-    function projectBadgeClass(type) {
-      if (type === "equity") return "equity";
-      if (type === "revenue") return "revenue";
-      return "rwa";
-    }
-
-    function filteredProjects() {
-      let arr = [...state.projects];
-
-      if (state.filters.type !== "all") arr = arr.filter((p) => p.type === state.filters.type);
-      if (state.filters.risk !== "all") arr = arr.filter((p) => p.risk === state.filters.risk);
-
-      if (state.filters.sort === "raised") {
-        arr.sort((a, b) => b.raised - a.raised);
-      } else if (state.filters.sort === "progress") {
-        arr.sort((a, b) => (b.raised / Math.max(b.target, 1)) - (a.raised / Math.max(a.target, 1)));
-      } else {
-        arr.sort((a, b) => b.createdAt - a.createdAt);
-      }
-
-      return arr;
-    }
-
-    async function loadProjectsFromContract() {
-      try {
-        state.loadingProjects = true;
-        renderProjects();
-
-        const assets = await readLaunchpad.getAllAssets();
-
-        const projects = await Promise.all(
-          assets.map(async (asset) => {
-            const token = new ethers.Contract(asset.tokenContract, ASSET_TOKEN_ABI, readProvider);
-
-            const [
-              companyName,
-              description,
-              totalValuation,
-              pricePerToken,
-              maxSupply,
-              isActive,
-              createdAt,
-              totalRaised,
-              totalSupply,
-              riskTier
-            ] = await Promise.all([
-              token.companyName(),
-              token.description(),
-              token.totalValuation(),
-              token.pricePerToken(),
-              token.maxSupply(),
-              token.isActive(),
-              token.createdAt(),
-              token.totalRaised(),
-              token.totalSupply(),
-              token.riskTier()
-            ]);
-
-            return {
-              id: asset.tokenContract.toLowerCase(),
-              tokenContract: asset.tokenContract,
-              name: asset.name,
-              symbol: asset.symbol,
-              company: companyName,
-              founder: asset.founder,
-              type: mapAssetType(asset.assetType),
-              risk: mapRisk(riskTier),
-              description,
-              target: fromUsdc(totalValuation),
-              targetRaw: totalValuation,
-              raised: fromUsdc(totalRaised),
-              raisedRaw: totalRaised,
-              price: fromUsdc(pricePerToken),
-              priceRaw: pricePerToken,
-              createdAt: Number(createdAt) * 1000,
-              listedAt: Number(asset.listedAt) * 1000,
-              maxSupply: Number(maxSupply),
-              totalSupply: Number(ethers.formatUnits(totalSupply, 18)),
-              active: isActive
-            };
-          })
-        );
-
-        state.projects = projects.filter((p) => p.active);
-        if (state.walletFull) await loadPortfolioFromContract();
-        renderAll();
-      } catch (error) {
-        console.error(error);
-        showToast("Failed to load contract tokens.", "error");
-      } finally {
-        state.loadingProjects = false;
-        renderProjects();
-      }
-    }
-
-    async function loadPortfolioFromContract() {
-      if (!state.walletFull) {
-        state.portfolio = [];
-        return;
-      }
-
-      const positions = [];
-      const pendingMap = {};
-      const claimedMap = {};
-
-      for (const project of state.projects) {
-        const token = new ethers.Contract(project.tokenContract, ASSET_TOKEN_ABI, readProvider);
-        const [balance, pending, totalInvested] = await Promise.all([
-          token.balanceOf(state.walletFull),
-          token.pendingDividends(state.walletFull),
-          token.totalInvested(state.walletFull)
-        ]);
-
-        const tokenBalance = Number(ethers.formatUnits(balance, 18));
-        pendingMap[project.id] = fromUsdc(pending);
-        claimedMap[project.id] = state.lifetimeClaimed[project.id] || 0;
-
-        if (tokenBalance > 0) {
-          positions.push({
-            projectId: project.id,
-            tokens: tokenBalance,
-            cost: fromUsdc(totalInvested),
-            daysHeld: Math.max(0, Math.floor((Date.now() - project.createdAt) / 86400000))
-          });
-        }
-      }
-
-      state.pendingDividends = pendingMap;
-      state.lifetimeClaimed = claimedMap;
-      state.portfolio = positions;
-    }
-
-    function renderProjects() {
-      const grid = document.getElementById("projectsGrid");
-
-      if (state.loadingProjects) {
-        grid.innerHTML = '<div class="empty">Loading tokens from contract...</div>';
-        return;
-      }
-
-      const projects = filteredProjects();
-
-      if (!projects.length) {
-        grid.innerHTML = '<div class="empty">No tokens created under your contract yet.</div>';
-        return;
-      }
-
-      grid.innerHTML = projects.map((project) => {
-        const pct = Math.min(100, project.target > 0 ? (project.raised / project.target) * 100 : 0);
-        return `
-          <div class="project-card">
-            <div class="pc-head">
-              <div class="pc-icon">${project.symbol[0] || "A"}</div>
-              <span class="badge ${projectBadgeClass(project.type)}">${project.type === "revenue" ? "Revenue Share" : project.type === "rwa" ? "Real-World Asset" : "Equity"}</span>
-            </div>
-
-            <h3 class="pc-title">${project.name}</h3>
-            <div class="pc-sub">${project.symbol} · ${project.company}</div>
-            <p class="pc-desc">${project.description}</p>
-
-            <div class="raise-row">
-              <span class="raised">${fmtUsd(project.raised)} raised</span>
-              <span>${Math.round(pct)}% of ${fmtUsd(project.target)}</span>
-            </div>
-            <div class="progress"><span data-pct="${pct}"></span></div>
-
-            <div class="kv"><span class="k">Risk</span><span class="v">${project.risk.toUpperCase()}</span></div>
-
-            <div class="pc-footer">
-              <div class="price-wrap">
-                <small>Price per token</small>
-                <strong>${fmtUsd(project.price)} USDC</strong>
-              </div>
-              <button class="btn btn-primary" onclick="selectProject('${project.id}')">Invest -></button>
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      document.querySelectorAll(".progress span[data-pct]").forEach((el) => {
-        el.style.width = el.getAttribute("data-pct") + "%";
-      });
-    }
-
-    function selectProject(id) {
-      state.selectedProjectId = id;
-      const p = state.projects.find((x) => x.id === id);
-      if (!p) return;
-
-      document.getElementById("detailSubtitle").textContent = `${p.symbol} · ${p.company}`;
-      document.getElementById("detailBox").innerHTML = `
-        <div class="kv"><span class="k">Token Contract</span><span class="v mono">${shortAddress(p.tokenContract)}</span></div>
-        <div class="kv"><span class="k">Asset Type</span><span class="v">${p.type === "revenue" ? "Revenue Share" : p.type === "rwa" ? "Real-World Asset" : "Equity"}</span></div>
-        <div class="kv"><span class="k">Risk Tier</span><span class="v">${p.risk.toUpperCase()}</span></div>
-        <div class="kv"><span class="k">Price Per Token</span><span class="v">${fmtUsd(p.price)} USDC</span></div>
-        <div class="kv"><span class="k">Raised</span><span class="v">${fmtUsd(p.raised)}</span></div>
-        <div class="kv"><span class="k">Target</span><span class="v">${fmtUsd(p.target)}</span></div>
-      `;
-
-      updateInvestPreview();
-      updateRoi();
-      updateReturnBox();
-    }
-
-    function getPosition(projectId) {
-      return state.portfolio.find((x) => x.projectId === projectId);
-    }
-
-    function updateInvestPreview() {
-      const amount = Number(document.getElementById("buyAmount").value || 0);
-      const p = state.projects.find((x) => x.id === state.selectedProjectId);
-      if (!p || amount <= 0) {
-        document.getElementById("buyCost").value = "0 USDC";
-        return;
-      }
-      document.getElementById("buyCost").value = (amount * p.price).toLocaleString(undefined, { maximumFractionDigits: 2 }) + " USDC";
-      updateRoi();
-      updateReturnBox();
-    }
-
-    function updateRoi() {
-      const revenue = Number(document.getElementById("revSlider").value || 0);
-      document.getElementById("revVal").textContent = fmtUsd(revenue);
-
-      const p = state.projects.find((x) => x.id === state.selectedProjectId);
-      if (!p) {
-        document.getElementById("roiVal").textContent = "$0";
-        return;
-      }
-
-      const amount = Number(document.getElementById("buyAmount").value || 0);
-      const invested = amount * p.price;
-      const share = p.target > 0 ? invested / p.target : 0;
-      document.getElementById("roiVal").textContent = fmtUsd(revenue * share);
-    }
-
-    function updateReturnBox() {
-      const p = state.projects.find((x) => x.id === state.selectedProjectId);
-      if (!p) {
-        document.getElementById("retInvested").textContent = "$0";
-        document.getElementById("retTokens").textContent = "0";
-        document.getElementById("retShare").textContent = "0.00%";
-        document.getElementById("retPending").textContent = "$0";
-        document.getElementById("retClaimed").textContent = "$0";
-        return;
-      }
-
-      const pos = getPosition(p.id);
-      const tokens = pos ? pos.tokens : Number(document.getElementById("buyAmount").value || 0);
-      const cost = pos ? pos.cost : tokens * p.price;
-      const sharePct = p.target > 0 ? (cost / p.target) * 100 : 0;
-
-      document.getElementById("retInvested").textContent = fmtUsd(cost);
-      document.getElementById("retTokens").textContent = tokens.toLocaleString();
-      document.getElementById("retShare").textContent = sharePct.toFixed(3) + "%";
-      document.getElementById("retPending").textContent = fmtUsd(state.pendingDividends[p.id] || 0);
-      document.getElementById("retClaimed").textContent = fmtUsd(state.lifetimeClaimed[p.id] || 0);
-    }
-
-    async function launchProject() {
-      try {
-        const name = document.getElementById("newName").value.trim();
-        const symbol = document.getElementById("newSymbol").value.trim().toUpperCase();
-        const type = document.getElementById("newType").value;
-        const risk = document.getElementById("newRisk").value;
-        const company = document.getElementById("newCompany").value.trim();
-        const desc = document.getElementById("newDesc").value.trim();
-        const targetInput = Number(document.getElementById("newTarget").value || 0);
-        const priceInput = Number(document.getElementById("newPrice").value || 0);
-
-        if (!name || !symbol || !company || !desc || !targetInput || !priceInput) {
-          throw new Error("Complete all launch fields with valid values.");
-        }
-
-        const maxSupply = BigInt(Math.floor(targetInput / priceInput));
-        if (maxSupply <= 0n) throw new Error("Total valuation must be greater than price per token.");
-
-        const { signer } = await getWriteContext();
-        const userAddress = await signer.getAddress();
-        const usdc = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, signer);
-        const launchpad = new ethers.Contract(LAUNCHPAD_ADDRESS, LAUNCHPAD_ABI, signer);
-
-        const allowance = await usdc.allowance(userAddress, LAUNCHPAD_ADDRESS);
-        if (allowance < LISTING_FEE) {
-          const approveTx = await usdc.approve(LAUNCHPAD_ADDRESS, LISTING_FEE);
-          showTx("Approve tx", approveTx.hash);
-          await approveTx.wait();
-        }
-
-        const tx = await launchpad.launchAsset(
-          name,
-          symbol,
-          company,
-          desc,
-          mapAssetTypeEnum(type),
-          mapRiskEnum(risk),
-          toUsdc(targetInput),
-          toUsdc(priceInput),
-          maxSupply
-        );
-
-        showTx("Launch tx", tx.hash);
-        await tx.wait();
-
-        document.getElementById("newName").value = "";
-        document.getElementById("newSymbol").value = "";
-        document.getElementById("newCompany").value = "";
-        document.getElementById("newDesc").value = "";
-        document.getElementById("newTarget").value = "";
-        document.getElementById("newPrice").value = "";
-        document.getElementById("newType").value = "equity";
-        document.getElementById("newRisk").value = "medium";
-        document.querySelectorAll("#launchTypeGroup .chip").forEach((chip, index) => chip.classList.toggle("active", index === 0));
-        document.querySelectorAll("#launchRiskGroup .chip").forEach((chip, index) => chip.classList.toggle("active", index === 1));
-
-        await loadProjectsFromContract();
-        showToast("Asset launched onchain.", "success");
-      } catch (error) {
-        showToast(error.message || "Launch failed.", "error");
-      }
-    }
-
-    async function investSelected() {
-      try {
-        if (!state.walletFull) throw new Error("Connect wallet first.");
-
-        const p = state.projects.find((x) => x.id === state.selectedProjectId);
-        if (!p) throw new Error("Select a project first.");
-
-        const amount = Number(document.getElementById("buyAmount").value || 0);
-        if (!Number.isInteger(amount) || amount <= 0) throw new Error("Enter a valid whole token amount.");
-
-        const { signer } = await getWriteContext();
-        const userAddress = await signer.getAddress();
-        const usdc = new ethers.Contract(USDC_ADDRESS, ERC20_ABI, signer);
-        const token = new ethers.Contract(p.tokenContract, ASSET_TOKEN_ABI, signer);
-
-        const usdcCost = BigInt(amount) * p.priceRaw;
-        const allowance = await usdc.allowance(userAddress, p.tokenContract);
-
-        if (allowance < usdcCost) {
-          const approveTx = await usdc.approve(p.tokenContract, usdcCost);
-          showTx("Approve tx", approveTx.hash);
-          await approveTx.wait();
-        }
-
-        const tx = await token.purchaseTokens(BigInt(amount));
-        showTx("Investment tx", tx.hash);
-        await tx.wait();
-
-        await loadProjectsFromContract();
-        await loadPortfolioFromContract();
-        renderAll();
-        showToast("Investment confirmed.", "success");
-      } catch (error) {
-        showToast(error.message || "Investment failed.", "error");
-      }
-    }
-
-    async function claimDividendsForCurrent() {
-      try {
-        const p = state.projects.find((x) => x.id === state.selectedProjectId);
-        if (!p) throw new Error("Select a project first.");
-        if (!state.walletFull) throw new Error("Connect wallet first.");
-
-        const { signer } = await getWriteContext();
-        const token = new ethers.Contract(p.tokenContract, ASSET_TOKEN_ABI, signer);
-        const tx = await token.claimDividends();
-
-        showTx("Claim tx", tx.hash);
-        await tx.wait();
-
-        state.lifetimeClaimed[p.id] = (state.lifetimeClaimed[p.id] || 0) + (state.pendingDividends[p.id] || 0);
-
-        await loadProjectsFromContract();
-        await loadPortfolioFromContract();
-        renderAll();
-        showToast("Dividends claimed successfully.", "success");
-      } catch (error) {
-        showToast(error.message || "Claim failed.", "error");
-      }
-    }
-
-    function openExitModal(mode) {
-      const p = state.projects.find((x) => x.id === state.selectedProjectId);
-      if (!p) return showToast("Select a project first.", "error");
-
-      const pos = getPosition(p.id);
-      if (!pos || pos.tokens <= 0) return showToast("No holdings for selected project.", "error");
-
-      state.exitMode = mode;
-
-      if (mode === "sell") {
-        document.getElementById("exitTitle").textContent = "Sell on Marketplace";
-        document.getElementById("exitSub").textContent = "Create a local demo sell order for secondary market matching.";
-      } else if (mode === "buyback") {
-        document.getElementById("exitTitle").textContent = "Request Buyback";
-        document.getElementById("exitSub").textContent = "Local demo buyback flow.";
-      } else {
-        document.getElementById("exitTitle").textContent = "Early Redemption";
-        document.getElementById("exitSub").textContent = "Local demo early redemption flow.";
-      }
-
-      document.getElementById("exitAmount").value = "";
-      document.getElementById("exitPrice").value = "";
-      document.getElementById("exitPreview").innerHTML = '<div><span>Provide amount and price to preview settlement.</span><span class="pill">Preview</span></div>';
-      document.getElementById("exitModal").classList.add("open");
-    }
-
-    function closeExitModal() {
-      document.getElementById("exitModal").classList.remove("open");
-      state.exitMode = null;
-    }
-
-    function updateExitPreview() {
-      const amount = Number(document.getElementById("exitAmount").value || 0);
-      const price = Number(document.getElementById("exitPrice").value || 0);
-      const gross = amount * price;
-      const preview = document.getElementById("exitPreview");
-
-      if (amount <= 0 || price <= 0) {
-        preview.innerHTML = '<div><span>Provide amount and price to preview settlement.</span><span class="pill">Preview</span></div>';
-        return;
-      }
-
-      if (state.exitMode === "redeem") {
-        const penalty = gross * 0.15;
-        preview.innerHTML = `
-          <div><span>Gross Value</span><span>${fmtUsd(gross)}</span></div>
-          <div><span>Penalty (15%)</span><span>${fmtUsd(penalty)}</span></div>
-          <div><span>You Receive</span><span>${fmtUsd(gross - penalty)}</span></div>
-        `;
-      } else {
-        preview.innerHTML = `
-          <div><span>Order Value</span><span>${fmtUsd(gross)}</span></div>
-          <div><span>Mode</span><span>${state.exitMode === "sell" ? "Market Listing" : "Buyback Request"}</span></div>
-        `;
-      }
-    }
-
-    function createSellOrder(project, amount, price) {
-      state.sellOrders.push({
-        id: "sell_" + Date.now(),
-        projectId: project.id,
-        symbol: project.symbol,
-        amount,
-        price,
-        side: "sell",
-        timestamp: Date.now()
-      });
-
-      state.founderAlerts.push({
-        id: "alert_" + Date.now(),
-        projectId: project.id,
-        symbol: project.symbol,
-        amount,
-        price,
-        total: amount * price
-      });
-
-      showToast(`Your order for ${amount} tokens at $${price} USDC is now live.`, "success");
-    }
-
-    function confirmExit() {
-      const p = state.projects.find((x) => x.id === state.selectedProjectId);
-      if (!p || !state.exitMode) return;
-
-      const amount = Number(document.getElementById("exitAmount").value || 0);
-      const price = Number(document.getElementById("exitPrice").value || 0);
-      if (amount <= 0 || price <= 0) return showToast("Enter valid amount and price.", "error");
-
-      const pos = getPosition(p.id);
-      if (!pos || pos.tokens < amount) return showToast("Insufficient tokens for this action.", "error");
-
-      if (state.exitMode === "sell") {
-        createSellOrder(p, amount, price);
-        pos.tokens -= amount;
-      } else if (state.exitMode === "buyback") {
-        state.buyOrders.push({
-          id: "buyback_" + Date.now(),
-          projectId: p.id,
-          symbol: p.symbol,
-          amount,
-          price,
-          side: "buy",
-          timestamp: Date.now()
-        });
-        pos.tokens -= amount;
-        showToast("Buyback request queued.", "success");
-      } else {
-        const gross = amount * price;
-        const penalty = gross * 0.15;
-        pos.tokens -= amount;
-        showToast("Early redemption confirmed. Net received: " + fmtUsd(gross - penalty), "success");
-      }
-
-      closeExitModal();
-      matchOrders();
-      renderAll();
-    }
-
-    function addBuyOrder(projectId, symbol, amount, price) {
-      state.buyOrders.push({
-        id: "buy_" + Date.now() + "_" + Math.random(),
-        projectId,
-        symbol,
-        amount,
-        price,
-        side: "buy",
-        timestamp: Date.now()
-      });
-    }
-
-    function matchOrders() {
-      state.sellOrders.sort((a, b) => a.price - b.price || a.timestamp - b.timestamp);
-      state.buyOrders.sort((a, b) => b.price - a.price || a.timestamp - b.timestamp);
-
-      const newFills = [];
-      let i = 0;
-
-      while (i < state.sellOrders.length) {
-        const sell = state.sellOrders[i];
-        const buyIndex = state.buyOrders.findIndex((b) => b.projectId === sell.projectId && b.price >= sell.price);
-        if (buyIndex === -1) {
-          i += 1;
-          continue;
-        }
-
-        const buy = state.buyOrders[buyIndex];
-        const qty = Math.min(sell.amount, buy.amount);
-        const fillPrice = Number(((sell.price + buy.price) / 2).toFixed(2));
-
-        sell.amount -= qty;
-        buy.amount -= qty;
-
-        newFills.push({
-          id: "fill_" + Date.now() + "_" + Math.random(),
-          symbol: sell.symbol,
-          amount: qty,
-          price: fillPrice,
-          timestamp: Date.now()
-        });
-
-        if (sell.amount <= 0) state.sellOrders.splice(i, 1);
-        else i += 1;
-
-        if (buy.amount <= 0) state.buyOrders.splice(buyIndex, 1);
-      }
-
-      state.fills = [...newFills, ...state.fills].slice(0, 20);
-    }
-
-    function acceptBid(alertId) {
-      const alert = state.founderAlerts.find((x) => x.id === alertId);
-      if (!alert) return;
-      addBuyOrder(alert.projectId, alert.symbol, alert.amount, alert.price);
-      state.founderAlerts = state.founderAlerts.filter((x) => x.id !== alertId);
-      matchOrders();
-      renderAll();
-      showToast("Founder accepted buyback bid.", "success");
-    }
-
-    function counterBid(alertId) {
-      const alert = state.founderAlerts.find((x) => x.id === alertId);
-      if (!alert) return;
-
-      const newPrice = Number(prompt("Enter counter price (USDC):", String(Math.max(1, alert.price - 1))));
-      if (!newPrice || newPrice <= 0) return;
-
-      addBuyOrder(alert.projectId, alert.symbol, alert.amount, newPrice);
-      state.founderAlerts = state.founderAlerts.filter((x) => x.id !== alertId);
-      matchOrders();
-      renderAll();
-      showToast("Founder submitted counter order.", "success");
-    }
-
-    function ignoreAlert(alertId) {
-      state.founderAlerts = state.founderAlerts.filter((x) => x.id !== alertId);
-      renderFounderAlerts();
-      showToast("Alert ignored.");
-    }
-
-    function renderOrderBook() {
-      const sellEl = document.getElementById("sellOrders");
-      const buyEl = document.getElementById("buyOrders");
-      const fillsEl = document.getElementById("fillsList");
-
-      if (!state.sellOrders.length) sellEl.innerHTML = '<div><span>No sell orders</span><span class="pill">-</span></div>';
-      else sellEl.innerHTML = state.sellOrders.slice(0, 10).map((o) => `<div><span>${o.amount} @ ${fmtUsd(o.price)}</span><span class="pill">${o.symbol}</span></div>`).join("");
-
-      if (!state.buyOrders.length) buyEl.innerHTML = '<div><span>No buy orders</span><span class="pill">-</span></div>';
-      else buyEl.innerHTML = state.buyOrders.slice(0, 10).map((o) => `<div><span>${o.amount} @ ${fmtUsd(o.price)}</span><span class="pill">${o.symbol}</span></div>`).join("");
-
-      if (!state.fills.length) fillsEl.innerHTML = '<div><span>No fills yet</span><span class="pill">-</span></div>';
-      else fillsEl.innerHTML = state.fills.slice(0, 8).map((f) => `<div><span>${f.amount} tokens @ ${fmtUsd(f.price)}</span><span class="pill">${nowLabel(f.timestamp)}</span></div>`).join("");
-    }
-
-    function renderFounderAlerts() {
-      const el = document.getElementById("founderAlerts");
-      if (!state.founderAlerts.length) {
-        el.innerHTML = '<div><span>No investor exit requests</span><span class="pill">Clear</span></div>';
-        return;
-      }
-
-      el.innerHTML = state.founderAlerts.map((a) => `
-        <div>
-          <div>
-            <div><strong>${a.symbol}</strong> investor wants to sell ${a.amount} tokens</div>
-            <div class="subtle">Asking ${fmtUsd(a.price)} USDC / token (Total ${fmtUsd(a.total)})</div>
-          </div>
-          <div class="action-row">
-            <button class="btn" onclick="acceptBid('${a.id}')">Accept</button>
-            <button class="btn" onclick="counterBid('${a.id}')">Counter</button>
-            <button class="btn btn-danger" onclick="ignoreAlert('${a.id}')">Ignore</button>
+  <div class="sect-title">Trending Projects</div>
+  <div class="gridN g3" id="trendGrid">
+    <div class="card"><div class="skel" style="height:150px"></div></div>
+    <div class="card"><div class="skel" style="height:150px"></div></div>
+    <div class="card"><div class="skel" style="height:150px"></div></div>
+  </div>
+</div>
+
+<div class="page" id="page-discover">
+  <div class="page-head">
+    <div class="ph-row">
+      <div><h1>Discover</h1><p>Every project enriched with the AI Risk Engine, Builder Score and live on-chain state.</p></div>
+      <button class="btn btn-ghost" onclick="loadEverything()">Refresh chain data</button>
+    </div>
+  </div>
+  <div class="fbar" id="fbar">
+    <button class="fchip on" data-f="all" onclick="setFilter('all',this)">ALL</button>
+    <button class="fchip" data-f="0" onclick="setFilter('0',this)">EQUITY</button>
+    <button class="fchip" data-f="1" onclick="setFilter('1',this)">REVENUE</button>
+    <button class="fchip" data-f="2" onclick="setFilter('2',this)">RWA</button>
+    <button class="fchip" data-f="low" onclick="setFilter('low',this)">LOW RISK</button>
+    <button class="fchip" data-f="active" onclick="setFilter('active',this)">RAISING</button>
+  </div>
+  <div class="gridN g3" id="discoverGrid">
+    <div class="card"><div class="skel" style="height:220px"></div></div>
+    <div class="card"><div class="skel" style="height:220px"></div></div>
+    <div class="card"><div class="skel" style="height:220px"></div></div>
+  </div>
+</div>
+
+<div class="page" id="page-studio">
+  <div class="page-head">
+    <h1>Builder Studio</h1>
+    <p>Launch a tokenized asset in a guided flow — project, tokenomics, risk, AI review, deploy. Fee: 1 USDC.</p>
+  </div>
+  <div class="wizard">
+    <div class="wsteps" id="wsteps">
+      <div class="wstep on" data-s="0"><span class="n">1</span>Project</div>
+      <div class="wstep" data-s="1"><span class="n">2</span>Tokenomics</div>
+      <div class="wstep" data-s="2"><span class="n">3</span>Risk Profile</div>
+      <div class="wstep" data-s="3"><span class="n">4</span>AI Review</div>
+      <div class="wstep" data-s="4"><span class="n">5</span>Deploy</div>
+    </div>
+
+    <div class="card">
+      <div class="wpane on" data-p="0">
+        <div class="fgrid">
+          <div class="field ffull"><label>COMPANY / PROJECT NAME</label><input id="sCompany" placeholder="e.g. Lagos Solar Grid Ltd."/></div>
+          <div class="field"><label>TOKEN NAME</label><input id="sName" placeholder="e.g. Lagos Solar Token"/></div>
+          <div class="field"><label>TOKEN SYMBOL</label><input id="sSymbol" placeholder="LST" maxlength="8" oninput="this.value=this.value.toUpperCase()"/></div>
+          <div class="field ffull"><label>DESCRIPTION</label><textarea id="sDesc" placeholder="What does this asset represent? Why are you raising on Arc?"></textarea></div>
+          <div class="field ffull"><label>ASSET TYPE</label>
+            <select id="sType">
+              <option value="0">Equity — company shares</option>
+              <option value="1">Revenue Share — percentage of revenue</option>
+              <option value="2">Real-World Asset — property / commodity</option>
+            </select>
           </div>
         </div>
-      `).join("");
-    }
+        <div class="wnav"><span></span><button class="btn" onclick="wgo(1)">Next: Tokenomics</button></div>
+      </div>
 
-    function renderPortfolio() {
-      const grid = document.getElementById("portfolioGrid");
-      if (!state.portfolio.length) {
-        grid.innerHTML = '<div class="empty">No holdings yet.</div>';
-        document.getElementById("pfValue").textContent = "$0";
-        document.getElementById("pfCost").textContent = "$0";
-        document.getElementById("pfPnl").textContent = "$0";
-        document.getElementById("pfPositions").textContent = "0";
-        return;
+      <div class="wpane" data-p="1">
+        <div class="fgrid">
+          <div class="field"><label>TOTAL VALUATION (USDC)</label><input id="sVal" type="number" placeholder="1000000" oninput="calcStudio()"/></div>
+          <div class="field"><label>PRICE PER TOKEN (USDC)</label><input id="sPrice" type="number" placeholder="10" oninput="calcStudio()"/></div>
+          <div class="field"><label>MAX TOKEN SUPPLY</label><input id="sMax" type="number" placeholder="100000" oninput="calcStudio()"/></div>
+          <div class="field"><label>IMPLIED RAISE CAP (AUTO)</label><input id="sCap" readonly placeholder="—"/></div>
+        </div>
+        <div class="wnav"><button class="btn btn-ghost" onclick="wgo(0)">Back</button><button class="btn" onclick="wgo(2)">Next: Risk</button></div>
+      </div>
+
+      <div class="wpane" data-p="2">
+        <div class="field ffull"><label>RISK TIER (STORED ON-CHAIN)</label>
+          <select id="sRisk">
+            <option value="0">Low — stable, collateralized, proven revenue</option>
+            <option value="1">Medium — operating business, growth stage</option>
+            <option value="2">High — early stage, speculative</option>
+          </select>
+        </div>
+        <div class="ai-review-box" style="margin-top:16px">
+          <h4>Why this matters</h4>
+          <ul>
+            <li>Your risk tier is written into the token contract permanently</li>
+            <li>The AI Risk Engine combines it with live funding and valuation data</li>
+            <li>Honest tiering improves your Builder Score over time</li>
+          </ul>
+        </div>
+        <div class="wnav"><button class="btn btn-ghost" onclick="wgo(1)">Back</button><button class="btn" onclick="wgo(3)">Next: AI Review</button></div>
+      </div>
+
+      <div class="wpane" data-p="3">
+        <div id="aiReviewOut"></div>
+        <div class="wnav"><button class="btn btn-ghost" onclick="wgo(2)">Back</button><button class="btn" onclick="wgo(4)">Continue to Deploy</button></div>
+      </div>
+
+      <div class="wpane" data-p="4">
+        <div id="deployReview"></div>
+        <div class="ai-review-box">
+          <h4>Deployment cost</h4>
+          <ul><li>1 USDC listing fee (approve + launch = 2 wallet confirmations)</li><li>Gas is paid in USDC — settles in ~0.5s on Arc</li></ul>
+        </div>
+        <div class="wnav">
+          <button class="btn btn-ghost" onclick="wgo(3)">Back</button>
+          <button class="btn" id="deployBtn" onclick="deployAsset()">Deploy on Arc Testnet</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-vault">
+  <div class="page-head">
+    <h1>Vault</h1>
+    <p>Your on-chain identity — holdings, cost basis, claimable yield and builder reputation.</p>
+  </div>
+  <div id="vaultContent">
+    <div class="empty"><div class="ei">VA</div><h3>Connect your wallet</h3><p>Holdings, dividends and Builder Score appear here</p></div>
+  </div>
+</div>
+
+<div class="page" id="page-stable">
+  <div class="page-head">
+    <h1>Stablecoin Hub</h1>
+    <p>USDC is Arc's native gas and settlement currency. Track platform flows and Circle-native rails.</p>
+  </div>
+  <div class="gridN g4">
+    <div class="card kpi"><div class="kv" id="stRaised">—</div><div class="kl">USDC Settled via ArcVault</div></div>
+    <div class="card kpi"><div class="kv" id="stFees">—</div><div class="kl">Listing Fees Collected</div></div>
+    <div class="card kpi"><div class="kv">USDC</div><div class="kl">Native Gas Token</div></div>
+    <div class="card kpi"><div class="kv">~0.5s</div><div class="kl">Settlement Finality</div></div>
+  </div>
+  <div class="sect-title">Circle-Native Rails on Arc</div>
+  <div class="gridN g3">
+    <div class="card hover"><b style="font-size:14px">StableFX</b><p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">On-chain FX engine for USDC / EURC pairs. RFQ-based settlement, 24/7. FxEscrow: <span class="chip">0x8676…a9f8</span></p></div>
+    <div class="card hover"><b style="font-size:14px">CCTP v2</b><p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">Native USDC transfer across chains. Bring capital from Ethereum or Solana into ArcVault raises. Messenger: <span class="chip">0x8FE6…2DAA</span></p></div>
+    <div class="card hover"><b style="font-size:14px">USYC</b><p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">Tokenized yield for idle treasury. Future ArcVault raises can auto-park unspent USDC into yield. <span class="chip">0xe918…86C</span></p></div>
+  </div>
+</div>
+
+<div class="page" id="page-analytics">
+  <div class="page-head">
+    <h1>Analytics and Leaderboard</h1>
+    <p>Top builders, top raises, and ecosystem health — computed live from chain state.</p>
+  </div>
+  <div class="gridN g2">
+    <div class="card"><b style="font-size:13px">Top Builders</b><div id="topBuilders" style="margin-top:10px"><div class="skel" style="height:110px"></div></div></div>
+    <div class="card"><b style="font-size:13px">Top Raises</b><div id="topRaises" style="margin-top:10px"><div class="skel" style="height:110px"></div></div></div>
+  </div>
+  <div class="sect-title">Ecosystem Health</div>
+  <div class="gridN g4" id="healthRow"></div>
+</div>
+
+</main>
+
+<div class="ov" id="assetOv">
+  <div class="modal">
+    <div class="mh">
+      <div><div class="mt-title" id="amName"></div><div class="ms" id="amSub"></div></div>
+      <button class="xb" onclick="closeAsset()">X</button>
+    </div>
+    <div id="amBody"></div>
+    <div class="buybox" id="amBuy"></div>
+  </div>
+</div>
+
+<button class="copilot-fab" onclick="toggleCopilot()">AI COPILOT</button>
+<div class="copilot" id="copilot">
+  <div class="cp-head">
+    <div class="cp-ic">AI</div>
+    <div><b>ArcVault Copilot</b><small>ON-CHAIN INTELLIGENCE · RUNS IN YOUR BROWSER</small></div>
+  </div>
+  <div class="cp-body" id="cpBody">
+    <div class="cp-msg bot">Welcome. I am your ArcVault copilot. I read live chain state and can explain anything on the platform. Try a quick prompt below.</div>
+  </div>
+  <div class="cp-quick">
+    <button class="cpq" onclick="askCopilot('How do I launch an asset?')">How do I launch?</button>
+    <button class="cpq" onclick="askCopilot('What is the best project right now?')">Best project?</button>
+    <button class="cpq" onclick="askCopilot('Explain the risk engine')">Risk engine?</button>
+    <button class="cpq" onclick="askCopilot('Summarize my portfolio')">My portfolio</button>
+    <button class="cpq" onclick="askCopilot('What is Builder Score?')">Builder Score?</button>
+  </div>
+  <div class="cp-input">
+    <input id="cpIn" placeholder="Ask anything about ArcVault or Arc" onkeydown="if(event.key==='Enter')sendCopilot()"/>
+    <button onclick="sendCopilot()">Send</button>
+  </div>
+</div>
+
+<div class="cmdk" id="cmdk">
+  <div class="cmdk-box">
+    <input id="cmdkIn" placeholder="Type a command or search" oninput="filterCmdk()"/>
+    <div class="cmdk-list" id="cmdkList"></div>
+  </div>
+</div>
+
+<div class="bottom-nav">
+  <button class="bn-item on" data-page="dash" onclick="nav('dash',this)"><span class="bi">HQ</span>Home</button>
+  <button class="bn-item" data-page="discover" onclick="nav('discover',this)"><span class="bi">DS</span>Discover</button>
+  <button class="bn-item" data-page="studio" onclick="nav('studio',this)"><span class="bi">BS</span>Launch</button>
+  <button class="bn-item" data-page="vault" onclick="nav('vault',this)"><span class="bi">VA</span>Vault</button>
+  <button class="bn-item" onclick="toggleCopilot()"><span class="bi">AI</span>Copilot</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* CONFIG — YOUR LIVE CONTRACT */
+const RPC_URL = "https://rpc.testnet.arc.network";
+const CHAIN_ID = 5042002;
+const ARC_CHAIN_HEX = "0x4cef52";
+const LAUNCHPAD_ADDRESS = "0x705C2b9D3B06eeF72831F463Ca6eBc5A9B543e3b";
+const USDC_ADDRESS = "0x3600000000000000000000000000000000000000";
+const LISTING_FEE = 1000000n;
+const EXPLORER = "https://testnet.arcscan.app";
+
+const LAUNCHPAD_ABI = [
+  "function launchAsset(string name,string symbol,string companyName,string description,uint8 assetType,uint8 riskTier,uint256 totalValuation,uint256 pricePerToken,uint256 maxSupply) returns (address)",
+  "function getAllAssets() view returns (tuple(address tokenContract,string name,string symbol,address founder,uint8 assetType,uint8 riskTier,uint256 listedAt)[])"
+];
+const ASSET_TOKEN_ABI = [
+  "function companyName() view returns (string)",
+  "function description() view returns (string)",
+  "function assetType() view returns (uint8)",
+  "function riskTier() view returns (uint8)",
+  "function totalValuation() view returns (uint256)",
+  "function pricePerToken() view returns (uint256)",
+  "function maxSupply() view returns (uint256)",
+  "function isActive() view returns (bool)",
+  "function founder() view returns (address)",
+  "function createdAt() view returns (uint256)",
+  "function totalRaised() view returns (uint256)",
+  "function totalSupply() view returns (uint256)",
+  "function balanceOf(address) view returns (uint256)",
+  "function pendingDividends(address) view returns (uint256)",
+  "function totalInvested(address) view returns (uint256)",
+  "function totalPurchasedTokens(address) view returns (uint256)",
+  "function purchaseTokens(uint256 tokenAmount)",
+  "function claimDividends()"
+];
+const ERC20_ABI = [
+  "function approve(address spender,uint256 amount) returns (bool)",
+  "function allowance(address owner,address spender) view returns (uint256)"
+];
+
+const readProvider = new ethers.JsonRpcProvider(RPC_URL);
+const readLaunchpad = new ethers.Contract(LAUNCHPAD_ADDRESS, LAUNCHPAD_ABI, readProvider);
+
+/* STATE */
+let signer=null, wallet=null;
+let projects=[];
+let currentAsset=null;
+let filter="all";
+let wstep=0;
+
+const TYPE_N={0:"Equity",1:"Revenue Share",2:"RWA"};
+const TYPE_B={0:"b-eq",1:"b-rev",2:"b-rwa"};
+const TYPE_C={0:"var(--equity)",1:"var(--revenue)",2:"var(--rwa)"};
+const TYPE_I={0:"EQ",1:"RS",2:"RW"};
+const RISK_N={0:"LOW",1:"MED",2:"HIGH"};
+const RISK_B={0:"b-low",1:"b-med",2:"b-high"};
+
+const fmtUsd=n=>"$"+Number(n).toLocaleString(undefined,{maximumFractionDigits:2});
+const fmtK=n=>n>=1e6?"$"+(n/1e6).toFixed(2)+"M":n>=1e3?"$"+(n/1e3).toFixed(1)+"K":fmtUsd(n);
+const short=a=>a.slice(0,6)+"…"+a.slice(-4);
+const ago=ms=>{const s=(Date.now()-ms)/1000;if(s<60)return Math.floor(s)+"s ago";if(s<3600)return Math.floor(s/60)+"m ago";if(s<86400)return Math.floor(s/3600)+"h ago";return Math.floor(s/86400)+"d ago"};
+
+/* AI RISK ENGINE */
+function riskEngine(p){
+  let score = p.riskTier===0?8.6:p.riskTier===1?6.8:4.9;
+  const prog = p.target>0 ? p.raised/p.target : 0;
+  score += Math.min(1.2, prog*2.4);
+  const days=(Date.now()-p.createdAt)/86400000;
+  score += Math.min(.5, days/60);
+  if (p.price>0 && p.maxSupply>0){
+    const cap=p.price*p.maxSupply;
+    if (cap>0 && p.target>0 && cap/p.target>0.5 && cap/p.target<2.5) score+=.3;
+  }
+  if (!p.active) score-=.6;
+  score=Math.max(1,Math.min(9.9,score));
+  const conf = Math.min(97, 62 + prog*22 + Math.min(12,days/5));
+  return {score:score.toFixed(1), conf:conf.toFixed(0),
+    verdict: score>=7.5?"Strong":score>=5.5?"Moderate":"Speculative"};
+}
+
+/* BUILDER SCORE */
+function builderScore(addr){
+  const mine=projects.filter(p=>p.founder.toLowerCase()===addr.toLowerCase());
+  if(!mine.length) return null;
+  const dep=Math.min(100, mine.length*25);
+  const raised=mine.reduce((s,p)=>s+p.raised,0);
+  const fund=Math.min(100, Math.log10(Math.max(10,raised))*22);
+  const act=Math.round(mine.filter(p=>p.active).length/mine.length*100);
+  const oldest=Math.min(...mine.map(p=>p.createdAt));
+  const age=Math.min(100,(Date.now()-oldest)/86400000*3);
+  const trust=Math.round(dep*.3+fund*.3+act*.2+age*.2);
+  return {trust,dep,fund:Math.round(fund),act,age:Math.round(age),count:mine.length,raised};
+}
+
+/* LOAD CHAIN DATA */
+async function loadEverything(){
+  try{
+    const [assets, block] = await Promise.all([readLaunchpad.getAllAssets(), readProvider.getBlockNumber()]);
+    document.getElementById("kBlock").textContent="#"+block.toLocaleString();
+    document.getElementById("sideBlock").textContent="Block #"+block.toLocaleString();
+
+    projects = await Promise.all(assets.map(async(a,idx)=>{
+      const t=new ethers.Contract(a.tokenContract,ASSET_TOKEN_ABI,readProvider);
+      const [company,desc,val,price,maxS,active,created,raised,supply]=await Promise.all([
+        t.companyName(),t.description(),t.totalValuation(),t.pricePerToken(),
+        t.maxSupply(),t.isActive(),t.createdAt(),t.totalRaised(),t.totalSupply()
+      ]);
+      return {
+        id:idx, tokenContract:a.tokenContract, name:a.name, symbol:a.symbol,
+        founder:a.founder, assetType:Number(a.assetType), riskTier:Number(a.riskTier),
+        listedAt:Number(a.listedAt)*1000, company, description:desc,
+        target:Number(ethers.formatUnits(val,6)), price:Number(ethers.formatUnits(price,6)),
+        priceRaw:price, maxSupply:Number(maxS), active,
+        createdAt:Number(created)*1000, raised:Number(ethers.formatUnits(raised,6)),
+        sold:Number(ethers.formatUnits(supply,18))
+      };
+    }));
+    projects.sort((a,b)=>b.listedAt-a.listedAt);
+
+    renderKPIs(); renderFeed(); renderInsights(); renderTrending();
+    renderDiscover(); renderAnalytics(); renderStableHub();
+    if(wallet) renderVault();
+  }catch(e){
+    console.error(e);
+    toast("Chain read error: "+e.message,"err");
+  }
+}
+
+/* DASHBOARD */
+function renderKPIs(){
+  const raised=projects.reduce((s,p)=>s+p.raised,0);
+  const builders=new Set(projects.map(p=>p.founder.toLowerCase())).size;
+  document.getElementById("kAssets").textContent=projects.length;
+  document.getElementById("kAssetsT").textContent=projects.filter(p=>p.active).length+" actively raising";
+  document.getElementById("kRaised").textContent=fmtK(raised);
+  document.getElementById("kRaisedT").textContent="settled in USDC on Arc";
+  document.getElementById("kBuilders").textContent=builders;
+}
+function renderFeed(){
+  const el=document.getElementById("feedList");
+  if(!projects.length){el.innerHTML=`<div class="empty" style="padding:26px"><p>No activity yet — deploy the first asset</p></div>`;return;}
+  const items=[];
+  projects.slice(0,8).forEach(p=>{
+    items.push({ic:"NEW",t:`<b>${p.name}</b> (${p.symbol}) deployed by <b>${short(p.founder)}</b>`,time:p.listedAt});
+    if(p.raised>0) items.push({ic:"TX",t:`<b>${fmtK(p.raised)}</b> USDC raised into <b>${p.symbol}</b>`,time:p.listedAt+1});
+  });
+  items.sort((a,b)=>b.time-a.time);
+  el.innerHTML=items.slice(0,7).map(i=>`
+    <div class="feed-item"><div class="feed-ic">${i.ic}</div>
+    <div class="feed-tx">${i.t}</div><div class="feed-time">${ago(i.time)}</div></div>`).join("");
+}
+function renderInsights(){
+  const el=document.getElementById("insightList");
+  if(!projects.length){el.innerHTML="No data yet — insights appear once assets go live.";return;}
+  const best=[...projects].sort((a,b)=>(b.raised/(b.target||1))-(a.raised/(a.target||1)))[0];
+  const risky=projects.filter(p=>p.riskTier===2).length;
+  const raised=projects.reduce((s,p)=>s+p.raised,0);
+  const re=riskEngine(best);
+  el.innerHTML=`
+    <div><b style="color:var(--text)">${best.symbol}</b> leads funding at <b style="color:var(--arc)">${((best.raised/(best.target||1))*100).toFixed(1)}%</b> of target — AI score ${re.score}/10</div>
+    <div style="margin-top:8px">Total ecosystem settlement: <b style="color:var(--text)">${fmtK(raised)}</b> USDC across ${projects.length} contracts</div>
+    <div style="margin-top:8px">Risk mix: ${projects.filter(p=>p.riskTier===0).length} low · ${projects.filter(p=>p.riskTier===1).length} medium · ${risky} high</div>`;
+}
+function renderTrending(){
+  const el=document.getElementById("trendGrid");
+  if(!projects.length){el.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">BS</div><h3>No projects yet</h3><p>Open Builder Studio to launch the first one</p></div>`;return;}
+  const top=[...projects].sort((a,b)=>b.raised-a.raised).slice(0,3);
+  el.innerHTML=top.map(p=>assetCardHTML(p)).join("");
+}
+
+/* DISCOVER */
+function setFilter(f,btn){filter=f;document.querySelectorAll("#fbar .fchip").forEach(c=>c.classList.remove("on"));btn.classList.add("on");renderDiscover();}
+function renderDiscover(){
+  const el=document.getElementById("discoverGrid");
+  let arr=[...projects];
+  if(filter==="0"||filter==="1"||filter==="2") arr=arr.filter(p=>p.assetType===Number(filter));
+  if(filter==="low") arr=arr.filter(p=>p.riskTier===0);
+  if(filter==="active") arr=arr.filter(p=>p.active);
+  if(!arr.length){el.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">DS</div><h3>Nothing matches</h3><p>Try another filter or launch an asset</p></div>`;return;}
+  el.innerHTML=arr.map(p=>assetCardHTML(p)).join("");
+}
+function assetCardHTML(p){
+  const pct=p.target>0?Math.min(100,(p.raised/p.target)*100):0;
+  const re=riskEngine(p);
+  return `
+  <div class="acard" style="--tc:${TYPE_C[p.assetType]}" onclick="openAsset(${p.id})">
+    <div class="ac-top">
+      <div class="ac-ico" style="background:${TYPE_C[p.assetType]}">${TYPE_I[p.assetType]}</div>
+      <div class="badges">
+        <span class="tbadge ${TYPE_B[p.assetType]}">${TYPE_N[p.assetType]}</span>
+        <span class="tbadge ${RISK_B[p.riskTier]}">${RISK_N[p.riskTier]} RISK</span>
+      </div>
+    </div>
+    <div class="ac-name">${p.name}</div>
+    <div class="ac-co">${p.symbol} · ${p.company} · by ${short(p.founder)}</div>
+    <div class="ac-desc">${p.description.slice(0,100)}${p.description.length>100?"…":""}</div>
+    <div class="ai-strip">
+      <span class="as-tag">AI</span>
+      <span class="as-score">${re.score}/10</span>
+      <span class="as-label">${re.verdict}</span>
+      <span class="as-conf">conf ${re.conf}%</span>
+    </div>
+    <div class="pmeta"><span class="pr">${fmtK(p.raised)} raised</span><span class="pt">${pct.toFixed(0)}% of ${fmtK(p.target)}</span></div>
+    <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
+    <div class="ac-foot">
+      <div><div class="pl">PER TOKEN</div><div class="pv">$${p.price.toLocaleString()}</div></div>
+      <button class="btn" onclick="event.stopPropagation();openAsset(${p.id})">Invest</button>
+    </div>
+  </div>`;
+}
+
+/* ASSET MODAL */
+function openAsset(id){
+  currentAsset=projects.find(p=>p.id===id);
+  if(!currentAsset)return;
+  const p=currentAsset, re=riskEngine(p);
+  const pct=p.target>0?Math.min(100,(p.raised/p.target)*100):0;
+  const bs=builderScore(p.founder);
+  document.getElementById("amName").textContent=p.name;
+  document.getElementById("amSub").textContent=`${p.symbol} · ${p.company}`;
+  document.getElementById("amBody").innerHTML=`
+    <div class="ai-strip" style="margin-bottom:14px">
+      <span class="as-tag">AI</span>
+      <span class="as-score">Risk ${re.score}/10</span>
+      <span class="as-label">${re.verdict}</span>
+      <span class="as-conf">confidence ${re.conf}%</span>
+    </div>
+    <div class="review-row"><span class="rk">TYPE / RISK</span><span><span class="tbadge ${TYPE_B[p.assetType]}">${TYPE_N[p.assetType]}</span> <span class="tbadge ${RISK_B[p.riskTier]}">${RISK_N[p.riskTier]}</span></span></div>
+    <div class="review-row"><span class="rk">VALUATION</span><span class="rv">${fmtUsd(p.target)}</span></div>
+    <div class="review-row"><span class="rk">PRICE / TOKEN</span><span class="rv">$${p.price.toLocaleString()}</span></div>
+    <div class="review-row"><span class="rk">RAISED</span><span class="rv" style="color:var(--arc)">${fmtUsd(p.raised)} (${pct.toFixed(1)}%)</span></div>
+    <div class="review-row"><span class="rk">TOKENS SOLD</span><span class="rv">${p.sold.toLocaleString()} / ${p.maxSupply.toLocaleString()}</span></div>
+    <div class="review-row"><span class="rk">BUILDER</span><span class="rv">${short(p.founder)}${bs?` · Trust ${bs.trust}/100`:``}</span></div>
+    <div class="review-row"><span class="rk">STATUS</span><span class="rv" style="color:${p.active?"var(--success)":"var(--danger)"}">${p.active?"Raising":"Closed"}</span></div>
+    <div class="review-row"><span class="rk">CONTRACT</span><a class="chip" target="_blank" href="${EXPLORER}/address/${p.tokenContract}">${short(p.tokenContract)}</a></div>`;
+  document.getElementById("amBuy").innerHTML=`
+    <h4>Purchase with USDC</h4>
+    <div class="brow2">
+      <div class="field"><label>TOKEN AMOUNT</label><input id="buyAmt" type="number" min="1" placeholder="100" oninput="updBuyCost()"/></div>
+      <div class="field"><label>TOTAL COST</label><div class="calc" id="buyCost">0 USDC</div></div>
+    </div>
+    <button class="btn btn-full" id="buyBtn" onclick="buyTokens()">Invest with USDC</button>
+    <button class="btn btn-ghost btn-full mt-8" onclick="claimDivs()">Claim Dividends</button>
+    <div style="text-align:center;margin-top:9px;font-size:10px;font-family:var(--mono);color:var(--muted2)">Gas in USDC · ~0.5s finality · Chain 5042002</div>`;
+  document.getElementById("assetOv").classList.add("open");
+}
+function closeAsset(){document.getElementById("assetOv").classList.remove("open");currentAsset=null;}
+function updBuyCost(){
+  if(!currentAsset)return;
+  const q=parseFloat(document.getElementById("buyAmt").value)||0;
+  document.getElementById("buyCost").textContent=(q*currentAsset.price).toLocaleString()+" USDC";
+}
+async function buyTokens(){
+  if(!signer){toast("Connect wallet first","err");return;}
+  if(!currentAsset)return;
+  const q=parseInt(document.getElementById("buyAmt").value);
+  if(!q||q<1){toast("Enter a valid amount","err");return;}
+  const cost=BigInt(q)*currentAsset.priceRaw;
+  const btn=document.getElementById("buyBtn");
+  btn.disabled=true;btn.textContent="Approving USDC";
+  try{
+    const usdc=new ethers.Contract(USDC_ADDRESS,ERC20_ABI,signer);
+    const allow=await usdc.allowance(wallet,currentAsset.tokenContract);
+    if(allow<cost){
+      toast("Approving USDC","inf");
+      const atx=await usdc.approve(currentAsset.tokenContract,cost);
+      await atx.wait();
+    }
+    btn.textContent="Buying on Arc";
+    toast("Purchasing on Arc","inf");
+    const t=new ethers.Contract(currentAsset.tokenContract,ASSET_TOKEN_ABI,signer);
+    const tx=await t.purchaseTokens(BigInt(q));
+    await tx.wait();
+    toast(`Purchased ${q} ${currentAsset.symbol}`,"ok");
+    closeAsset();await loadEverything();
+  }catch(e){toast("Error: "+(e.reason||e.shortMessage||e.message),"err");}
+  btn.disabled=false;btn.textContent="Invest with USDC";
+}
+async function claimDivs(){
+  if(!signer){toast("Connect wallet first","err");return;}
+  if(!currentAsset)return;
+  try{
+    const t=new ethers.Contract(currentAsset.tokenContract,ASSET_TOKEN_ABI,signer);
+    const pending=await t.pendingDividends(wallet);
+    if(pending===0n){toast("No dividends to claim yet","inf");return;}
+    toast("Claiming dividends","inf");
+    const tx=await t.claimDividends();
+    await tx.wait();
+    toast("Dividends claimed","ok");
+    await loadEverything();
+  }catch(e){toast("Error: "+(e.reason||e.shortMessage||e.message),"err");}
+}
+
+/* BUILDER STUDIO */
+function wgo(n){
+  if(n>=1&&wstep===0){
+    if(!v("sCompany")||!v("sName")||!v("sSymbol")||!v("sDesc")){toast("Fill in all project fields","err");return;}
+  }
+  if(n>=2&&wstep===1){
+    if(!vn("sVal")||!vn("sPrice")||!vn("sMax")){toast("Fill in all tokenomics fields","err");return;}
+  }
+  wstep=n;
+  document.querySelectorAll(".wstep").forEach((s,i)=>{
+    s.classList.toggle("on",i===n);s.classList.toggle("done",i<n);
+  });
+  document.querySelectorAll(".wpane").forEach((p,i)=>p.classList.toggle("on",i===n));
+  if(n===3)renderAIReview();
+  if(n===4)renderDeployReview();
+}
+const v=id=>document.getElementById(id).value.trim();
+const vn=id=>parseFloat(document.getElementById(id).value)>0;
+function calcStudio(){
+  const m=parseFloat(document.getElementById("sMax").value)||0;
+  const pr=parseFloat(document.getElementById("sPrice").value)||0;
+  document.getElementById("sCap").value=(m*pr).toLocaleString()+" USDC";
+}
+function renderAIReview(){
+  const val=parseFloat(v("sVal"))||0, price=parseFloat(v("sPrice"))||0, max=parseFloat(v("sMax"))||0;
+  const cap=price*max, risk=Number(v("sRisk"));
+  const notes=[];
+  if(cap<val*0.5)notes.push(`Raise cap (${fmtK(cap)}) is under 50% of valuation — investors may see limited upside allocation. Consider more supply or higher price.`);
+  else if(cap>val*2)notes.push(`Raise cap (${fmtK(cap)}) is over 2x valuation — this can look dilutive. Consider reducing supply.`);
+  else notes.push(`Raise cap ${fmtK(cap)} vs valuation ${fmtK(val)} looks balanced.`);
+  if(price<1)notes.push("Sub-$1 token price reads as speculative — fine for community raises, weaker for institutions.");
+  else notes.push(`$${price} per token is a credible institutional price point.`);
+  if(risk===2&&val>1e6)notes.push("High risk tier plus $1M+ valuation: expect the AI Risk Engine to score conservatively until funding traction builds.");
+  else notes.push("Risk tier and valuation are consistent.");
+  if(v("sDesc").length<60)notes.push("Description is short — richer descriptions convert investors better and lift your AI score.");
+  document.getElementById("aiReviewOut").innerHTML=`
+    <div class="ai-review-box" style="margin-top:0">
+      <h4>AI Pre-Deployment Review</h4>
+      <ul>${notes.map(n=>`<li>${n}</li>`).join("")}</ul>
+    </div>`;
+}
+function renderDeployReview(){
+  document.getElementById("deployReview").innerHTML=`
+    <div class="review-row"><span class="rk">COMPANY</span><span class="rv">${v("sCompany")}</span></div>
+    <div class="review-row"><span class="rk">TOKEN</span><span class="rv">${v("sName")} (${v("sSymbol")})</span></div>
+    <div class="review-row"><span class="rk">TYPE</span><span class="rv">${TYPE_N[Number(v("sType"))]}</span></div>
+    <div class="review-row"><span class="rk">RISK TIER</span><span class="rv">${RISK_N[Number(v("sRisk"))]}</span></div>
+    <div class="review-row"><span class="rk">VALUATION</span><span class="rv">${fmtK(parseFloat(v("sVal"))||0)}</span></div>
+    <div class="review-row"><span class="rk">PRICE / SUPPLY</span><span class="rv">$${v("sPrice")} x ${Number(v("sMax")).toLocaleString()}</span></div>
+    <div class="review-row"><span class="rk">NETWORK</span><span class="rv">Arc Testnet · 5042002</span></div>`;
+}
+async function deployAsset(){
+  if(!signer){toast("Connect wallet first","err");return;}
+  const btn=document.getElementById("deployBtn");
+  btn.disabled=true;btn.textContent="Approving fee";
+  try{
+    const usdc=new ethers.Contract(USDC_ADDRESS,ERC20_ABI,signer);
+    const allow=await usdc.allowance(wallet,LAUNCHPAD_ADDRESS);
+    if(allow<LISTING_FEE){
+      toast("Approving 1 USDC listing fee","inf");
+      const atx=await usdc.approve(LAUNCHPAD_ADDRESS,LISTING_FEE);
+      await atx.wait();
+    }
+    btn.textContent="Deploying on Arc";
+    toast("Deploying your asset contract","inf");
+    const lp=new ethers.Contract(LAUNCHPAD_ADDRESS,LAUNCHPAD_ABI,signer);
+    const tx=await lp.launchAsset(
+      v("sName"), v("sSymbol"), v("sCompany"), v("sDesc"),
+      Number(v("sType")), Number(v("sRisk")),
+      ethers.parseUnits(v("sVal"),6),
+      ethers.parseUnits(v("sPrice"),6),
+      BigInt(v("sMax"))
+    );
+    const rc=await tx.wait();
+    toast(`${v("sSymbol")} deployed on Arc`,"ok");
+    console.log("TX:",rc.hash,"->",EXPLORER+"/tx/"+rc.hash);
+    ["sCompany","sName","sSymbol","sDesc","sVal","sPrice","sMax","sCap"].forEach(id=>document.getElementById(id).value="");
+    wgo(0);
+    await loadEverything();
+    nav("discover",document.querySelector('[data-page="discover"]'));
+  }catch(e){toast("Error: "+(e.reason||e.shortMessage||e.message),"err");}
+  btn.disabled=false;btn.textContent="Deploy on Arc Testnet";
+}
+
+/* VAULT */
+async function renderVault(){
+  const el=document.getElementById("vaultContent");
+  if(!wallet){el.innerHTML=`<div class="empty"><div class="ei">VA</div><h3>Connect your wallet</h3><p>Holdings, dividends and Builder Score appear here</p></div>`;return;}
+  el.innerHTML=`<div class="card"><div class="skel" style="height:120px"></div></div>`;
+  try{
+    const holdings=await Promise.all(projects.map(async p=>{
+      const t=new ethers.Contract(p.tokenContract,ASSET_TOKEN_ABI,readProvider);
+      const [bal,pend,inv]=await Promise.all([
+        t.balanceOf(wallet),t.pendingDividends(wallet),t.totalInvested(wallet)
+      ]);
+      return {...p,bal:Number(ethers.formatUnits(bal,18)),pend:Number(ethers.formatUnits(pend,6)),inv:Number(ethers.formatUnits(inv,6))};
+    }));
+    const owned=holdings.filter(h=>h.bal>0);
+    const totVal=owned.reduce((s,h)=>s+h.bal*h.price,0);
+    const totInv=owned.reduce((s,h)=>s+h.inv,0);
+    const totPend=owned.reduce((s,h)=>s+h.pend,0);
+    const bs=builderScore(wallet);
+    const conc=owned.length?Math.max(...owned.map(h=>h.bal*h.price))/Math.max(1,totVal)*100:0;
+    const health=owned.length?Math.round(100-Math.max(0,conc-40)):0;
+    el.innerHTML=`
+    <div class="gridN g4">
+      <div class="card kpi"><div class="kv">${fmtK(totVal)}</div><div class="kl">Portfolio Value</div></div>
+      <div class="card kpi"><div class="kv">${fmtK(totInv)}</div><div class="kl">Cost Basis (on-chain)</div></div>
+      <div class="card kpi"><div class="kv" style="color:var(--arc)">${fmtUsd(totPend)}</div><div class="kl">Claimable Dividends</div></div>
+      <div class="card kpi"><div class="kv">${owned.length?health+"/100":"—"}</div><div class="kl">Portfolio Health</div><div class="kt ${conc>60?"neu":"pos"}">${owned.length?(conc>60?"concentrated — diversify":"well diversified"):""}</div></div>
+    </div>
+    ${bs?`
+    <div class="sect-title">Builder Reputation Passport</div>
+    <div class="card" style="display:flex;gap:20px;align-items:center;flex-wrap:wrap">
+      <div class="bscore-ring" style="background:conic-gradient(var(--arc) ${bs.trust*3.6}deg,var(--border2) 0deg)">
+        <div style="width:58px;height:58px;border-radius:50%;background:var(--surface);display:flex;align-items:center;justify-content:center">${bs.trust}</div>
+      </div>
+      <div class="score-rows">
+        <div class="score-row"><span class="sn">DEPLOYMENTS</span><div class="sb"><div class="sf" style="width:${bs.dep}%"></div></div><span class="sv">${bs.dep}</span></div>
+        <div class="score-row"><span class="sn">FUNDING</span><div class="sb"><div class="sf" style="width:${bs.fund}%"></div></div><span class="sv">${bs.fund}</span></div>
+        <div class="score-row"><span class="sn">ACTIVITY</span><div class="sb"><div class="sf" style="width:${bs.act}%"></div></div><span class="sv">${bs.act}</span></div>
+        <div class="score-row"><span class="sn">TENURE</span><div class="sb"><div class="sf" style="width:${bs.age}%"></div></div><span class="sv">${bs.age}</span></div>
+      </div>
+      <div style="font-size:11px;font-family:var(--mono);color:var(--muted2)">${bs.count} contract${bs.count>1?"s":""} deployed<br/>${fmtK(bs.raised)} raised lifetime</div>
+    </div>`:""}
+    <div class="sect-title">Holdings</div>
+    ${owned.length?`<div class="gridN g3">${owned.map(h=>`
+      <div class="acard" style="--tc:${TYPE_C[h.assetType]}" onclick="openAsset(${h.id})">
+        <div class="ac-top"><div class="ac-ico" style="background:${TYPE_C[h.assetType]}">${TYPE_I[h.assetType]}</div>
+        <span class="tbadge ${TYPE_B[h.assetType]}">${TYPE_N[h.assetType]}</span></div>
+        <div class="ac-name">${h.name}</div>
+        <div class="ac-co">${h.symbol}</div>
+        <div class="vrow"><span class="vk">BALANCE</span><span class="vv">${h.bal.toLocaleString()} ${h.symbol}</span></div>
+        <div class="vrow"><span class="vk">VALUE</span><span class="vv">${fmtUsd(h.bal*h.price)}</span></div>
+        <div class="vrow"><span class="vk">COST BASIS</span><span class="vv">${fmtUsd(h.inv)}</span></div>
+        <div class="vrow"><span class="vk">P/L</span><span class="vv" style="color:${h.bal*h.price>=h.inv?"var(--success)":"var(--danger)"}">${fmtUsd(h.bal*h.price-h.inv)}</span></div>
+        <div class="vrow"><span class="vk">CLAIMABLE</span><span class="vv" style="color:var(--arc)">${fmtUsd(h.pend)}</span></div>
+      </div>`).join("")}</div>`
+    :`<div class="empty"><div class="ei">DS</div><h3>No holdings yet</h3><p>Invest from Discover to build your vault</p></div>`}`;
+  }catch(e){
+    el.innerHTML=`<div class="empty"><div class="ei">ER</div><h3>Error loading vault</h3><p>${e.message}</p></div>`;
+  }
+}
+
+/* ANALYTICS */
+function renderAnalytics(){
+  const tb=document.getElementById("topBuilders");
+  const tr=document.getElementById("topRaises");
+  const hr=document.getElementById("healthRow");
+  if(!projects.length){
+    tb.innerHTML=tr.innerHTML=`<div class="empty" style="padding:22px"><p>No data yet</p></div>`;hr.innerHTML="";return;
+  }
+  const byBuilder={};
+  projects.forEach(p=>{
+    const k=p.founder.toLowerCase();
+    byBuilder[k]=byBuilder[k]||{addr:p.founder,count:0,raised:0};
+    byBuilder[k].count++;byBuilder[k].raised+=p.raised;
+  });
+  const builders=Object.values(byBuilder).sort((a,b)=>b.raised-a.raised).slice(0,5);
+  tb.innerHTML=builders.map((b,i)=>{
+    const bs=builderScore(b.addr);
+    return `<div class="vrow"><span class="vk">#${i+1} ${short(b.addr)}</span>
+    <span class="vv">${b.count} projects · ${fmtK(b.raised)} · Trust ${bs?bs.trust:"—"}</span></div>`;
+  }).join("");
+  const raises=[...projects].sort((a,b)=>b.raised-a.raised).slice(0,5);
+  tr.innerHTML=raises.map((p,i)=>`<div class="vrow"><span class="vk">#${i+1} ${p.symbol}</span>
+    <span class="vv" style="color:var(--arc)">${fmtK(p.raised)} · ${p.target>0?((p.raised/p.target)*100).toFixed(0):0}%</span></div>`).join("");
+  const avgScore=projects.reduce((s,p)=>s+parseFloat(riskEngine(p).score),0)/projects.length;
+  hr.innerHTML=`
+    <div class="card kpi"><div class="kv">${avgScore.toFixed(1)}/10</div><div class="kl">Avg AI Score</div></div>
+    <div class="card kpi"><div class="kv">${projects.filter(p=>p.active).length}/${projects.length}</div><div class="kl">Active Ratio</div></div>
+    <div class="card kpi"><div class="kv">${projects.filter(p=>p.riskTier===0).length}</div><div class="kl">Low-Risk Assets</div></div>
+    <div class="card kpi"><div class="kv">${fmtK(projects.reduce((s,p)=>s+p.target,0))}</div><div class="kl">Total Valuation Listed</div></div>`;
+}
+function renderStableHub(){
+  const raised=projects.reduce((s,p)=>s+p.raised,0);
+  document.getElementById("stRaised").textContent=fmtK(raised);
+  document.getElementById("stFees").textContent=fmtUsd(projects.length*1);
+}
+
+/* AI COPILOT */
+function toggleCopilot(){document.getElementById("copilot").classList.toggle("open");}
+function askCopilot(q){document.getElementById("cpIn").value=q;sendCopilot();}
+function sendCopilot(){
+  const inp=document.getElementById("cpIn");
+  const q=inp.value.trim();if(!q)return;
+  inp.value="";
+  addMsg(q,"user");
+  setTimeout(()=>addMsg(copilotAnswer(q.toLowerCase()),"bot"),350);
+}
+function addMsg(t,cls){
+  const b=document.getElementById("cpBody");
+  const d=document.createElement("div");
+  d.className="cp-msg "+cls;d.textContent=t;
+  b.appendChild(d);b.scrollTop=b.scrollHeight;
+}
+function copilotAnswer(q){
+  if(q.includes("launch")||q.includes("deploy")||q.includes("create")){
+    return "To launch: open Builder Studio, fill Project, Tokenomics, pick a Risk Tier, read the AI Review, then Deploy. You will sign 2 transactions: approve 1 USDC fee, then launchAsset(). Your contract goes live in ~0.5s and appears in Discover instantly.";
+  }
+  if(q.includes("best")||q.includes("top")||q.includes("recommend")){
+    if(!projects.length)return "No projects live yet — you could be first. Open Builder Studio to deploy.";
+    const best=[...projects].sort((a,b)=>parseFloat(riskEngine(b).score)-parseFloat(riskEngine(a).score))[0];
+    const re=riskEngine(best);
+    return `Right now ${best.name} (${best.symbol}) scores highest: ${re.score}/10 (${re.verdict}, ${re.conf}% confidence). It has raised ${fmtK(best.raised)} of ${fmtK(best.target)} at $${best.price}/token. Open it in Discover for the full breakdown. Not financial advice — always do your own research.`;
+  }
+  if(q.includes("risk")){
+    return "The AI Risk Engine blends 4 signals: (1) the on-chain risk tier the founder committed at deploy, (2) live funding traction vs target, (3) contract age, (4) valuation-vs-raise-cap sanity. Output is a 0-10 score with a confidence percentage. Traction raises both score and confidence over time.";
+  }
+  if(q.includes("portfolio")||q.includes("my ")||q.includes("holdings")||q.includes("vault")){
+    if(!wallet)return "Connect your wallet first, then I can read your holdings, cost basis and claimable dividends live from your token contracts.";
+    return "Open the Vault tab — it shows portfolio value, on-chain cost basis, P/L per position, claimable dividends, a Portfolio Health score based on concentration, and your Builder Passport if you have deployed contracts.";
+  }
+  if(q.includes("builder score")||q.includes("reputation")||q.includes("trust")){
+    return "Builder Score is a 0-100 reputation computed from chain state: deployments (30%), lifetime USDC raised (30%), active-contract ratio (20%) and tenure (20%). It appears in your Vault and inside every project modal so investors can verify a founder track record without leaving the app.";
+  }
+  if(q.includes("usdc")||q.includes("gas")||q.includes("fee")){
+    return "On Arc, USDC is the gas token — fees are dollar-denominated and predictable. Listing an asset costs 1 USDC. Buys settle in ~0.5s. Get testnet USDC free at faucet.circle.com (select Arc Testnet).";
+  }
+  if(q.includes("arc")||q.includes("circle")||q.includes("chain")){
+    return "Arc is Circle's stablecoin-native L1: EVM-compatible, USDC as gas, sub-second deterministic finality, opt-in privacy, and native rails like CCTP v2 (cross-chain USDC), StableFX (on-chain FX) and USYC (tokenized yield). ArcVault is built directly on it — Chain ID 5042002.";
+  }
+  if(q.includes("dividend")||q.includes("claim")||q.includes("yield")){
+    return "Founders distribute USDC into their token contract; your share accrues automatically pro-rata to holdings. Check the Vault for claimable amounts, then use Claim Dividends inside any asset modal — one transaction, paid straight to your wallet.";
+  }
+  if(q.includes("gm")||q.includes("hello")||q.includes("hi")){
+    return "Welcome. Ready to build on Arc? Ask me about launching, the risk engine, your portfolio, or anything on the platform.";
+  }
+  return "I can help with: launching assets (Builder Studio), the AI Risk Engine, Builder Scores, your Vault and portfolio, dividends, USDC-as-gas, and Arc network basics. Try one of the quick prompts, or rephrase your question.";
+}
+
+/* COMMAND PALETTE */
+const CMDS=[
+  {ic:"HQ",t:"Go to Dashboard",fn:()=>nav("dash",document.querySelector('[data-page="dash"]'))},
+  {ic:"DS",t:"Go to Discover",fn:()=>nav("discover",document.querySelector('[data-page="discover"]'))},
+  {ic:"BS",t:"Launch an asset (Builder Studio)",fn:()=>nav("studio",document.querySelector('[data-page="studio"]'))},
+  {ic:"VA",t:"Open my Vault",fn:()=>nav("vault",document.querySelector('[data-page="vault"]'))},
+  {ic:"US",t:"Stablecoin Hub",fn:()=>nav("stable",document.querySelector('[data-page="stable"]'))},
+  {ic:"AN",t:"Analytics and Leaderboard",fn:()=>nav("analytics",document.querySelector('[data-page="analytics"]'))},
+  {ic:"AI",t:"Ask the AI Copilot",fn:()=>toggleCopilot()},
+  {ic:"WL",t:"Connect wallet",fn:()=>connectWallet()},
+  {ic:"RF",t:"Refresh chain data",fn:()=>loadEverything()},
+  {ic:"EX",t:"Open Arc explorer",fn:()=>window.open(EXPLORER,"_blank")},
+  {ic:"FC",t:"Get testnet USDC (faucet)",fn:()=>window.open("https://faucet.circle.com","_blank")}
+];
+function openCmdk(){
+  document.getElementById("cmdk").classList.add("open");
+  document.getElementById("cmdkIn").value="";filterCmdk();
+  setTimeout(()=>document.getElementById("cmdkIn").focus(),40);
+}
+function closeCmdk(){document.getElementById("cmdk").classList.remove("open");}
+function filterCmdk(){
+  const q=document.getElementById("cmdkIn").value.toLowerCase();
+  const list=CMDS.filter(c=>c.t.toLowerCase().includes(q));
+  const projHits=projects.filter(p=>(p.name+p.symbol+p.company).toLowerCase().includes(q)).slice(0,4)
+    .map(p=>({ic:TYPE_I[p.assetType],t:`Open ${p.name} (${p.symbol})`,fn:()=>{openAsset(p.id);}}));
+  const all=q?[...projHits,...list]:list;
+  window._cmdkAll=all;
+  document.getElementById("cmdkList").innerHTML=all.map((c,i)=>
+    `<div class="cmdk-item" data-i="${i}"><span class="ci">${c.ic}</span>${c.t}</div>`).join("")||`<div class="cmdk-item">No matches</div>`;
+  document.querySelectorAll(".cmdk-item").forEach(el=>{
+    el.onclick=()=>{
+      const i=Number(el.dataset.i);
+      if(window._cmdkAll[i]&&window._cmdkAll[i].fn){window._cmdkAll[i].fn();closeCmdk();}
+    };
+  });
+}
+document.addEventListener("keydown",e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){e.preventDefault();openCmdk();}
+  if(e.key==="Escape"){closeCmdk();closeAsset();}
+});
+document.getElementById("cmdk").addEventListener("click",e=>{if(e.target.id==="cmdk")closeCmdk();});
+document.getElementById("assetOv").addEventListener("click",e=>{if(e.target.id==="assetOv")closeAsset();});
+
+/* NAV / WALLET / TOAST */
+function nav(page,btn){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById("page-"+page).classList.add("active");
+  document.querySelectorAll(".nitem[data-page]").forEach(n=>n.classList.toggle("on",n.dataset.page===page));
+  document.querySelectorAll(".bn-item[data-page]").forEach(n=>n.classList.toggle("on",n.dataset.page===page));
+  if(page==="vault"&&wallet)renderVault();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+async function connectWallet(){
+  if(!window.ethereum){toast("MetaMask not found — install it first","err");return;}
+  try{
+    await window.ethereum.request({method:"eth_requestAccounts"});
+    try{
+      await window.ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:ARC_CHAIN_HEX}]});
+    }catch(sw){
+      if(sw.code===4902){
+        await window.ethereum.request({method:"wallet_addEthereumChain",params:[{
+          chainId:ARC_CHAIN_HEX,chainName:"Arc Testnet",
+          nativeCurrency:{name:"USDC",symbol:"USDC",decimals:18},
+          rpcUrls:[RPC_URL],blockExplorerUrls:[EXPLORER]}]});
       }
-
-      let totalValue = 0;
-      let totalCost = 0;
-
-      grid.innerHTML = state.portfolio.map((pos) => {
-        const project = state.projects.find((p) => p.id === pos.projectId);
-        if (!project) return "";
-
-        const value = pos.tokens * project.price;
-        const pending = state.pendingDividends[project.id] || 0;
-        const claimed = state.lifetimeClaimed[project.id] || 0;
-
-        totalValue += value;
-        totalCost += pos.cost;
-
-        return `
-          <div class="portfolio-card">
-            <div class="pc-head">
-              <div class="pc-title">${project.name}</div>
-              <span class="badge ${project.type}">${project.type}</span>
-            </div>
-            <div class="pc-sub">${project.symbol} · ${project.company}</div>
-            <div class="kv"><span class="k">Risk Tier</span><span class="v">${project.risk.toUpperCase()}</span></div>
-            <div class="kv"><span class="k">Tokens</span><span class="v">${pos.tokens.toLocaleString()}</span></div>
-            <div class="kv"><span class="k">Value</span><span class="v">${fmtUsd(value)}</span></div>
-            <div class="kv"><span class="k">Purchase Cost Basis</span><span class="v">${fmtUsd(pos.cost)}</span></div>
-            <div class="kv"><span class="k">Pending Dividend</span><span class="v">${fmtUsd(pending)}</span></div>
-            <div class="kv"><span class="k">Lifetime Claimed</span><span class="v">${fmtUsd(claimed)}</span></div>
-            <div class="kv"><span class="k">Days Held</span><span class="v">${pos.daysHeld}</span></div>
-            <button class="btn btn-full mt-8" onclick="selectProject('${project.id}')">Open Position</button>
-          </div>
-        `;
-      }).join("");
-
-      document.getElementById("pfValue").textContent = fmtUsd(totalValue);
-      document.getElementById("pfCost").textContent = fmtUsd(totalCost);
-      document.getElementById("pfPnl").textContent = fmtUsd(totalValue - totalCost);
-      document.getElementById("pfPositions").textContent = String(state.portfolio.length);
     }
+    const bp=new ethers.BrowserProvider(window.ethereum);
+    signer=await bp.getSigner();
+    wallet=await signer.getAddress();
+    const b=document.getElementById("wbtn");
+    b.textContent=short(wallet);b.classList.add("on");
+    toast("Connected to Arc Testnet","ok");
+    renderVault();
+  }catch(e){toast("Connect failed: "+e.message,"err");}
+}
+function toast(m,t="inf"){
+  const el=document.getElementById("toast");
+  el.textContent=m;el.className=`toast ${t} show`;
+  setTimeout(()=>el.classList.remove("show"),3800);
+}
 
-    function renderFounderMetrics() {
-      const holders = state.portfolio.reduce((acc, p) => acc + (p.tokens > 0 ? 1 : 0), 0);
-      document.getElementById("distHolders").textContent = holders + " investors";
-
-      const p = state.projects.find((x) => x.id === state.selectedProjectId);
-      if (p) {
-        const share = Number(document.getElementById("buyAmount").value || 0) * p.price / Math.max(p.target, 1);
-        document.getElementById("distYourShare").textContent = fmtUsd(50000 * share);
-      } else {
-        document.getElementById("distYourShare").textContent = "$0";
-      }
-    }
-
-    function updateTopMetrics() {
-      const assets = state.projects.length;
-      const raised = state.projects.reduce((acc, p) => acc + p.raised, 0);
-      const distributed = Object.values(state.lifetimeClaimed).reduce((acc, v) => acc + v, 0);
-
-      document.getElementById("statAssets").textContent = String(assets);
-      document.getElementById("statRaised").textContent = fmtUsd(raised);
-      document.getElementById("statDistributed").textContent = fmtUsd(distributed);
-    }
-
-    function incrementTime() {
-      state.portfolio.forEach((p) => {
-        p.daysHeld = Math.min(365, p.daysHeld + 1);
-      });
-    }
-
-    function renderAll() {
-      renderProjects();
-      renderOrderBook();
-      renderFounderAlerts();
-      renderPortfolio();
-      updateTopMetrics();
-      renderFounderMetrics();
-      updateReturnBox();
-    }
-
-    document.getElementById("exitModal").addEventListener("click", (e) => {
-      if (e.target.id === "exitModal") closeExitModal();
-    });
-
-    setInterval(() => {
-      incrementTime();
-      matchOrders();
-      renderPortfolio();
-      renderOrderBook();
-    }, 30000);
-
-    loadProjectsFromContract();
-  </script>
+/* boot */
+loadEverything();
+setInterval(async()=>{try{const b=await readProvider.getBlockNumber();document.getElementById("kBlock").textContent="#"+b.toLocaleString();document.getElementById("sideBlock").textContent="Block #"+b.toLocaleString();}catch(_){}},6000);
+</script>
 </body>
 </html>
