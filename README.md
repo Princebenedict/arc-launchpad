@@ -1,6 +1,10 @@
-# ArcVault
+ # ArcVault
 
-> Arc-native launchpad for real-world assets. Launch onchain asset tokens, fund them with USDC, and manage investor positions through a contract-backed frontend.
+> The Intelligence Layer for Arc. Build, discover, invest, deploy and manage
+> tokenized assets, stablecoin applications and AI-powered financial
+> infrastructure on Arc.
+
+ frontend.
 
 [![Foundry](https://img.shields.io/badge/Built%20With-Foundry-f0b90b)](#local-development)
 [![Arc Testnet](https://img.shields.io/badge/Network-Arc%20Testnet-00d4aa)](#deployed-addresses)
