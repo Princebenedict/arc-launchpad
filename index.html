@@ -76,9 +76,9 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
 
 /* GRID / CARDS */
 .gridN{display:grid;gap:14px}
-.g4{grid-template-columns:repeat(4,1fr)}
-.g3{grid-template-columns:repeat(3,1fr)}
-.g2{grid-template-columns:repeat(2,1fr)}
+.g4{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;transition:all .18s;position:relative;overflow:hidden}
 .card.hover:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 14px 44px rgba(0,0,0,.45)}
 .kpi .kv{font-size:24px;font-weight:800;font-family:var(--mono);letter-spacing:-1px}
@@ -177,7 +177,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
 
 /* BUILDER SCORE */
 .bscore-ring{width:74px;height:74px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:800;font-size:18px;flex-shrink:0;position:relative}
-.score-rows{display:flex;flex-direction:column;gap:7px;flex:1}
+.score-rows{display:flex;flex-direction:column;gap:7px;flex:1;min-width:180px}
 .score-row{display:flex;align-items:center;gap:10px;font-size:11px;font-family:var(--mono)}
 .score-row .sn{width:96px;color:var(--muted2)}
 .score-row .sb{flex:1;height:4px;background:var(--border2);border-radius:2px;overflow:hidden}
@@ -256,23 +256,65 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
 .empty h3{font-size:16px;margin-bottom:6px;color:var(--muted)}
 .empty p{font-size:11.5px;font-family:var(--mono)}
 
-/* mobile */
+/* responsive */
 .bottom-nav{display:none}
+
+@media(max-width:1200px){
+  .main{max-width:100%}
+}
+
+@media(max-width:1000px){
+  :root{--sidebar-w:190px}
+  .sidebar{padding:14px 8px}
+  .brand{font-size:15px}
+  .main{padding:22px 18px 90px}
+  .page-head h1{font-size:22px}
+}
+
 @media(max-width:900px){
   .sidebar{display:none}
   .topbar,.main{margin-left:0}
-  .g4{grid-template-columns:1fr 1fr}
-  .g3,.g2{grid-template-columns:1fr}
+  .topbar{padding:0 14px;height:56px}
+  .searchbar{max-width:none}
+  .searchbar kbd{display:none}
+  .chain-pill{display:none}
   .fgrid{grid-template-columns:1fr}
   .brow2{grid-template-columns:1fr}
-  .copilot{right:12px;left:12px;width:auto}
-  .bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:120;background:rgba(13,19,29,.94);backdrop-filter:blur(16px);border-top:1px solid var(--border);padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
-  .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 2px;font-size:9px;font-family:var(--mono);color:var(--muted2);background:none;border:none;cursor:pointer}
+  .ph-row{flex-direction:column;align-items:flex-start}
+  .wsteps{gap:4px}
+  .wstep{padding:6px 9px;font-size:9.5px}
+  .modal{padding:20px;border-radius:14px;max-height:88vh}
+  .copilot{right:10px;left:10px;width:auto;bottom:150px;max-height:60vh}
+  .copilot-fab{bottom:88px;right:14px;height:42px;padding:0 16px;font-size:11px}
+  .cmdk{padding-top:8vh}
+  .feed-time{display:none}
+  .bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:120;
+    background:rgba(13,19,29,.96);backdrop-filter:blur(16px);
+    border-top:1px solid var(--border);
+    padding:8px 6px calc(8px + env(safe-area-inset-bottom))}
+  .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+    padding:6px 2px;font-size:9px;font-family:var(--mono);color:var(--muted2);
+    background:none;border:none;cursor:pointer}
   .bn-item.on{color:var(--arc)}
-  .bn-item .bi{font-size:10px;font-family:var(--mono);border:1px solid var(--border);border-radius:6px;padding:3px 8px}
+  .bn-item .bi{font-size:9px;font-family:var(--mono);border:1px solid var(--border);
+    border-radius:6px;padding:3px 8px}
   .bn-item.on .bi{border-color:var(--arc)}
-  .main{padding-bottom:130px}
-  .copilot-fab{bottom:84px}
+  .main{padding-bottom:140px}
+}
+
+@media(max-width:480px){
+  .main{padding:16px 12px 140px}
+  .page-head h1{font-size:20px}
+  .card{padding:14px}
+  .kpi .kv{font-size:19px}
+  .acard{padding:16px}
+  .ac-desc{min-height:0}
+  .wnav{flex-direction:column}
+  .wnav .btn{width:100%}
+  .fbar{gap:6px}
+  .fchip{padding:6px 10px;font-size:10px}
+  .toast{left:12px;right:12px;transform:translateY(70px);max-width:none}
+  .toast.show{transform:translateY(0)}
 }
 </style>
 </head>
@@ -643,21 +685,40 @@ function builderScore(addr){
   return {trust,dep,fund:Math.round(fund),act,age:Math.round(age),count:mine.length,raised};
 }
 
-/* LOAD CHAIN DATA */
+/* LOAD CHAIN DATA — resilient: skips incompatible legacy assets */
 async function loadEverything(){
   try{
-    const [assets, block] = await Promise.all([readLaunchpad.getAllAssets(), readProvider.getBlockNumber()]);
+    const block = await readProvider.getBlockNumber();
     document.getElementById("kBlock").textContent="#"+block.toLocaleString();
     document.getElementById("sideBlock").textContent="Block #"+block.toLocaleString();
 
-    projects = await Promise.all(assets.map(async(a,idx)=>{
+    // Guard: confirm a contract exists at the launchpad address
+    const code = await readProvider.getCode(LAUNCHPAD_ADDRESS);
+    if(code === "0x"){
+      const msg=`<div class="empty" style="grid-column:1/-1"><div class="ei">CF</div>
+        <h3>Launchpad contract not found</h3>
+        <p>No contract at ${LAUNCHPAD_ADDRESS.slice(0,10)}... on Arc Testnet.<br/>Update LAUNCHPAD_ADDRESS in index.html.</p></div>`;
+      document.getElementById("discoverGrid").innerHTML=msg;
+      document.getElementById("trendGrid").innerHTML=msg;
+      document.getElementById("feedList").innerHTML=`<div class="empty" style="padding:26px"><p>Waiting for a valid contract address</p></div>`;
+      document.getElementById("insightList").innerHTML="Configure LAUNCHPAD_ADDRESS to enable insights.";
+      document.getElementById("kAssets").textContent="0";
+      document.getElementById("kRaised").textContent="$0";
+      document.getElementById("kBuilders").textContent="0";
+      return;
+    }
+
+    const assets = await readLaunchpad.getAllAssets();
+
+    // Load each asset independently — one bad legacy token can't break the whole page
+    const results = await Promise.allSettled(assets.map(async(a)=>{
       const t=new ethers.Contract(a.tokenContract,ASSET_TOKEN_ABI,readProvider);
       const [company,desc,val,price,maxS,active,created,raised,supply]=await Promise.all([
         t.companyName(),t.description(),t.totalValuation(),t.pricePerToken(),
         t.maxSupply(),t.isActive(),t.createdAt(),t.totalRaised(),t.totalSupply()
       ]);
       return {
-        id:idx, tokenContract:a.tokenContract, name:a.name, symbol:a.symbol,
+        tokenContract:a.tokenContract, name:a.name, symbol:a.symbol,
         founder:a.founder, assetType:Number(a.assetType), riskTier:Number(a.riskTier),
         listedAt:Number(a.listedAt)*1000, company, description:desc,
         target:Number(ethers.formatUnits(val,6)), price:Number(ethers.formatUnits(price,6)),
@@ -666,14 +727,25 @@ async function loadEverything(){
         sold:Number(ethers.formatUnits(supply,18))
       };
     }));
+
+    const skipped=[];
+    projects = results.map((r,i)=>{
+      if(r.status==="fulfilled") return r.value;
+      skipped.push(assets[i].tokenContract);
+      return null;
+    }).filter(Boolean);
+
     projects.sort((a,b)=>b.listedAt-a.listedAt);
+    projects.forEach((p,i)=>p.id=i);
+
+    if(skipped.length) console.warn("Skipped incompatible legacy assets:",skipped);
 
     renderKPIs(); renderFeed(); renderInsights(); renderTrending();
     renderDiscover(); renderAnalytics(); renderStableHub();
     if(wallet) renderVault();
   }catch(e){
     console.error(e);
-    toast("Chain read error: "+e.message,"err");
+    toast("Chain read error — check console for details","err");
   }
 }
 
@@ -926,19 +998,20 @@ async function deployAsset(){
   btn.disabled=false;btn.textContent="Deploy on Arc Testnet";
 }
 
-/* VAULT */
+/* VAULT — also resilient to bad assets */
 async function renderVault(){
   const el=document.getElementById("vaultContent");
   if(!wallet){el.innerHTML=`<div class="empty"><div class="ei">VA</div><h3>Connect your wallet</h3><p>Holdings, dividends and Builder Score appear here</p></div>`;return;}
   el.innerHTML=`<div class="card"><div class="skel" style="height:120px"></div></div>`;
   try{
-    const holdings=await Promise.all(projects.map(async p=>{
+    const settled=await Promise.allSettled(projects.map(async p=>{
       const t=new ethers.Contract(p.tokenContract,ASSET_TOKEN_ABI,readProvider);
       const [bal,pend,inv]=await Promise.all([
         t.balanceOf(wallet),t.pendingDividends(wallet),t.totalInvested(wallet)
       ]);
       return {...p,bal:Number(ethers.formatUnits(bal,18)),pend:Number(ethers.formatUnits(pend,6)),inv:Number(ethers.formatUnits(inv,6))};
     }));
+    const holdings=settled.filter(r=>r.status==="fulfilled").map(r=>r.value);
     const owned=holdings.filter(h=>h.bal>0);
     const totVal=owned.reduce((s,h)=>s+h.bal*h.price,0);
     const totInv=owned.reduce((s,h)=>s+h.inv,0);
