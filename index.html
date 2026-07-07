@@ -71,6 +71,21 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
 .wm-item:hover{background:var(--surface2)}
 .wm-item.danger{color:var(--danger)}
 .wm-item.danger:hover{background:rgba(239,68,68,.1)}
+.netbanner{display:none;align-items:center;justify-content:center;gap:14px;padding:10px 18px;background:rgba(239,68,68,.14);border-bottom:1px solid rgba(239,68,68,.4);color:#ffb4b4;font-size:12px;font-family:var(--mono);margin-left:var(--sidebar-w);position:relative;z-index:70}
+.netbanner.show{display:flex}
+.netbanner button{background:var(--danger);color:#fff;border:none;border-radius:8px;padding:6px 14px;font-weight:700;font-family:var(--font);font-size:11px;cursor:pointer}
+.risk-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.risk-card{padding:16px 12px;border:2px solid var(--border2);border-radius:12px;cursor:pointer;text-align:center;background:var(--bg);transition:all .16s}
+.risk-card:hover{border-color:var(--border)}
+.risk-card .rc-dot{width:12px;height:12px;border-radius:50%;margin:0 auto 8px}
+.risk-card .rc-name{font-size:13px;font-weight:800;margin-bottom:3px}
+.risk-card .rc-desc{font-size:10px;font-family:var(--mono);color:var(--muted2);line-height:1.4}
+.risk-card.on-0{border-color:var(--success);background:rgba(34,197,94,.06)}
+.risk-card.on-1{border-color:var(--warn);background:rgba(245,158,11,.06)}
+.risk-card.on-2{border-color:var(--danger);background:rgba(239,68,68,.06)}
+.tbadge[title]{cursor:help}
+.hidden-tag{background:rgba(122,138,181,.16);color:var(--muted);padding:3px 9px;border-radius:16px;font-size:9.5px;font-weight:700;font-family:var(--mono);letter-spacing:.6px;text-transform:uppercase}
+@media(max-width:900px){.netbanner{margin-left:0}.risk-picker{grid-template-columns:1fr}}
 
 /* MAIN */
 .main{margin-left:var(--sidebar-w);padding:28px 26px 90px;position:relative;z-index:1;max-width:1240px}
@@ -380,6 +395,11 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
   </div>
 </div>
 
+<div class="netbanner" id="netbanner">
+  <span>Wrong network detected. ArcVault runs on Arc Testnet (Chain ID 5042002).</span>
+  <button onclick="switchNetwork()">Switch to Arc Testnet</button>
+</div>
+
 <main class="main">
 
 <div class="page active" id="page-dash">
@@ -488,11 +508,12 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
 
       <div class="wpane" data-p="2">
         <div class="field ffull"><label>RISK TIER (STORED ON-CHAIN)</label>
-          <select id="sRisk">
-            <option value="0">Low — stable, collateralized, proven revenue</option>
-            <option value="1">Medium — operating business, growth stage</option>
-            <option value="2">High — early stage, speculative</option>
-          </select>
+          <input type="hidden" id="sRisk" value="0"/>
+          <div class="risk-picker" id="riskPicker">
+            <div class="risk-card on-0" data-r="0" onclick="pickRisk(0)"><div class="rc-dot" style="background:var(--success)"></div><div class="rc-name">Conservative</div><div class="rc-desc">Stable, collateralized, proven revenue</div></div>
+            <div class="risk-card" data-r="1" onclick="pickRisk(1)"><div class="rc-dot" style="background:var(--warn)"></div><div class="rc-name">Moderate</div><div class="rc-desc">Operating business, growth stage</div></div>
+            <div class="risk-card" data-r="2" onclick="pickRisk(2)"><div class="rc-dot" style="background:var(--danger)"></div><div class="rc-name">Aggressive</div><div class="rc-desc">Early stage, speculative</div></div>
+          </div>
         </div>
         <div class="ai-review-box" style="margin-top:16px">
           <h4>Why this matters</h4>
@@ -558,10 +579,11 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
   </div>
   <div class="sect-title">Circle-Native Rails on Arc</div>
   <div class="gridN g3">
-    <div class="card hover"><b style="font-size:14px">StableFX</b><p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">On-chain FX engine for USDC / EURC pairs. RFQ-based settlement, 24/7. FxEscrow: <span class="chip">0x8676…a9f8</span></p></div>
-    <div class="card hover"><b style="font-size:14px">CCTP v2</b><p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">Native USDC transfer across chains. Bring capital from Ethereum or Solana into ArcVault raises. Messenger: <span class="chip">0x8FE6…2DAA</span></p></div>
-    <div class="card hover"><b style="font-size:14px">USYC</b><p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">Tokenized yield for idle treasury. Future ArcVault raises can auto-park unspent USDC into yield. <span class="chip">0xe918…86C</span></p></div>
+    <div class="card hover"><b style="font-size:14px">StableFX</b><p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">On-chain FX engine for USDC / EURC pairs. RFQ-based settlement, 24/7. FxEscrow: <a class="chip" target="_blank" href="https://testnet.arcscan.app/address/0x867650F5eAe8df91445971f14d89fd84F0C9a9f8">0x8676…a9f8</a></p></div>
+    <div class="card hover"><b style="font-size:14px">CCTP v2</b><p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">Native USDC transfer across chains. Bring capital from Ethereum or Solana into ArcVault raises. Messenger: <a class="chip" target="_blank" href="https://testnet.arcscan.app/address/0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA">0x8FE6…2DAA</a></p></div>
+    <div class="card hover"><b style="font-size:14px">USYC</b><p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">Tokenized yield for idle treasury. Future ArcVault raises can auto-park unspent USDC into yield. <a class="chip" target="_blank" href="https://testnet.arcscan.app/address/0xe9185F0c5F296Ed1797AaE4238D26CCaBEadb86C">0xe918…86C</a></p></div>
   </div>
+  <div style="margin-top:16px;font-size:11px;font-family:var(--mono);color:var(--muted2)">Native gas token (USDC): <a class="chip" target="_blank" href="https://testnet.arcscan.app/address/0x3600000000000000000000000000000000000000">0x3600…0000</a></div>
 </div>
 
 <div class="page" id="page-analytics">
@@ -684,8 +706,23 @@ const TYPE_N={0:"Equity",1:"Revenue Share",2:"RWA"};
 const TYPE_B={0:"b-eq",1:"b-rev",2:"b-rwa"};
 const TYPE_C={0:"var(--equity)",1:"var(--revenue)",2:"var(--rwa)"};
 const TYPE_I={0:"EQ",1:"RS",2:"RW"};
-const RISK_N={0:"LOW",1:"MED",2:"HIGH"};
+const RISK_N={0:"CONSERVATIVE",1:"MODERATE",2:"AGGRESSIVE"};
 const RISK_B={0:"b-low",1:"b-med",2:"b-high"};
+const RISK_TIP="Risk tier is set by the founder and stored on-chain. Higher tiers indicate higher potential volatility.";
+
+/* PRIVATE REMOVAL — founder-managed hidden list (client-side moderation layer) */
+const HIDDEN_KEY="arcvault_hidden_assets";
+function getHidden(){try{return JSON.parse(localStorage.getItem(HIDDEN_KEY)||"[]");}catch(_){return [];}}
+function setHiddenList(a){try{localStorage.setItem(HIDDEN_KEY,JSON.stringify(a));}catch(_){}}
+function isHidden(addr){return getHidden().map(x=>x.toLowerCase()).includes(addr.toLowerCase());}
+function toggleHidden(addr){
+  let h=getHidden();
+  const was=h.map(x=>x.toLowerCase()).includes(addr.toLowerCase());
+  h = was ? h.filter(x=>x.toLowerCase()!==addr.toLowerCase()) : [...h,addr];
+  setHiddenList(h);
+  renderFounder(); renderDiscover(); renderTrending(); renderKPIs();
+  toast(was?"Asset restored to Explore":"Asset hidden from Explore","ok");
+}
 
 const fmtUsd=n=>"$"+Number(n).toLocaleString(undefined,{maximumFractionDigits:2});
 const fmtK=n=>n>=1e6?"$"+(n/1e6).toFixed(2)+"M":n>=1e3?"$"+(n/1e3).toFixed(1)+"K":fmtUsd(n);
@@ -825,8 +862,9 @@ function renderInsights(){
 }
 function renderTrending(){
   const el=document.getElementById("trendGrid");
-  if(!projects.length){el.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">BS</div><h3>No projects yet</h3><p>Open Builder Studio to launch the first one</p></div>`;return;}
-  const top=[...projects].sort((a,b)=>b.raised-a.raised).slice(0,3);
+  const visible=projects.filter(p=>!isHidden(p.tokenContract));
+  if(!visible.length){el.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">BS</div><h3>No projects yet</h3><p>Open Builder Studio to launch the first one</p><button class="btn" style="margin-top:14px" onclick="goStudio()">Launch an asset</button></div>`;return;}
+  const top=[...visible].sort((a,b)=>b.raised-a.raised).slice(0,3);
   el.innerHTML=top.map(p=>assetCardHTML(p)).join("");
 }
 
@@ -834,7 +872,7 @@ function renderTrending(){
 function setFilter(f,btn){filter=f;document.querySelectorAll("#fbar .fchip").forEach(c=>c.classList.remove("on"));btn.classList.add("on");renderDiscover();}
 function renderDiscover(){
   const el=document.getElementById("discoverGrid");
-  let arr=[...projects];
+  let arr=projects.filter(p=>!isHidden(p.tokenContract));
   if(filter==="0"||filter==="1"||filter==="2") arr=arr.filter(p=>p.assetType===Number(filter));
   if(filter==="low") arr=arr.filter(p=>p.riskTier===0);
   if(filter==="active") arr=arr.filter(p=>p.active);
@@ -855,7 +893,7 @@ function assetCardHTML(p){
       <div class="badges">
         ${ver?'<span class="tbadge b-verified">VERIFIED</span>':''}
         <span class="tbadge ${TYPE_B[p.assetType]}">${TYPE_N[p.assetType]}</span>
-        <span class="tbadge ${RISK_B[p.riskTier]}">${RISK_N[p.riskTier]} RISK</span>
+        <span class="tbadge ${RISK_B[p.riskTier]}" title="${RISK_N[p.riskTier]} — ${RISK_TIP}">${RISK_N[p.riskTier]}</span>
       </div>
     </div>
     <div class="ac-name">${p.name}</div>
@@ -921,6 +959,7 @@ function updBuyCost(){
 }
 async function buyTokens(){
   if(!signer){toast("Connect wallet first","err");return;}
+  if(!(await ensureNetwork()))return;
   if(!currentAsset)return;
   const q=parseInt(document.getElementById("buyAmt").value);
   if(!q||q<1){toast("Enter a valid amount","err");return;}
@@ -947,6 +986,7 @@ async function buyTokens(){
 }
 async function claimDivs(){
   if(!signer){toast("Connect wallet first","err");return;}
+  if(!(await ensureNetwork()))return;
   if(!currentAsset)return;
   try{
     const t=new ethers.Contract(currentAsset.tokenContract,ASSET_TOKEN_ABI,signer);
@@ -1013,6 +1053,7 @@ function renderDeployReview(){
 }
 async function deployAsset(){
   if(!signer){toast("Connect wallet first","err");return;}
+  if(!(await ensureNetwork()))return;
   const btn=document.getElementById("deployBtn");
   btn.disabled=true;btn.textContent="Approving fee";
   try{
@@ -1259,6 +1300,69 @@ function onWalletBtn(){
   if(wallet){document.getElementById("walletMenu").classList.toggle("open");}
   else connectWallet();
 }
+function pickRisk(n){
+  document.getElementById("sRisk").value=String(n);
+  document.querySelectorAll("#riskPicker .risk-card").forEach(c=>{
+    c.className="risk-card"+(Number(c.dataset.r)===n?" on-"+n:"");
+  });
+}
+async function checkNetwork(){
+  if(!window.ethereum) return true;
+  try{
+    const cid=await window.ethereum.request({method:"eth_chainId"});
+    const ok=parseInt(cid,16)===CHAIN_ID;
+    document.getElementById("netbanner").classList.toggle("show",!ok && !!wallet);
+    return ok;
+  }catch(_){return true;}
+}
+async function switchNetwork(){
+  if(!window.ethereum){toast("MetaMask not found","err");return;}
+  try{
+    await window.ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:ARC_CHAIN_HEX}]});
+  }catch(sw){
+    if(sw.code===4902){
+      try{
+        await window.ethereum.request({method:"wallet_addEthereumChain",params:[{
+          chainId:ARC_CHAIN_HEX,chainName:"Arc Testnet",
+          nativeCurrency:{name:"USDC",symbol:"USDC",decimals:18},
+          rpcUrls:[RPC_URL],blockExplorerUrls:[EXPLORER]}]});
+      }catch(e){toast("Could not add Arc Testnet","err");}
+    }
+  }
+  await checkNetwork();
+}
+async function ensureNetwork(){
+  const ok=await checkNetwork();
+  if(!ok){toast("Switch to Arc Testnet to continue","err");await switchNetwork();return await checkNetwork();}
+  return true;
+}
+async function restoreSession(){
+  if(!window.ethereum) return;
+  try{
+    const accts=await window.ethereum.request({method:"eth_accounts"});
+    if(accts && accts.length){
+      const bp=new ethers.BrowserProvider(window.ethereum);
+      signer=await bp.getSigner();
+      wallet=await signer.getAddress();
+      const b=document.getElementById("wbtn");
+      b.textContent=short(wallet);b.classList.add("on");
+      document.getElementById("wmAddr").textContent=wallet;
+      renderVault();renderFounder();
+    }
+    await checkNetwork();
+    if(window.ethereum.on){
+      window.ethereum.on("accountsChanged",async(a)=>{
+        if(!a||!a.length){disconnectWallet();return;}
+        try{const bp=new ethers.BrowserProvider(window.ethereum);signer=await bp.getSigner();wallet=await signer.getAddress();}catch(_){}
+        document.getElementById("wbtn").textContent=short(wallet);
+        document.getElementById("wbtn").classList.add("on");
+        document.getElementById("wmAddr").textContent=wallet;
+        renderVault();renderFounder();
+      });
+      window.ethereum.on("chainChanged",()=>{checkNetwork();});
+    }
+  }catch(_){}
+}
 async function connectWallet(){
   if(!window.ethereum){toast("MetaMask not found — install it first","err");return;}
   try{
@@ -1341,16 +1445,25 @@ async function renderFounder(){
   <div class="gridN g2">
     ${mine.map(p=>{
       const pct=p.target>0?Math.min(100,(p.raised/p.target)*100):0;
+      const hidden=isHidden(p.tokenContract);
       return `
       <div class="card">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
           <div><div style="font-size:16px;font-weight:800;letter-spacing:-.3px">${p.name}</div><div style="font-size:11px;font-family:var(--mono);color:var(--muted2)">${p.symbol} &middot; ${TYPE_N[p.assetType]}</div></div>
-          <span class="tbadge ${p.active?'b-low':'b-high'}">${p.active?'RAISING':'CLOSED'}</span>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+            ${hidden?'<span class="hidden-tag">Hidden</span>':''}
+            <span class="tbadge ${p.active?'b-low':'b-high'}">${p.active?'RAISING':'CLOSED'}</span>
+          </div>
         </div>
         <div class="pmeta"><span class="pr">${fmtK(p.raised)} raised</span><span class="pt">${pct.toFixed(0)}% of ${fmtK(p.target)}</span></div>
         <div class="pbar"><div class="pfill" style="width:${pct}%"></div></div>
         <div class="vrow"><span class="vk">TOKENS SOLD</span><span class="vv">${p.sold.toLocaleString()} / ${p.maxSupply.toLocaleString()}</span></div>
         <div class="vrow"><span class="vk">CONTRACT</span><span><a class="chip" target="_blank" href="${EXPLORER}/address/${p.tokenContract}">${short(p.tokenContract)}</a><button class="copy-mini" onclick="copyText('${p.tokenContract}')">copy</button></span></div>
+        <div class="founder-action">
+          <div class="fa-title">Explore Visibility</div>
+          <button class="btn ${hidden?'':'btn-ghost'} btn-full" onclick="toggleHidden('${p.tokenContract}')">${hidden?'Restore to Explore':'Hide from Explore'}</button>
+          <div style="font-size:10px;font-family:var(--mono);color:var(--muted2);margin-top:7px;line-height:1.5">${hidden?'This asset is hidden from the public Explore page. The contract stays live on-chain.':'Hide spam or retired listings from Explore without deleting the on-chain contract.'}</div>
+        </div>
         <div class="founder-action">
           <div class="fa-title">Distribute Dividends to Holders (USDC)</div>
           <div style="display:flex;gap:8px">
@@ -1371,6 +1484,7 @@ async function renderFounder(){
 }
 async function distributeDividends(tokenAddr,inputId){
   if(!signer){toast("Connect wallet first","err");return;}
+  if(!(await ensureNetwork()))return;
   const amt=parseFloat(document.getElementById(inputId).value);
   if(!amt||amt<=0){toast("Enter a USDC amount","err");return;}
   const usdcAmt=ethers.parseUnits(String(amt),6);
@@ -1391,6 +1505,7 @@ async function distributeDividends(tokenAddr,inputId){
 }
 async function withdrawRaised(tokenAddr,inputId){
   if(!signer){toast("Connect wallet first","err");return;}
+  if(!(await ensureNetwork()))return;
   const amt=parseFloat(document.getElementById(inputId).value);
   if(!amt||amt<=0){toast("Enter a USDC amount","err");return;}
   const usdcAmt=ethers.parseUnits(String(amt),6);
@@ -1405,6 +1520,7 @@ async function withdrawRaised(tokenAddr,inputId){
 }
 async function claimAll(){
   if(!signer){toast("Connect wallet first","err");return;}
+  if(!(await ensureNetwork()))return;
   const claimable=(window._vaultOwned||[]).filter(h=>h.pend>0);
   if(!claimable.length){toast("Nothing to claim right now","inf");return;}
   toast(`Claiming from ${claimable.length} position(s)`,"inf");
@@ -1422,6 +1538,7 @@ async function claimAll(){
 
 /* boot */
 loadEverything();
+restoreSession();
 setInterval(async()=>{try{const b=await readProvider.getBlockNumber();document.getElementById("kBlock").textContent="#"+b.toLocaleString();document.getElementById("sideBlock").textContent="Block #"+b.toLocaleString();}catch(_){}},6000);
 </script>
 </body>
