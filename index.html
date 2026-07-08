@@ -289,6 +289,36 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
 .empty h3{font-size:16px;margin-bottom:6px;color:var(--muted)}
 .empty p{font-size:11.5px;font-family:var(--mono)}
 
+/* ===== PRIVATE CONTROL CENTER + ANNOUNCEMENT BANNER ===== */
+.cc-banner{display:none;align-items:center;gap:12px;justify-content:center;padding:10px 18px;margin-left:var(--sidebar-w);background:linear-gradient(90deg,rgba(0,212,170,.14),rgba(61,143,224,.14));border-bottom:1px solid rgba(0,212,170,.3);font-size:12.5px;color:var(--text);position:relative;z-index:70}
+.cc-banner.show{display:flex}
+.cc-banner-dot{width:7px;height:7px;border-radius:50%;background:var(--arc);box-shadow:0 0 8px var(--arc);animation:pulse 2s infinite;flex-shrink:0}
+.cc-banner span#ccBannerText{font-weight:600}
+.cc-banner button{background:rgba(255,255,255,.08);border:1px solid var(--border2);color:var(--muted);font-size:10px;font-family:var(--mono);padding:4px 10px;border-radius:6px;cursor:pointer;flex-shrink:0}
+.cc-banner button:hover{color:var(--text)}
+.cc-overlay{display:none;position:fixed;inset:0;z-index:600;background:rgba(3,5,8,.9);backdrop-filter:blur(12px);align-items:flex-start;justify-content:center;padding:40px 18px;overflow-y:auto}
+.cc-overlay.open{display:flex}
+.cc-panel{width:100%;max-width:920px;background:var(--surface);border:1px solid var(--border2);border-radius:18px;padding:26px;box-shadow:0 30px 90px rgba(0,0,0,.65);animation:up .25s ease}
+.cc-gate{max-width:380px;margin:6vh auto;text-align:center}
+.cc-lock-ic{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:2px;color:var(--arc);border:1px solid rgba(0,212,170,.4);border-radius:8px;padding:8px 16px;margin-bottom:18px}
+.cc-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px}
+.cc-title{font-size:20px;font-weight:800;letter-spacing:-.5px}
+.cc-sub{font-size:11px;font-family:var(--mono);color:var(--muted2);margin-top:3px}
+.cc-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:10px}
+.cc-stat{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px}
+.cc-stat .v{font-size:20px;font-weight:800;font-family:var(--mono);letter-spacing:-1px}
+.cc-stat .l{font-size:9px;font-family:var(--mono);color:var(--muted2);letter-spacing:.5px;text-transform:uppercase;margin-top:3px}
+.cc-section-title{font-size:11px;font-family:var(--mono);color:var(--muted2);letter-spacing:1.2px;text-transform:uppercase;margin:22px 0 12px}
+.cc-textarea{width:100%;min-height:70px;background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--text);font-family:var(--font);outline:none;resize:vertical}
+.cc-textarea:focus{border-color:var(--arc)}
+.cc-table{display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto}
+.cc-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:11px}
+.cc-row-hidden{opacity:.6}
+.cc-row-name{font-size:13.5px;font-weight:700}
+.cc-row-meta{font-size:10.5px;font-family:var(--mono);color:var(--muted2);margin-top:3px}
+.cc-row-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+@media(max-width:900px){.cc-banner{margin-left:0}.cc-stats{grid-template-columns:1fr 1fr}.cc-row{flex-direction:column;align-items:flex-start}.cc-row-actions{width:100%;justify-content:space-between}}
+
 /* responsive */
 .bottom-nav{display:none}
 
@@ -478,7 +508,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
 
 /* responsive */
 @media(max-width:900px){
-  .lp-hero{grid-template-columns:1fr;gap:36px;padding-top:40px;min-height:0;text-align:center}
+  .lp-hero{grid-template-columns:1fr;gap:36px;padding-top:40px;min-height:auto;text-align:center}
   .lp-hero-cta,.lp-stats{justify-content:center}
   .lp-hero p.lead{margin-left:auto;margin-right:auto}
   .lp-art{height:420px;margin-top:10px}
@@ -657,7 +687,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
     <div class="flinks">
       <a onclick="lpScroll('lp-features')">Features</a>
       <a onclick="lpScroll('lp-how')">How it works</a>
-      <a href="https://testnet.arcscan.app" target="_blank" rel="noopener">Explorer</a>
+      <a href="https://testnet.arcscan.app" target="_blank">Explorer</a>
       <a onclick="enterApp()">Launch App</a>
     </div>
     <div class="fcopy">The Intelligence Layer for Arc</div>
@@ -710,6 +740,12 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
 <div class="netbanner" id="netbanner">
   <span>Wrong network detected. ArcVault runs on Arc Testnet (Chain ID 5042002).</span>
   <button onclick="switchNetwork()">Switch to Arc Testnet</button>
+</div>
+
+<div class="cc-banner" id="ccBanner">
+  <span class="cc-banner-dot"></span>
+  <span id="ccBannerText"></span>
+  <button onclick="dismissAnnouncement()">Dismiss</button>
 </div>
 
 <main class="main">
@@ -891,11 +927,11 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
   </div>
   <div class="sect-title">Circle-Native Rails on Arc</div>
   <div class="gridN g3">
-    <div class="card hover"><b style="font-size:14px">StableFX</b><p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">On-chain FX engine for USDC / EURC pairs. RFQ-based settlement, 24/7. FxEscrow: <a class="chip" target="_blank" rel="noopener" href="https://testnet.arcscan.app/address/0x867650F5eAe8df91445971f14d89fd84F0C9a9f8">0x8676…a9f8</a></p></div>
-      <div class="card hover"><b style="font-size:14px">CCTP v2</b><p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">Native USDC transfer across chains. Bring capital from Ethereum or Solana into ArcVault raises. Messenger: <a class="chip" target="_blank" rel="noopener" href="https://testnet.arcscan.app/address/0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA">0x8FE6…2DAA</a></p></div>
-      <div class="card hover"><b style="font-size:14px">USYC</b><p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">Tokenized yield for idle treasury. Future ArcVault raises can auto-park unspent USDC into yield. <a class="chip" target="_blank" rel="noopener" href="https://testnet.arcscan.app/address/0xe9185F0c5F296Ed1797AaE4238D26CCaBEadb86C">0xe918…86C</a></p></div>
+    <div class="card hover"><b style="font-size:14px">StableFX</b><p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">On-chain FX engine for USDC / EURC pairs. RFQ-based settlement, 24/7. FxEscrow: <a class="chip" target="_blank" href="https://testnet.arcscan.app/address/0x867650F5eAe8df91445971f14d89fd84F0C9a9f8">0x8676…a9f8</a></p></div>
+    <div class="card hover"><b style="font-size:14px">CCTP v2</b><p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">Native USDC transfer across chains. Bring capital from Ethereum or Solana into ArcVault raises. Messenger: <a class="chip" target="_blank" href="https://testnet.arcscan.app/address/0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA">0x8FE6…2DAA</a></p></div>
+    <div class="card hover"><b style="font-size:14px">USYC</b><p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">Tokenized yield for idle treasury. Future ArcVault raises can auto-park unspent USDC into yield. <a class="chip" target="_blank" href="https://testnet.arcscan.app/address/0xe9185F0c5F296Ed1797AaE4238D26CCaBEadb86C">0xe918…86C</a></p></div>
   </div>
-  <div style="margin-top:16px;font-size:11px;font-family:var(--mono);color:var(--muted2)">Native gas token (USDC): <a class="chip" target="_blank" rel="noopener" href="https://testnet.arcscan.app/address/0x3600000000000000000000000000000000000000">0x3600…0000</a></div>
+  <div style="margin-top:16px;font-size:11px;font-family:var(--mono);color:var(--muted2)">Native gas token (USDC): <a class="chip" target="_blank" href="https://testnet.arcscan.app/address/0x3600000000000000000000000000000000000000">0x3600…0000</a></div>
 </div>
 
 <div class="page" id="page-analytics">
@@ -959,6 +995,10 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
   <button class="bn-item" data-page="studio" onclick="nav('studio',this)"><span class="bi">BS</span>Launch</button>
   <button class="bn-item" data-page="vault" onclick="nav('vault',this)"><span class="bi">VA</span>Vault</button>
   <button class="bn-item" onclick="toggleCopilot()"><span class="bi">AI</span>Copilot</button>
+</div>
+
+<div class="cc-overlay" id="ccOverlay">
+  <div class="cc-panel"><div id="ccBody"></div></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1848,9 +1888,124 @@ async function claimAll(){
   await loadEverything();
 }
 
+
+/* ===== PRIVATE CONTROL CENTER (admin — client-side moderation) ===== */
+const CC_KEY = "arcvaultadmin2026"; /* CHANGE THIS to your own secret passphrase */
+function ccIsUnlocked(){try{return sessionStorage.getItem("cc_unlocked")==="1";}catch(_){return false;}}
+function openControl(){document.getElementById("ccOverlay").classList.add("open");renderControl();}
+function closeControl(){document.getElementById("ccOverlay").classList.remove("open");}
+function ccUnlock(){
+  const el=document.getElementById("ccPass");
+  const val=el?el.value:"";
+  if(val===CC_KEY){try{sessionStorage.setItem("cc_unlocked","1");}catch(_){}renderControl();}
+  else{const er=document.getElementById("ccErr");if(er)er.textContent="Incorrect passphrase. Try again.";}
+}
+function ccLock(){try{sessionStorage.removeItem("cc_unlocked");}catch(_){}renderControl();}
+function ccToggle(addr){toggleHidden(addr);renderControl();}
+function renderControl(){
+  const body=document.getElementById("ccBody");
+  if(!body)return;
+  if(!ccIsUnlocked()){
+    body.innerHTML=`
+      <div class="cc-gate">
+        <div class="cc-lock-ic">PRIVATE ACCESS</div>
+        <h2 style="font-size:20px;margin-bottom:6px;letter-spacing:-.5px">Control Center</h2>
+        <p style="font-size:12.5px;color:var(--muted);margin-bottom:18px">Enter the admin passphrase to access private moderation and platform controls.</p>
+        <input id="ccPass" type="password" placeholder="Passphrase" onkeydown="if(event.key==='Enter')ccUnlock()" style="width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--text);font-family:var(--font);outline:none;text-align:center"/>
+        <div id="ccErr" style="color:var(--danger);font-size:11px;font-family:var(--mono);margin-top:8px;min-height:14px"></div>
+        <button class="btn btn-full" style="margin-top:12px" onclick="ccUnlock()">Unlock</button>
+        <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="closeControl()">Close</button>
+      </div>`;
+    setTimeout(()=>{const p=document.getElementById("ccPass");if(p)p.focus();},50);
+    return;
+  }
+  const all=[...projects];
+  const hiddenCount=all.filter(p=>isHidden(p.tokenContract)).length;
+  const totalRaised=all.reduce((s,p)=>s+p.raised,0);
+  const builders=new Set(all.map(p=>p.founder.toLowerCase())).size;
+  const ann=getAnnouncement();
+  body.innerHTML=`
+    <div class="cc-head">
+      <div><div class="cc-title">Control Center</div><div class="cc-sub">Private moderation and platform controls</div></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="ccLock()">Lock</button>
+        <button class="xb" onclick="closeControl()">X</button>
+      </div>
+    </div>
+    <div class="cc-stats">
+      <div class="cc-stat"><div class="v">${all.length}</div><div class="l">Total Assets</div></div>
+      <div class="cc-stat"><div class="v">${all.length-hiddenCount}</div><div class="l">Visible</div></div>
+      <div class="cc-stat"><div class="v" style="color:var(--warn)">${hiddenCount}</div><div class="l">Hidden</div></div>
+      <div class="cc-stat"><div class="v">${fmtK(totalRaised)}</div><div class="l">USDC Raised</div></div>
+      <div class="cc-stat"><div class="v">${builders}</div><div class="l">Builders</div></div>
+    </div>
+
+    <div class="cc-section-title">Ship an Update — public announcement banner</div>
+    <textarea id="ccAnn" class="cc-textarea" placeholder="e.g. New tokenized assets dropping this week on ArcVault. Stay tuned.">${ann?ann.replace(/&/g,"&amp;").replace(/</g,"&lt;"):""}</textarea>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn" onclick="publishAnnouncement()">Publish</button>
+      <button class="btn btn-ghost" onclick="clearAnnouncementAdmin()">Clear</button>
+    </div>
+
+    <div class="cc-section-title">Project Moderation — all on-chain assets (${all.length})</div>
+    ${all.length?`<div class="cc-table">
+      ${all.map(p=>{
+        const h=isHidden(p.tokenContract);
+        return `<div class="cc-row ${h?'cc-row-hidden':''}">
+          <div class="cc-row-main">
+            <div class="cc-row-name">${p.name} <span style="color:var(--muted2);font-weight:400">${p.symbol}</span> ${h?'<span class="hidden-tag">Hidden</span>':''}</div>
+            <div class="cc-row-meta">${TYPE_N[p.assetType]} &middot; ${fmtK(p.raised)} raised &middot; by ${short(p.founder)}</div>
+          </div>
+          <div class="cc-row-actions">
+            <a class="chip" target="_blank" href="${EXPLORER}/address/${p.tokenContract}">explorer</a>
+            <button class="btn ${h?'':'btn-ghost'}" onclick="ccToggle('${p.tokenContract}')">${h?'Restore':'Remove'}</button>
+          </div>
+        </div>`;
+      }).join("")}
+    </div>`:`<div class="empty"><div class="ei">CC</div><h3>No assets on-chain yet</h3><p>Assets appear here once deployed</p></div>`}
+
+    <div style="font-size:10.5px;font-family:var(--mono);color:var(--muted2);margin-top:18px;line-height:1.6;border-top:1px solid var(--border);padding-top:14px">
+      Remove hides an asset from the public Explore instantly. The on-chain contract is immutable and cannot be deleted from here. Hides are stored in this browser only — for global enforcement across all visitors, connect a backend or add an on-chain pause flag.
+    </div>`;
+}
+
+/* announcements */
+function getAnnouncement(){try{return localStorage.getItem("arcvault_announcement")||"";}catch(_){return "";}}
+function publishAnnouncement(){
+  const el=document.getElementById("ccAnn");
+  const t=el?el.value.trim():"";
+  try{localStorage.setItem("arcvault_announcement",t);}catch(_){}
+  try{sessionStorage.removeItem("ann_dismissed");}catch(_){}
+  renderAnnouncement();toast(t?"Announcement published":"Announcement cleared","ok");
+}
+function clearAnnouncementAdmin(){
+  try{localStorage.removeItem("arcvault_announcement");}catch(_){}
+  const a=document.getElementById("ccAnn");if(a)a.value="";
+  renderAnnouncement();toast("Announcement cleared","inf");
+}
+function dismissAnnouncement(){try{sessionStorage.setItem("ann_dismissed","1");}catch(_){}renderAnnouncement();}
+function renderAnnouncement(){
+  const b=document.getElementById("ccBanner");if(!b)return;
+  const t=getAnnouncement();
+  let dismissed=false;try{dismissed=sessionStorage.getItem("ann_dismissed")==="1";}catch(_){}
+  if(t && !dismissed){document.getElementById("ccBannerText").textContent=t;b.classList.add("show");}
+  else b.classList.remove("show");
+}
+
+/* secret access: URL hash (#control-center or #sys-control) or Ctrl+Shift+. */
+function ccCheckHash(){if(location.hash==="#control-center"||location.hash==="#sys-control"){openControl();}}
+window.addEventListener("hashchange",ccCheckHash);
+document.addEventListener("keydown",function(e){
+  if(e.ctrlKey&&e.shiftKey&&(e.key==="."||e.key===">")){e.preventDefault();openControl();}
+  if(e.key==="Escape"){closeControl();}
+});
+
+
 /* boot */
 loadEverything();
 restoreSession();
+renderAnnouncement();
+ccCheckHash();
 setInterval(async()=>{try{const b=await readProvider.getBlockNumber();document.getElementById("kBlock").textContent="#"+b.toLocaleString();document.getElementById("sideBlock").textContent="Block #"+b.toLocaleString();}catch(_){}},6000);
 </script>
 <script>
