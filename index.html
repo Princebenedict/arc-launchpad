@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>ArcVault — The Intelligence Layer for Arc</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
 <style>
 :root{
@@ -350,8 +350,320 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
   .toast.show{transform:translateY(0)}
 }
 </style>
+<style id="lp-style">
+/* ===== ARCVAULT CINEMATIC LANDING (scoped overlay) ===== */
+#landing{position:fixed;inset:0;z-index:500;overflow-y:auto;overflow-x:hidden;background:#05070A;color:#e8eef8;font-family:"Inter",-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+#landing.hide{display:none}
+#landing.fade-out{opacity:0;transition:opacity .55s ease;pointer-events:none}
+.lp *{box-sizing:border-box}
+.lp-canvas{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.55}
+.lp-aurora{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.lp-aurora i{position:absolute;border-radius:50%;filter:blur(120px)}
+.lp-aurora .a1{width:62vw;height:62vw;background:radial-gradient(circle,rgba(0,212,170,.22),transparent 68%);top:-22vw;right:-12vw;animation:lpF1 22s ease-in-out infinite alternate}
+.lp-aurora .a2{width:52vw;height:52vw;background:radial-gradient(circle,rgba(77,127,255,.20),transparent 68%);bottom:-18vw;left:-12vw;animation:lpF2 28s ease-in-out infinite alternate}
+.lp-aurora .a3{width:40vw;height:40vw;background:radial-gradient(circle,rgba(139,92,246,.16),transparent 70%);top:35%;left:40%;animation:lpF3 32s ease-in-out infinite alternate}
+@keyframes lpF1{to{transform:translate(-6vw,7vw) scale(1.15)}}
+@keyframes lpF2{to{transform:translate(7vw,-5vw) scale(1.12)}}
+@keyframes lpF3{to{transform:translate(-4vw,-6vw) scale(1.2)}}
+.lp-grid{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.13;background-image:linear-gradient(rgba(255,255,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.09) 1px,transparent 1px);background-size:62px 62px;-webkit-mask-image:radial-gradient(ellipse at 50% 0%,#000 38%,transparent 82%);mask-image:radial-gradient(ellipse at 50% 0%,#000 38%,transparent 82%)}
+
+/* nav */
+.lp-nav{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:20px;max-width:1200px;margin:0 auto;padding:22px 26px;transition:padding .3s ease}
+.lp-nav.shrunk{padding:12px 26px}
+.lp-nav.shrunk .lp-nav-inner{background:rgba(11,18,32,.72);backdrop-filter:blur(22px);border-color:rgba(255,255,255,.09)}
+.lp-nav-inner{position:relative;width:100%;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:12px 20px;border-radius:16px;border:1px solid transparent;transition:all .3s ease}
+.lp-brand{display:flex;align-items:center;gap:11px;font-weight:700;font-size:16px;letter-spacing:-.3px}
+.lp-brand .lpm{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#00d4aa,#4d7fff);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#05070A}
+.lp-brand small{display:block;font-size:9px;font-weight:500;letter-spacing:1px;color:#6f87a4;font-family:"DM Mono",monospace}
+.lp-links{display:flex;gap:6px;align-items:center}
+.lp-links a{position:relative;color:#93a6c0;text-decoration:none;font-size:13.5px;font-weight:500;padding:8px 14px;border-radius:9px;transition:color .18s}
+.lp-links a:hover{color:#fff}
+.lp-links a::after{content:"";position:absolute;left:14px;right:14px;bottom:5px;height:1.5px;background:linear-gradient(90deg,#00d4aa,#4d7fff);transform:scaleX(0);transform-origin:left;transition:transform .25s}
+.lp-links a:hover::after{transform:scaleX(1)}
+.lp-nav-cta{padding:10px 20px;border-radius:11px;border:none;background:#fff;color:#05070A;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit;transition:transform .18s,box-shadow .18s}
+.lp-nav-cta:hover{transform:translateY(-1px);box-shadow:0 10px 30px rgba(255,255,255,.18)}
+
+/* layout */
+.lp-wrap{position:relative;z-index:5;max-width:1200px;margin:0 auto;padding:0 26px}
+.lp-section{position:relative;z-index:5;padding:100px 0}
+.lp-eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:#00d4aa;font-family:"DM Mono",monospace;padding:7px 14px;border:1px solid rgba(0,212,170,.28);border-radius:20px;background:rgba(0,212,170,.07);margin-bottom:22px}
+.lp-eyebrow .dot{width:6px;height:6px;border-radius:50%;background:#00d4aa;animation:lpPulse 2s infinite}
+@keyframes lpPulse{0%,100%{opacity:1}50%{opacity:.3}}
+.lp-h2{font-size:clamp(28px,4vw,46px);font-weight:700;letter-spacing:-1.5px;line-height:1.08;margin-bottom:18px;background:linear-gradient(180deg,#fff,#a9bcd6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.lp-sub{font-size:clamp(15px,1.6vw,18px);color:#8ba0bc;line-height:1.6;max-width:620px;font-weight:300}
+
+/* hero */
+.lp-hero{position:relative;z-index:5;max-width:1200px;margin:0 auto;padding:70px 26px 90px;display:grid;grid-template-columns:1.05fr .95fr;gap:50px;align-items:center;min-height:82vh}
+.lp-hero-badge{display:inline-flex;align-items:center;gap:9px;font-size:12px;font-weight:500;color:#c9d7ea;padding:8px 15px;border:1px solid rgba(255,255,255,.12);border-radius:22px;background:rgba(255,255,255,.04);backdrop-filter:blur(10px);margin-bottom:26px}
+.lp-hero-badge .g{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 10px #22c55e}
+.lp-h1{font-size:clamp(38px,6vw,72px);font-weight:800;letter-spacing:-3px;line-height:.98;margin-bottom:24px}
+.lp-h1 .grad{background:linear-gradient(120deg,#00d4aa 0%,#4d7fff 55%,#8b5cf6 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.lp-hero p.lead{font-size:clamp(16px,1.8vw,20px);color:#93a6c0;line-height:1.55;max-width:540px;font-weight:300;margin-bottom:34px}
+.lp-hero-cta{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:44px}
+.lp-btn{padding:15px 28px;border-radius:13px;border:none;font-weight:700;font-size:14.5px;cursor:pointer;font-family:inherit;transition:transform .18s,box-shadow .22s;display:inline-flex;align-items:center;gap:9px}
+.lp-btn-primary{background:linear-gradient(120deg,#00d4aa,#4d7fff);color:#05070A}
+.lp-btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 44px rgba(0,212,170,.35)}
+.lp-btn-ghost{background:rgba(255,255,255,.05);color:#e8eef8;border:1px solid rgba(255,255,255,.13)}
+.lp-btn-ghost:hover{background:rgba(255,255,255,.09);transform:translateY(-2px)}
+.lp-stats{display:flex;gap:34px;flex-wrap:wrap}
+.lp-stat .v{font-size:26px;font-weight:800;letter-spacing:-1px;font-family:"DM Mono",monospace;background:linear-gradient(180deg,#fff,#9fb3cf);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.lp-stat .l{font-size:11px;color:#6f87a4;font-family:"DM Mono",monospace;letter-spacing:.5px;margin-top:3px;text-transform:uppercase}
+
+/* hero art — floating glass dashboard */
+.lp-art{position:relative;height:520px;perspective:1400px}
+.lp-glass{position:absolute;border-radius:20px;background:rgba(17,26,42,.55);backdrop-filter:blur(26px);border:1px solid rgba(255,255,255,.1);box-shadow:0 30px 80px rgba(0,0,0,.5);padding:20px;transition:transform .3s ease}
+.lp-card-main{top:60px;left:0;right:40px;height:280px}
+.lp-card-a{top:0;right:0;width:220px;height:150px;animation:lpBob 6s ease-in-out infinite}
+.lp-card-b{bottom:20px;left:30px;width:250px;height:140px;animation:lpBob 7s ease-in-out infinite reverse}
+@keyframes lpBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.lp-cardhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.lp-cardhead .t{font-size:12px;font-weight:700;color:#d6e2f2}
+.lp-cardhead .tag{font-size:9px;font-family:"DM Mono",monospace;color:#00d4aa;border:1px solid rgba(0,212,170,.3);border-radius:5px;padding:2px 7px}
+.lp-ring{width:96px;height:96px;border-radius:50%;margin:6px auto;display:flex;align-items:center;justify-content:center;background:conic-gradient(#00d4aa 0deg,#4d7fff 300deg,rgba(255,255,255,.08) 300deg);position:relative}
+.lp-ring::after{content:"";position:absolute;inset:9px;border-radius:50%;background:#0c1524}
+.lp-ring .n{position:relative;z-index:2;font-family:"DM Mono",monospace;font-weight:800;font-size:22px;color:#fff}
+.lp-mini-rows{display:flex;flex-direction:column;gap:9px;margin-top:6px}
+.lp-mini-row{display:flex;align-items:center;gap:9px}
+.lp-mini-row .mn{font-size:9.5px;font-family:"DM Mono",monospace;color:#6f87a4;width:60px}
+.lp-mini-row .mb{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.08);overflow:hidden}
+.lp-mini-row .mf{height:100%;border-radius:3px;background:linear-gradient(90deg,#00d4aa,#4d7fff);animation:lpGrow 2s ease forwards;transform-origin:left;transform:scaleX(0)}
+@keyframes lpGrow{to{transform:scaleX(1)}}
+.lp-netrow{display:flex;align-items:center;gap:8px;font-size:11px;color:#93a6c0;font-family:"DM Mono",monospace;margin-top:8px}
+.lp-netrow .g{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e;animation:lpPulse 2s infinite}
+.lp-spark{display:flex;align-items:flex-end;gap:4px;height:52px;margin-top:8px}
+.lp-spark i{flex:1;border-radius:3px 3px 0 0;background:linear-gradient(180deg,#4d7fff,rgba(77,127,255,.2));animation:lpBar 1.6s ease forwards;transform-origin:bottom;transform:scaleY(.2)}
+@keyframes lpBar{to{transform:scaleY(1)}}
+
+/* features */
+.lp-feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:44px}
+.lp-feat{position:relative;padding:26px;border-radius:18px;background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);overflow:hidden;transition:transform .25s ease,border-color .25s ease,background .25s ease}
+.lp-feat:hover{transform:translateY(-4px);border-color:rgba(0,212,170,.35);background:rgba(0,212,170,.04)}
+.lp-feat::before{content:"";position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,212,170,.6),transparent);opacity:0;transition:opacity .3s}
+.lp-feat:hover::before{opacity:1}
+.lp-feat-ic{width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,rgba(0,212,170,.16),rgba(77,127,255,.16));border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.lp-feat-ic svg{width:22px;height:22px;stroke:#00d4aa;fill:none;stroke-width:1.7}
+.lp-feat h3{font-size:16.5px;font-weight:700;margin-bottom:8px;letter-spacing:-.3px}
+.lp-feat p{font-size:13px;color:#8ba0bc;line-height:1.6;font-weight:300}
+
+/* how */
+.lp-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:44px}
+.lp-step{position:relative;padding:28px;border-radius:18px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)}
+.lp-step .num{font-family:"DM Mono",monospace;font-size:13px;font-weight:700;color:#05070A;width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#00d4aa,#4d7fff);display:flex;align-items:center;justify-content:center;margin-bottom:16px}
+.lp-step h3{font-size:16px;font-weight:700;margin-bottom:8px}
+.lp-step p{font-size:13px;color:#8ba0bc;line-height:1.6;font-weight:300}
+
+/* ecosystem band */
+.lp-band{position:relative;z-index:5;max-width:1200px;margin:0 auto;padding:0 26px}
+.lp-band-inner{border-radius:24px;border:1px solid rgba(255,255,255,.09);background:linear-gradient(135deg,rgba(0,212,170,.06),rgba(77,127,255,.06));backdrop-filter:blur(20px);padding:46px;display:grid;grid-template-columns:repeat(4,1fr);gap:30px;text-align:center}
+.lp-band-stat .v{font-size:34px;font-weight:800;font-family:"DM Mono",monospace;letter-spacing:-1.5px;background:linear-gradient(120deg,#00d4aa,#4d7fff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.lp-band-stat .l{font-size:11px;color:#8ba0bc;font-family:"DM Mono",monospace;letter-spacing:.6px;margin-top:6px;text-transform:uppercase}
+
+/* final cta */
+.lp-final{position:relative;z-index:5;text-align:center;padding:110px 26px}
+.lp-final h2{font-size:clamp(32px,5vw,58px);font-weight:800;letter-spacing:-2.5px;line-height:1.02;margin-bottom:20px;background:linear-gradient(120deg,#fff,#00d4aa,#4d7fff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.lp-final p{font-size:17px;color:#8ba0bc;max-width:520px;margin:0 auto 34px;font-weight:300;line-height:1.6}
+
+/* footer */
+.lp-footer{position:relative;z-index:5;border-top:1px solid rgba(255,255,255,.07);padding:40px 26px;max-width:1200px;margin:60px auto 0;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.lp-footer .fb{display:flex;align-items:center;gap:10px;font-weight:700;font-size:14px}
+.lp-footer .fb .lpm{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#00d4aa,#4d7fff);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#05070A}
+.lp-footer .fcopy{font-size:12px;color:#6f87a4;font-family:"DM Mono",monospace}
+.lp-footer .flinks{display:flex;gap:20px}
+.lp-footer .flinks a{color:#8ba0bc;text-decoration:none;font-size:12.5px;transition:color .18s}
+.lp-footer .flinks a:hover{color:#fff}
+
+/* reveal */
+.lp-reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease,transform .7s ease}
+.lp-reveal.in{opacity:1;transform:none}
+
+/* responsive */
+@media(max-width:900px){
+  .lp-hero{grid-template-columns:1fr;gap:36px;padding-top:40px;min-height:0;text-align:center}
+  .lp-hero-cta,.lp-stats{justify-content:center}
+  .lp-hero p.lead{margin-left:auto;margin-right:auto}
+  .lp-art{height:420px;margin-top:10px}
+  .lp-card-main{right:0}
+  .lp-links{display:none}
+  .lp-feat-grid,.lp-steps{grid-template-columns:1fr}
+  .lp-band-inner{grid-template-columns:1fr 1fr;padding:32px;gap:24px}
+  .lp-section{padding:70px 0}
+  .lp-footer{flex-direction:column;text-align:center}
+}
+@media(max-width:480px){
+  .lp-h1{letter-spacing:-1.5px}
+  .lp-art{height:360px}
+  .lp-card-a{width:180px}
+  .lp-card-b{width:200px}
+  .lp-band-inner{grid-template-columns:1fr}
+  .lp-nav{padding:16px}
+}
+@media(prefers-reduced-motion:reduce){
+  .lp-canvas,.lp-aurora i,.lp-card-a,.lp-card-b{animation:none!important}
+  .lp-reveal{transition:none;opacity:1;transform:none}
+}
+</style>
+
 </head>
 <body>
+<div id="landing" class="lp">
+  <canvas class="lp-canvas" id="lpCanvas"></canvas>
+  <div class="lp-aurora"><i class="a1"></i><i class="a2"></i><i class="a3"></i></div>
+  <div class="lp-grid"></div>
+
+  <!-- NAV -->
+  <nav class="lp-nav" id="lpNav">
+    <div class="lp-nav-inner">
+      <div class="lp-brand"><div class="lpm">AV</div><div>ArcVault<small>INTELLIGENCE LAYER</small></div></div>
+      <div class="lp-links">
+        <a onclick="lpScroll('lp-features')">Features</a>
+        <a onclick="lpScroll('lp-how')">How it works</a>
+        <a onclick="lpScroll('lp-eco')">Ecosystem</a>
+      </div>
+      <button class="lp-nav-cta" onclick="enterApp()">Launch App</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="lp-hero">
+    <div class="lp-hero-left">
+      <div class="lp-hero-badge"><span class="g"></span>Built on Arc &middot; Circle's stablecoin-native L1</div>
+      <h1 class="lp-h1">The <span class="grad">Intelligence Layer</span> for Arc</h1>
+      <p class="lead">Build, discover, invest and manage tokenized assets with an AI risk engine, on-chain builder reputation and USDC-native settlement — all in one intelligent platform.</p>
+      <div class="lp-hero-cta">
+        <button class="lp-btn lp-btn-primary" onclick="enterApp()">Enter ArcVault
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+        <button class="lp-btn lp-btn-ghost" onclick="lpScroll('lp-how')">See how it works</button>
+      </div>
+      <div class="lp-stats">
+        <div class="lp-stat"><div class="v" id="lpAssets">—</div><div class="l">Assets Live</div></div>
+        <div class="lp-stat"><div class="v" id="lpRaised">—</div><div class="l">USDC Raised</div></div>
+        <div class="lp-stat"><div class="v" id="lpBuilders">—</div><div class="l">Builders</div></div>
+      </div>
+    </div>
+
+    <div class="lp-hero-right">
+      <div class="lp-art" id="lpArt">
+        <div class="lp-glass lp-card-main" data-depth="0.02">
+          <div class="lp-cardhead"><span class="t">AI Risk Engine</span><span class="tag">LIVE</span></div>
+          <div style="display:flex;gap:20px;align-items:center">
+            <div class="lp-ring"><span class="n">8.6</span></div>
+            <div class="lp-mini-rows" style="flex:1">
+              <div class="lp-mini-row"><span class="mn">FUNDING</span><span class="mb"><span class="mf" style="width:82%"></span></span></div>
+              <div class="lp-mini-row"><span class="mn">TENURE</span><span class="mb"><span class="mf" style="width:64%"></span></span></div>
+              <div class="lp-mini-row"><span class="mn">VALUATION</span><span class="mb"><span class="mf" style="width:73%"></span></span></div>
+              <div class="lp-mini-row"><span class="mn">ACTIVITY</span><span class="mb"><span class="mf" style="width:90%"></span></span></div>
+            </div>
+          </div>
+        </div>
+        <div class="lp-glass lp-card-a" data-depth="0.05">
+          <div class="lp-cardhead"><span class="t">Arc Network</span></div>
+          <div class="lp-netrow"><span class="g"></span>Arc Testnet &middot; 5042002</div>
+          <div class="lp-netrow" id="lpBlock" style="color:#d6e2f2">Block —</div>
+          <div class="lp-netrow">USDC gas &middot; ~0.5s finality</div>
+        </div>
+        <div class="lp-glass lp-card-b" data-depth="0.04">
+          <div class="lp-cardhead"><span class="t">Builder Trust</span><span class="tag">92</span></div>
+          <div class="lp-spark"><i style="height:40%"></i><i style="height:65%"></i><i style="height:50%"></i><i style="height:80%"></i><i style="height:70%"></i><i style="height:95%"></i><i style="height:85%"></i></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="lp-section" id="lp-features">
+    <div class="lp-wrap">
+      <div class="lp-reveal"><span class="lp-eyebrow"><span class="dot"></span>Platform</span></div>
+      <h2 class="lp-h2 lp-reveal">Everything the Arc ecosystem needs</h2>
+      <p class="lp-sub lp-reveal">One intelligent surface for builders, founders and investors — every listing is a real on-chain contract, enriched with AI.</p>
+      <div class="lp-feat-grid">
+        <div class="lp-feat lp-reveal">
+          <div class="lp-feat-ic"><svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-4z"/></svg></div>
+          <h3>AI Risk Engine</h3>
+          <p>Every asset scored 0&ndash;10 from on-chain risk tier, funding traction, contract age and valuation — with a live confidence rating.</p>
+        </div>
+        <div class="lp-feat lp-reveal">
+          <div class="lp-feat-ic"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
+          <h3>Live Discovery</h3>
+          <p>Browse only real factory-created listings with type, risk, valuation and funding progress. No mock data, ever.</p>
+        </div>
+        <div class="lp-feat lp-reveal">
+          <div class="lp-feat-ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 4v16"/></svg></div>
+          <h3>Builder Studio</h3>
+          <p>Launch a tokenized asset in a guided flow — project, tokenomics, risk, AI review, deploy. Live in ~0.5s on Arc.</p>
+        </div>
+        <div class="lp-feat lp-reveal">
+          <div class="lp-feat-ic"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/><path d="M12 6v6l4 2"/></svg></div>
+          <h3>On-Chain Vault</h3>
+          <p>Portfolio value, cost basis, P&amp;L and claimable dividends — all read live from your token contracts.</p>
+        </div>
+        <div class="lp-feat lp-reveal">
+          <div class="lp-feat-ic"><svg viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4 2 7L12 17l-6.5 4 2-7L2 9h7z"/></svg></div>
+          <h3>Builder Reputation</h3>
+          <p>A 0&ndash;100 trust score from deployments, capital raised, activity and tenure — verifiable by any investor.</p>
+        </div>
+        <div class="lp-feat lp-reveal">
+          <div class="lp-feat-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5M12 15h.01"/></svg></div>
+          <h3>USDC-Native</h3>
+          <p>USDC is the gas token. Dollar-denominated fees, sub-second settlement, and Circle rails like CCTP and StableFX.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW -->
+  <section class="lp-section" id="lp-how">
+    <div class="lp-wrap">
+      <div class="lp-reveal"><span class="lp-eyebrow"><span class="dot"></span>How it works</span></div>
+      <h2 class="lp-h2 lp-reveal">From idea to on-chain in three steps</h2>
+      <div class="lp-steps">
+        <div class="lp-step lp-reveal"><div class="num">01</div><h3>Launch</h3><p>Founders define their asset, tokenomics and risk tier in Builder Studio. A dedicated token contract deploys to Arc for a 1 USDC fee.</p></div>
+        <div class="lp-step lp-reveal"><div class="num">02</div><h3>Discover</h3><p>Investors explore live listings enriched with AI risk scores and builder reputation, then buy tokens directly with USDC.</p></div>
+        <div class="lp-step lp-reveal"><div class="num">03</div><h3>Manage</h3><p>Track holdings, cost basis and claimable dividends in the Vault. Founders distribute returns and manage listings from their dashboard.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ECOSYSTEM -->
+  <section class="lp-section" id="lp-eco">
+    <div class="lp-band">
+      <div class="lp-reveal" style="text-align:center;margin-bottom:34px">
+        <span class="lp-eyebrow"><span class="dot"></span>Live on Arc Testnet</span>
+        <h2 class="lp-h2" style="margin-top:14px">Real contracts. Real settlement.</h2>
+      </div>
+      <div class="lp-band-inner lp-reveal">
+        <div class="lp-band-stat"><div class="v" id="lpEcoAssets">—</div><div class="l">Assets Deployed</div></div>
+        <div class="lp-band-stat"><div class="v" id="lpEcoRaised">—</div><div class="l">USDC Settled</div></div>
+        <div class="lp-band-stat"><div class="v" id="lpEcoBuilders">—</div><div class="l">Unique Builders</div></div>
+        <div class="lp-band-stat"><div class="v">~0.5s</div><div class="l">Finality</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA -->
+  <div class="lp-final">
+    <div class="lp-reveal">
+      <h2>Build the future of<br/>tokenized assets on Arc</h2>
+      <p>Join builders and investors using ArcVault as the intelligence layer for the Arc ecosystem.</p>
+      <button class="lp-btn lp-btn-primary" onclick="enterApp()">Enter ArcVault
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="lp-footer">
+    <div class="fb"><div class="lpm">AV</div>ArcVault</div>
+    <div class="flinks">
+      <a onclick="lpScroll('lp-features')">Features</a>
+      <a onclick="lpScroll('lp-how')">How it works</a>
+      <a href="https://testnet.arcscan.app" target="_blank" rel="noopener">Explorer</a>
+      <a onclick="enterApp()">Launch App</a>
+    </div>
+    <div class="fcopy">The Intelligence Layer for Arc</div>
+  </footer>
+</div>
+
 
 <div class="orb orb1"></div><div class="orb orb2"></div>
 
@@ -579,11 +891,11 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
   </div>
   <div class="sect-title">Circle-Native Rails on Arc</div>
   <div class="gridN g3">
-    <div class="card hover"><b style="font-size:14px">StableFX</b><p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">On-chain FX engine for USDC / EURC pairs. RFQ-based settlement, 24/7. FxEscrow: <a class="chip" target="_blank" href="https://testnet.arcscan.app/address/0x867650F5eAe8df91445971f14d89fd84F0C9a9f8">0x8676…a9f8</a></p></div>
-    <div class="card hover"><b style="font-size:14px">CCTP v2</b><p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">Native USDC transfer across chains. Bring capital from Ethereum or Solana into ArcVault raises. Messenger: <a class="chip" target="_blank" href="https://testnet.arcscan.app/address/0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA">0x8FE6…2DAA</a></p></div>
-    <div class="card hover"><b style="font-size:14px">USYC</b><p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">Tokenized yield for idle treasury. Future ArcVault raises can auto-park unspent USDC into yield. <a class="chip" target="_blank" href="https://testnet.arcscan.app/address/0xe9185F0c5F296Ed1797AaE4238D26CCaBEadb86C">0xe918…86C</a></p></div>
+    <div class="card hover"><b style="font-size:14px">StableFX</b><p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">On-chain FX engine for USDC / EURC pairs. RFQ-based settlement, 24/7. FxEscrow: <a class="chip" target="_blank" rel="noopener" href="https://testnet.arcscan.app/address/0x867650F5eAe8df91445971f14d89fd84F0C9a9f8">0x8676…a9f8</a></p></div>
+      <div class="card hover"><b style="font-size:14px">CCTP v2</b><p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">Native USDC transfer across chains. Bring capital from Ethereum or Solana into ArcVault raises. Messenger: <a class="chip" target="_blank" rel="noopener" href="https://testnet.arcscan.app/address/0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA">0x8FE6…2DAA</a></p></div>
+      <div class="card hover"><b style="font-size:14px">USYC</b><p style="font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6">Tokenized yield for idle treasury. Future ArcVault raises can auto-park unspent USDC into yield. <a class="chip" target="_blank" rel="noopener" href="https://testnet.arcscan.app/address/0xe9185F0c5F296Ed1797AaE4238D26CCaBEadb86C">0xe918…86C</a></p></div>
   </div>
-  <div style="margin-top:16px;font-size:11px;font-family:var(--mono);color:var(--muted2)">Native gas token (USDC): <a class="chip" target="_blank" href="https://testnet.arcscan.app/address/0x3600000000000000000000000000000000000000">0x3600…0000</a></div>
+  <div style="margin-top:16px;font-size:11px;font-family:var(--mono);color:var(--muted2)">Native gas token (USDC): <a class="chip" target="_blank" rel="noopener" href="https://testnet.arcscan.app/address/0x3600000000000000000000000000000000000000">0x3600…0000</a></div>
 </div>
 
 <div class="page" id="page-analytics">
@@ -1541,5 +1853,106 @@ loadEverything();
 restoreSession();
 setInterval(async()=>{try{const b=await readProvider.getBlockNumber();document.getElementById("kBlock").textContent="#"+b.toLocaleString();document.getElementById("sideBlock").textContent="Block #"+b.toLocaleString();}catch(_){}},6000);
 </script>
+<script>
+/* ===== ARCVAULT LANDING (isolated — does not touch app scope) ===== */
+(function(){
+  var landing=document.getElementById("landing");
+  if(!landing) return;
+
+  /* returning within session skips straight to app */
+  try{ if(sessionStorage.getItem("arcvault_entered")==="1"){ landing.classList.add("hide"); } }catch(e){}
+
+  /* enter app */
+  window.enterApp=function(){
+    landing.classList.add("fade-out");
+    try{ sessionStorage.setItem("arcvault_entered","1"); }catch(e){}
+    setTimeout(function(){ landing.classList.add("hide"); window.scrollTo(0,0); },560);
+  };
+  window.showLanding=function(){
+    landing.classList.remove("hide","fade-out");
+    try{ sessionStorage.removeItem("arcvault_entered"); }catch(e){}
+    window.scrollTo(0,0);
+  };
+  window.lpScroll=function(id){
+    var el=document.getElementById(id);
+    if(el) el.scrollIntoView({behavior:"smooth",block:"start"});
+  };
+
+  /* nav shrink on scroll (landing scrolls internally) */
+  var nav=document.getElementById("lpNav");
+  landing.addEventListener("scroll",function(){
+    if(nav){ nav.classList.toggle("shrunk", landing.scrollTop>30); }
+  });
+
+  /* scroll reveal */
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add("in"); io.unobserve(en.target); } });
+  },{threshold:0.12, root:landing});
+  landing.querySelectorAll(".lp-reveal").forEach(function(el){ io.observe(el); });
+
+  /* mouse-depth parallax on hero art */
+  var art=document.getElementById("lpArt");
+  if(art && !window.matchMedia("(prefers-reduced-motion:reduce)").matches){
+    art.addEventListener("mousemove",function(e){
+      var r=art.getBoundingClientRect();
+      var cx=(e.clientX-r.left)/r.width-0.5;
+      var cy=(e.clientY-r.top)/r.height-0.5;
+      art.querySelectorAll("[data-depth]").forEach(function(el){
+        var d=parseFloat(el.getAttribute("data-depth"))*100;
+        el.style.transform="translate("+(cx*d)+"px,"+(cy*d)+"px)";
+      });
+    });
+    art.addEventListener("mouseleave",function(){
+      art.querySelectorAll("[data-depth]").forEach(function(el){ el.style.transform=""; });
+    });
+  }
+
+  /* particle neural-network canvas */
+  var cv=document.getElementById("lpCanvas");
+  if(cv && !window.matchMedia("(prefers-reduced-motion:reduce)").matches){
+    var ctx=cv.getContext("2d"), W,H,pts,raf;
+    function size(){ W=cv.width=window.innerWidth; H=cv.height=window.innerHeight; }
+    function init(){
+      var n=Math.min(46, Math.floor(window.innerWidth/34));
+      pts=[];
+      for(var i=0;i<n;i++){ pts.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-0.5)*0.35,vy:(Math.random()-0.5)*0.35}); }
+    }
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      for(var i=0;i<pts.length;i++){
+        var p=pts[i]; p.x+=p.vx; p.y+=p.vy;
+        if(p.x<0||p.x>W) p.vx*=-1;
+        if(p.y<0||p.y>H) p.vy*=-1;
+        ctx.beginPath(); ctx.arc(p.x,p.y,1.6,0,Math.PI*2);
+        ctx.fillStyle="rgba(0,212,170,0.7)"; ctx.fill();
+        for(var j=i+1;j<pts.length;j++){
+          var q=pts[j], dx=p.x-q.x, dy=p.y-q.y, dist=Math.sqrt(dx*dx+dy*dy);
+          if(dist<130){
+            ctx.beginPath(); ctx.moveTo(p.x,p.y); ctx.lineTo(q.x,q.y);
+            ctx.strokeStyle="rgba(77,127,255,"+(0.14*(1-dist/130))+")"; ctx.lineWidth=1; ctx.stroke();
+          }
+        }
+      }
+      raf=requestAnimationFrame(draw);
+    }
+    size(); init(); draw();
+    window.addEventListener("resize",function(){ cancelAnimationFrame(raf); size(); init(); draw(); });
+  }
+
+  /* mirror REAL app KPIs into the landing (no fabricated numbers) */
+  function txt(id){ var el=document.getElementById(id); return el?el.textContent.trim():""; }
+  function syncReal(){
+    var a=txt("kAssets"), r=txt("kRaised"), b=txt("kBuilders"), blk=txt("sideBlock");
+    if(a && a!==""){ setText("lpAssets",a); setText("lpEcoAssets",a); }
+    if(r && r!==""){ setText("lpRaised",r); setText("lpEcoRaised",r); }
+    if(b && b!==""){ setText("lpBuilders",b); setText("lpEcoBuilders",b); }
+    if(blk && blk!==""){ setText("lpBlock", blk); }
+  }
+  function setText(id,v){ var el=document.getElementById(id); if(el && v && !v.match(/skel/)) el.textContent=v; }
+  setInterval(syncReal, 1500);
+  setTimeout(syncReal, 900);
+})();
+</script>
+
 </body>
 </html>
