@@ -105,6 +105,8 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;transition:all .18s;position:relative;overflow:hidden}
 .card.hover:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 14px 44px rgba(0,0,0,.45)}
 .kpi .kv{font-size:24px;font-weight:800;font-family:var(--mono);letter-spacing:-1px}
+.loading-dot{display:inline-block;width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--arc);border-radius:50%;animation:lspin .7s linear infinite;vertical-align:middle}
+@keyframes lspin{to{transform:rotate(360deg)}}
 .kpi .kl{font-size:10px;font-family:var(--mono);color:var(--muted2);letter-spacing:.8px;margin-top:3px;text-transform:uppercase}
 .kpi .kt{font-size:10px;font-family:var(--mono);margin-top:6px}
 .kt.pos{color:var(--success)}.kt.neu{color:var(--muted2)}
@@ -566,9 +568,9 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
         <button class="lp-btn lp-btn-ghost" onclick="lpScroll('lp-how')">See how it works</button>
       </div>
       <div class="lp-stats">
-        <div class="lp-stat"><div class="v" id="lpAssets">—</div><div class="l">Assets Live</div></div>
-        <div class="lp-stat"><div class="v" id="lpRaised">—</div><div class="l">USDC Raised</div></div>
-        <div class="lp-stat"><div class="v" id="lpBuilders">—</div><div class="l">Builders</div></div>
+        <div class="lp-stat"><div class="v" id="lpAssets"><span class="loading-dot"></span></div><div class="l">Assets Live</div></div>
+        <div class="lp-stat"><div class="v" id="lpRaised"><span class="loading-dot"></span></div><div class="l">USDC Raised</div></div>
+        <div class="lp-stat"><div class="v" id="lpBuilders"><span class="loading-dot"></span></div><div class="l">Builders</div></div>
       </div>
     </div>
 
@@ -589,7 +591,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
         <div class="lp-glass lp-card-a" data-depth="0.05">
           <div class="lp-cardhead"><span class="t">Arc Network</span></div>
           <div class="lp-netrow"><span class="g"></span>Arc Testnet &middot; 5042002</div>
-          <div class="lp-netrow" id="lpBlock" style="color:#d6e2f2">Block —</div>
+          <div class="lp-netrow" id="lpBlock" style="color:#d6e2f2">Block <span class="loading-dot"></span></div>
           <div class="lp-netrow">USDC gas &middot; ~0.5s finality</div>
         </div>
         <div class="lp-glass lp-card-b" data-depth="0.04">
@@ -662,9 +664,9 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
         <h2 class="lp-h2" style="margin-top:14px">Real contracts. Real settlement.</h2>
       </div>
       <div class="lp-band-inner lp-reveal">
-        <div class="lp-band-stat"><div class="v" id="lpEcoAssets">—</div><div class="l">Assets Deployed</div></div>
-        <div class="lp-band-stat"><div class="v" id="lpEcoRaised">—</div><div class="l">USDC Settled</div></div>
-        <div class="lp-band-stat"><div class="v" id="lpEcoBuilders">—</div><div class="l">Unique Builders</div></div>
+        <div class="lp-band-stat"><div class="v" id="lpEcoAssets"><span class="loading-dot"></span></div><div class="l">Assets Deployed</div></div>
+        <div class="lp-band-stat"><div class="v" id="lpEcoRaised"><span class="loading-dot"></span></div><div class="l">USDC Settled</div></div>
+        <div class="lp-band-stat"><div class="v" id="lpEcoBuilders"><span class="loading-dot"></span></div><div class="l">Unique Builders</div></div>
         <div class="lp-band-stat"><div class="v">~0.5s</div><div class="l">Finality</div></div>
       </div>
     </div>
@@ -714,7 +716,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
   <button class="nitem" onclick="toggleCopilot()"><span class="ic">AI</span>AI Copilot</button>
   <div class="side-foot">
     <div><span class="net-dot"></span>Arc Testnet · 5042002</div>
-    <div id="sideBlock">Block —</div>
+    <div id="sideBlock">Block <span class="loading-dot"></span></div>
     <div>USDC gas · ~0.5s finality</div>
     <div style="margin-top:7px;opacity:.65">Arc™ is a trademark of Circle Internet Group, Inc.</div>
   </div>
@@ -795,7 +797,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
   <div class="page-head">
     <div class="ph-row">
       <div><h1>Discover</h1><p>Every project enriched with the AI Risk Engine, Builder Score and live on-chain state.</p></div>
-      <button class="btn btn-ghost" onclick="loadEverything()">Refresh chain data</button>
+      <button class="btn btn-ghost" id="refreshBtn" onclick="doRefresh()">Refresh chain data</button>
     </div>
   </div>
   <div class="fbar" id="fbar">
@@ -921,8 +923,8 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.2;z-
     <p>USDC is Arc's native gas and settlement currency. Track platform flows and Circle-native rails.</p>
   </div>
   <div class="gridN g4">
-    <div class="card kpi"><div class="kv" id="stRaised">—</div><div class="kl">USDC Settled via Keystone</div></div>
-    <div class="card kpi"><div class="kv" id="stFees">—</div><div class="kl">Listing Fees Collected</div></div>
+    <div class="card kpi"><div class="kv" id="stRaised"><span class="loading-dot"></span></div><div class="kl">USDC Settled via Keystone</div></div>
+    <div class="card kpi"><div class="kv" id="stFees"><span class="loading-dot"></span></div><div class="kl">Listing Fees Collected</div></div>
     <div class="card kpi"><div class="kv">USDC</div><div class="kl">Native Gas Token</div></div>
     <div class="card kpi"><div class="kv">~0.5s</div><div class="kl">Settlement Finality</div></div>
   </div>
@@ -1786,7 +1788,7 @@ async function switchNetwork(){
       try{
         await window.ethereum.request({method:"wallet_addEthereumChain",params:[{
           chainId:ARC_CHAIN_HEX,chainName:"Arc Testnet",
-          nativeCurrency:{name:"USDC",symbol:"USDC",decimals:18},
+          nativeCurrency:{name:"USDC",symbol:"USDC",decimals:6},
           rpcUrls:[RPC_URL],blockExplorerUrls:[EXPLORER]}]});
       }catch(e){toast("Could not add Arc Testnet","err");}
     }
@@ -1835,7 +1837,7 @@ async function connectWallet(){
       if(sw.code===4902){
         await window.ethereum.request({method:"wallet_addEthereumChain",params:[{
           chainId:ARC_CHAIN_HEX,chainName:"Arc Testnet",
-          nativeCurrency:{name:"USDC",symbol:"USDC",decimals:18},
+          nativeCurrency:{name:"USDC",symbol:"USDC",decimals:6},
           rpcUrls:[RPC_URL],blockExplorerUrls:[EXPLORER]}]});
       }
     }
@@ -2111,11 +2113,42 @@ document.addEventListener("keydown",function(e){
 });
 
 
-/* boot */
-loadEverything();
+/* refresh with loading state */
+let isRefreshing=false;
+async function doRefresh(){
+  if(isRefreshing) return;
+  isRefreshing=true;
+  const btn=document.getElementById("refreshBtn");
+  const orig=btn?btn.textContent:"";
+  if(btn){btn.textContent="Refreshing...";btn.disabled=true;}
+  try{ await loadEverything(); toast("Data refreshed","ok"); }
+  catch(e){ toast("Refresh failed — try again","err"); }
+  if(btn){btn.textContent=orig;btn.disabled=false;}
+  isRefreshing=false;
+}
+
+/* boot — load with auto-retry so a single failed attempt doesn't leave a broken dashboard */
+let loadAttempts=0;
+async function bootWithRetry(){
+  try{ await loadEverything(); loadAttempts=0; }
+  catch(e){
+    loadAttempts++;
+    console.error("Boot attempt "+loadAttempts+" failed:",e);
+    if(loadAttempts<3){ setTimeout(bootWithRetry, 3000*loadAttempts); }
+    else{ toast("Could not load chain data. Click Refresh to retry.","err"); }
+  }
+}
+bootWithRetry();
 restoreSession();
 renderAnnouncement();
 ccCheckHash();
+/* safety net: if data still hasn't loaded after 25s, replace any spinners with 0 so nothing spins forever */
+setTimeout(function(){
+  ["lpAssets","lpRaised","lpBuilders","lpEcoAssets","lpEcoRaised","lpEcoBuilders","stRaised","stFees"].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el && el.querySelector(".loading-dot")){ el.textContent = id.includes("Raised")||id.includes("Fees")||id.includes("Settled")?"$0":"0"; }
+  });
+},25000);
 setInterval(async()=>{try{const b=await readProvider.getBlockNumber();document.getElementById("kBlock").textContent="#"+b.toLocaleString();document.getElementById("sideBlock").textContent="Block #"+b.toLocaleString();}catch(_){}},15000);
 </script>
 <script>
@@ -2216,6 +2249,26 @@ setInterval(async()=>{try{const b=await readProvider.getBlockNumber();document.g
   function setText(id,v){ var el=document.getElementById(id); if(el && v && !v.match(/skel/)) el.textContent=v; }
   setInterval(syncReal, 1500);
   setTimeout(syncReal, 900);
+
+  /* Landing fetches real asset count + builders directly (one call), so the
+     landing page shows real numbers even before the app finishes loading.
+     USDC-raised is left to the app's real running sum — no placeholder. */
+  async function fetchLandingStats(){
+    try{
+      const p=new ethers.JsonRpcProvider(RPC_URLS[0], {chainId:CHAIN_ID, name:"arc-testnet"}, {staticNetwork:true, batchMaxCount:1});
+      const block=await p.getBlockNumber();
+      setText("lpBlock","Block #"+block.toLocaleString());
+      const lp=new ethers.Contract(LAUNCHPAD_ADDRESS, LAUNCHPAD_ABI, p);
+      const assets=await lp.getAllAssets();
+      const count=assets.length;
+      const builders=new Set(assets.map(a=>a.founder.toLowerCase())).size;
+      setText("lpAssets",String(count)); setText("lpEcoAssets",String(count));
+      setText("lpBuilders",String(builders)); setText("lpEcoBuilders",String(builders));
+    }catch(e){ console.warn("Landing stats fetch:",e); }
+  }
+  window.fetchLandingStats=fetchLandingStats;
+  fetchLandingStats();
+  setInterval(fetchLandingStats, 12000);
 })();
 </script>
 
