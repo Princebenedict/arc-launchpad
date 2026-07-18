@@ -1045,7 +1045,7 @@ const ERC20_ABI = [
   "function allowance(address owner,address spender) view returns (uint256)"
 ];
 
-const readProvider = new ethers.JsonRpcProvider(RPC_URL);
+const readProvider = new ethers.JsonRpcProvider(RPC_URL, {chainId:CHAIN_ID, name:"arc-testnet"}, {staticNetwork:true, batchMaxCount:1});
 const readLaunchpad = new ethers.Contract(LAUNCHPAD_ADDRESS, LAUNCHPAD_ABI, readProvider);
 
 /* STATE */
@@ -1074,6 +1074,7 @@ function toggleHidden(addr){
   h = was ? h.filter(x=>x.toLowerCase()!==addr.toLowerCase()) : [...h,addr];
   setHiddenList(h);
   renderFounder(); renderDiscover(); renderTrending(); renderKPIs();
+  renderFeed(); renderInsights(); renderAnalytics(); renderStableHub();
   toast(was?"Asset restored to Explore":"Asset hidden from Explore","ok");
 }
 
@@ -1115,14 +1116,55 @@ function builderScore(addr){
 }
 
 /* LOAD CHAIN DATA — resilient: skips incompatible legacy assets */
+/* ---- rate-limit-safe loading helpers ---- */
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
+async function withRetry(fn, tries=3, delay=600){
+  for(let i=0;i<tries;i++){
+    try{ return await fn(); }
+    catch(e){
+      const msg=(e&&(e.message||""))+"";
+      const rate = msg.includes("429")||msg.includes("Too Many")||msg.includes("rate")||msg.includes("limit")||msg.includes("-32011")||msg.includes("coalesce");
+      if(i===tries-1) throw e;
+      await sleep(delay*(i+1)*(rate?3:1));
+    }
+  }
+}
+// run async tasks in small batches with a pause between batches (avoids RPC 429)
+async function runBatched(items, worker, batchSize=6, pause=350){
+  const out=[];
+  for(let i=0;i<items.length;i+=batchSize){
+    const slice=items.slice(i,i+batchSize);
+    const res=await Promise.allSettled(slice.map(worker));
+    out.push(...res);
+    if(i+batchSize<items.length) await sleep(pause);
+  }
+  return out;
+}
+async function loadOneAsset(a){
+  const t=new ethers.Contract(a.tokenContract,ASSET_TOKEN_ABI,readProvider);
+  const [company,desc,val,price,maxS,active,created,raised,supply]=await withRetry(()=>Promise.all([
+    t.companyName(),t.description(),t.totalValuation(),t.pricePerToken(),
+    t.maxSupply(),t.isActive(),t.createdAt(),t.totalRaised(),t.totalSupply()
+  ]));
+  return {
+    tokenContract:a.tokenContract, name:a.name, symbol:a.symbol,
+    founder:a.founder, assetType:Number(a.assetType), riskTier:Number(a.riskTier),
+    listedAt:Number(a.listedAt)*1000, company, description:desc,
+    target:Number(ethers.formatUnits(val,6)), price:Number(ethers.formatUnits(price,6)),
+    priceRaw:price, maxSupply:Number(maxS), active,
+    createdAt:Number(created)*1000, raised:Number(ethers.formatUnits(raised,6)),
+    sold:Number(ethers.formatUnits(supply,18))
+  };
+}
+
 async function loadEverything(){
   try{
-    const block = await readProvider.getBlockNumber();
+    const block = await withRetry(()=>readProvider.getBlockNumber());
     document.getElementById("kBlock").textContent="#"+block.toLocaleString();
     document.getElementById("sideBlock").textContent="Block #"+block.toLocaleString();
 
     // Guard: confirm a contract exists at the launchpad address
-    const code = await readProvider.getCode(LAUNCHPAD_ADDRESS);
+    const code = await withRetry(()=>readProvider.getCode(LAUNCHPAD_ADDRESS));
     if(code === "0x"){
       const msg=`<div class="empty" style="grid-column:1/-1"><div class="ei">CF</div>
         <h3>Launchpad contract not found</h3>
@@ -1137,25 +1179,10 @@ async function loadEverything(){
       return;
     }
 
-    const assets = await readLaunchpad.getAllAssets();
+    const assets = await withRetry(()=>readLaunchpad.getAllAssets());
 
-    // Load each asset independently — one bad legacy token can't break the whole page
-    const results = await Promise.allSettled(assets.map(async(a)=>{
-      const t=new ethers.Contract(a.tokenContract,ASSET_TOKEN_ABI,readProvider);
-      const [company,desc,val,price,maxS,active,created,raised,supply]=await Promise.all([
-        t.companyName(),t.description(),t.totalValuation(),t.pricePerToken(),
-        t.maxSupply(),t.isActive(),t.createdAt(),t.totalRaised(),t.totalSupply()
-      ]);
-      return {
-        tokenContract:a.tokenContract, name:a.name, symbol:a.symbol,
-        founder:a.founder, assetType:Number(a.assetType), riskTier:Number(a.riskTier),
-        listedAt:Number(a.listedAt)*1000, company, description:desc,
-        target:Number(ethers.formatUnits(val,6)), price:Number(ethers.formatUnits(price,6)),
-        priceRaw:price, maxSupply:Number(maxS), active,
-        createdAt:Number(created)*1000, raised:Number(ethers.formatUnits(raised,6)),
-        sold:Number(ethers.formatUnits(supply,18))
-      };
-    }));
+    // Load in small batches with pauses + retry so the RPC does not rate-limit (429)
+    const results = await runBatched(assets, loadOneAsset, 3, 900);
 
     const skipped=[];
     projects = results.map((r,i)=>{
@@ -1164,10 +1191,12 @@ async function loadEverything(){
       return null;
     }).filter(Boolean);
 
+    // newest first
     projects.sort((a,b)=>b.listedAt-a.listedAt);
     projects.forEach((p,i)=>p.id=i);
 
-    if(skipped.length) console.warn("Skipped incompatible legacy assets:",skipped);
+    if(skipped.length) console.warn("Could not load "+skipped.length+" of "+assets.length+" assets (likely rate-limited or legacy):",skipped);
+    console.log("Loaded "+projects.length+" of "+assets.length+" assets");
 
     renderKPIs(); renderFeed(); renderInsights(); renderTrending();
     renderDiscover(); renderAnalytics(); renderStableHub();
@@ -1179,20 +1208,25 @@ async function loadEverything(){
 }
 
 /* DASHBOARD */
+/* stats count only VISIBLE (non-hidden) assets — real, curated, never faked */
+function visibleProjects(){ return projects.filter(p=>!isHidden(p.tokenContract)); }
+
 function renderKPIs(){
-  const raised=projects.reduce((s,p)=>s+p.raised,0);
-  const builders=new Set(projects.map(p=>p.founder.toLowerCase())).size;
-  document.getElementById("kAssets").textContent=projects.length;
-  document.getElementById("kAssetsT").textContent=projects.filter(p=>p.active).length+" actively raising";
+  const vis=visibleProjects();
+  const raised=vis.reduce((s,p)=>s+p.raised,0);
+  const builders=new Set(vis.map(p=>p.founder.toLowerCase())).size;
+  document.getElementById("kAssets").textContent=vis.length;
+  document.getElementById("kAssetsT").textContent=vis.filter(p=>p.active).length+" actively raising";
   document.getElementById("kRaised").textContent=fmtK(raised);
   document.getElementById("kRaisedT").textContent="settled in USDC on Arc";
   document.getElementById("kBuilders").textContent=builders;
 }
 function renderFeed(){
   const el=document.getElementById("feedList");
-  if(!projects.length){el.innerHTML=`<div class="empty" style="padding:26px"><p>No activity yet — deploy the first asset</p></div>`;return;}
+  const vis=visibleProjects();
+  if(!vis.length){el.innerHTML=`<div class="empty" style="padding:26px"><p>No activity yet — deploy the first asset</p></div>`;return;}
   const items=[];
-  projects.slice(0,8).forEach(p=>{
+  vis.slice(0,8).forEach(p=>{
     items.push({ic:"NEW",t:`<b>${p.name}</b> (${p.symbol}) deployed by <b>${short(p.founder)}</b>`,time:p.listedAt});
     if(p.raised>0) items.push({ic:"TX",t:`<b>${fmtK(p.raised)}</b> USDC raised into <b>${p.symbol}</b>`,time:p.listedAt+1});
   });
@@ -1203,15 +1237,16 @@ function renderFeed(){
 }
 function renderInsights(){
   const el=document.getElementById("insightList");
-  if(!projects.length){el.innerHTML="No data yet — insights appear once assets go live.";return;}
-  const best=[...projects].sort((a,b)=>(b.raised/(b.target||1))-(a.raised/(a.target||1)))[0];
-  const risky=projects.filter(p=>p.riskTier===2).length;
-  const raised=projects.reduce((s,p)=>s+p.raised,0);
+  const vis=visibleProjects();
+  if(!vis.length){el.innerHTML="No data yet — insights appear once assets go live.";return;}
+  const best=[...vis].sort((a,b)=>(b.raised/(b.target||1))-(a.raised/(a.target||1)))[0];
+  const risky=vis.filter(p=>p.riskTier===2).length;
+  const raised=vis.reduce((s,p)=>s+p.raised,0);
   const re=riskEngine(best);
   el.innerHTML=`
     <div><b style="color:var(--text)">${best.symbol}</b> leads funding at <b style="color:var(--arc)">${((best.raised/(best.target||1))*100).toFixed(1)}%</b> of target — AI score ${re.score}/10</div>
-    <div style="margin-top:8px">Total ecosystem settlement: <b style="color:var(--text)">${fmtK(raised)}</b> USDC across ${projects.length} contracts</div>
-    <div style="margin-top:8px">Risk mix: ${projects.filter(p=>p.riskTier===0).length} low · ${projects.filter(p=>p.riskTier===1).length} medium · ${risky} high</div>`;
+    <div style="margin-top:8px">Total ecosystem settlement: <b style="color:var(--text)">${fmtK(raised)}</b> USDC across ${vis.length} contracts</div>
+    <div style="margin-top:8px">Risk mix: ${vis.filter(p=>p.riskTier===0).length} low · ${vis.filter(p=>p.riskTier===1).length} medium · ${risky} high</div>`;
 }
 function renderTrending(){
   const el=document.getElementById("trendGrid");
@@ -1444,13 +1479,13 @@ async function renderVault(){
   if(!wallet){el.innerHTML=`<div class="empty"><div class="ei">VA</div><h3>Connect your wallet</h3><p>Holdings, dividends and Builder Score appear here</p></div>`;return;}
   el.innerHTML=`<div class="card"><div class="skel" style="height:120px"></div></div>`;
   try{
-    const settled=await Promise.allSettled(projects.map(async p=>{
+    const settled=await runBatched(projects, async p=>{
       const t=new ethers.Contract(p.tokenContract,ASSET_TOKEN_ABI,readProvider);
-      const [bal,pend,inv]=await Promise.all([
+      const [bal,pend,inv]=await withRetry(()=>Promise.all([
         t.balanceOf(wallet),t.pendingDividends(wallet),t.totalInvested(wallet)
-      ]);
+      ]));
       return {...p,bal:Number(ethers.formatUnits(bal,18)),pend:Number(ethers.formatUnits(pend,6)),inv:Number(ethers.formatUnits(inv,6))};
-    }));
+    }, 3, 900);
     const holdings=settled.filter(r=>r.status==="fulfilled").map(r=>r.value);
     const owned=holdings.filter(h=>h.bal>0);
     window._vaultOwned=owned;
@@ -1507,11 +1542,12 @@ function renderAnalytics(){
   const tb=document.getElementById("topBuilders");
   const tr=document.getElementById("topRaises");
   const hr=document.getElementById("healthRow");
-  if(!projects.length){
+  const vis=visibleProjects();
+  if(!vis.length){
     tb.innerHTML=tr.innerHTML=`<div class="empty" style="padding:22px"><p>No data yet</p></div>`;hr.innerHTML="";return;
   }
   const byBuilder={};
-  projects.forEach(p=>{
+  vis.forEach(p=>{
     const k=p.founder.toLowerCase();
     byBuilder[k]=byBuilder[k]||{addr:p.founder,count:0,raised:0};
     byBuilder[k].count++;byBuilder[k].raised+=p.raised;
@@ -1522,20 +1558,21 @@ function renderAnalytics(){
     return `<div class="vrow"><span class="vk">#${i+1} ${short(b.addr)}</span>
     <span class="vv">${b.count} projects · ${fmtK(b.raised)} · Trust ${bs?bs.trust:"—"}</span></div>`;
   }).join("");
-  const raises=[...projects].sort((a,b)=>b.raised-a.raised).slice(0,5);
+  const raises=[...vis].sort((a,b)=>b.raised-a.raised).slice(0,5);
   tr.innerHTML=raises.map((p,i)=>`<div class="vrow"><span class="vk">#${i+1} ${p.symbol}</span>
     <span class="vv" style="color:var(--arc)">${fmtK(p.raised)} · ${p.target>0?((p.raised/p.target)*100).toFixed(0):0}%</span></div>`).join("");
-  const avgScore=projects.reduce((s,p)=>s+parseFloat(riskEngine(p).score),0)/projects.length;
+  const avgScore=vis.reduce((s,p)=>s+parseFloat(riskEngine(p).score),0)/vis.length;
   hr.innerHTML=`
     <div class="card kpi"><div class="kv">${avgScore.toFixed(1)}/10</div><div class="kl">Avg AI Score</div></div>
-    <div class="card kpi"><div class="kv">${projects.filter(p=>p.active).length}/${projects.length}</div><div class="kl">Active Ratio</div></div>
-    <div class="card kpi"><div class="kv">${projects.filter(p=>p.riskTier===0).length}</div><div class="kl">Low-Risk Assets</div></div>
-    <div class="card kpi"><div class="kv">${fmtK(projects.reduce((s,p)=>s+p.target,0))}</div><div class="kl">Total Valuation Listed</div></div>`;
+    <div class="card kpi"><div class="kv">${vis.filter(p=>p.active).length}/${vis.length}</div><div class="kl">Active Ratio</div></div>
+    <div class="card kpi"><div class="kv">${vis.filter(p=>p.riskTier===0).length}</div><div class="kl">Low-Risk Assets</div></div>
+    <div class="card kpi"><div class="kv">${fmtK(vis.reduce((s,p)=>s+p.target,0))}</div><div class="kl">Total Valuation Listed</div></div>`;
 }
 function renderStableHub(){
-  const raised=projects.reduce((s,p)=>s+p.raised,0);
+  const vis=visibleProjects();
+  const raised=vis.reduce((s,p)=>s+p.raised,0);
   document.getElementById("stRaised").textContent=fmtK(raised);
-  document.getElementById("stFees").textContent=fmtUsd(projects.length*1);
+  document.getElementById("stFees").textContent=fmtUsd(vis.length*1);
 }
 
 /* AI COPILOT */
